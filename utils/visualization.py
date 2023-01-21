@@ -19,3 +19,6 @@ def initializePlot(
              horizontalalignment='center')
     LOGGER.debug("Initialized subplots")
     return fig, axes
+
+def visualizeAccAndLoss(trainLoss, trainAcc):
+    pass

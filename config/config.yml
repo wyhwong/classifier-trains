@@ -1,12 +1,41 @@
-seed: 314159
+setup:
+  seed: 314159
+  outputDir: ./results
+  enableTraining: true
+  enableEvaluation: false
+  enableExport: false
+
+model:
+  arch: resnet10
+  numClasses: 2
+  weights: DEFAULT
+  unfreezeAllParams: false
+
+dataset:
+  trainsetDir: dataset/train/
+  valsetDir: /dataset/val/
+
+preprocessing:
+  width: 48
+  height: 48
+  interpolation: INTER_CUBIC
+  maintainAspectRatio: true
+  padding: bottomRight
+  mean: [0.5, 0.5, 0.5]
+  std: [0.5, 0.5, 0.5]
+  hflipProb: 0.5
+  vflipProb: 0.5
+  maxRotate: 10
+  centorCrop: false
+  randomCrop: false
+  grayScale: false
+  randomColorAugmentation: false
 
 training:
-  data:
-    trainsetDir: "dataset/train/"
-    valsetDir: "/dataset/val/"
-  numEpochs: 15
-  batchSize: 8
-  standard: loss # available choice: loss, acc
+  trainModel:
+    numEpochs: 15
+    batchSize: 8
+    standard: loss                          # available choice: loss, acc
 
   scheduler:
     name: step                              # ["step", "cosine"]
@@ -22,6 +51,12 @@ training:
     alpha: 0.99                             # Only for rmsprop
     betas: [0.9, 0.999]                     # Only for adam / adamw
 
-model:
-  arch: "resnet10"
-  numClasses: 2
+evaluation:
+  evalsetDir: /dataset/eval
+  modelPath: /results/bestModel.pt
+
+export:
+  saveLastWeight: true
+  saveBestWeight: true
+  exportLastWeight: true
+  exportBestWeight: true

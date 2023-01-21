@@ -16,7 +16,7 @@ def getLogger(logger_name: str) -> logging.Logger:
 LOGGER = getLogger("Common")
 
 
-def getConfig():
+def getConfig() -> dict:
     LOGGER.debug(f"Reading config/config.yml")
     with open("config/config.yml", "r") as file:
         config = yaml.load(file, Loader=yaml.SafeLoader)

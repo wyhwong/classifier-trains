@@ -11,7 +11,7 @@ AVAILABLE_OPTIMIZER = ["sgd", "rmsprop", "adam", "adamw"]
 AVAILABLE_SCHEDULER = ["step", "cosine"]
 
 
-def train_model(model, dataloaders, criterion, optimizer, scheduler, numEpochs, standard):
+def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, standard):
     trainingStart = time()
     LOGGER.info(f"Start time of training {trainingStart}")
     bestModel = model
