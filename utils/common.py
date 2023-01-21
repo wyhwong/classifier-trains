@@ -17,7 +17,7 @@ LOGGER = getLogger("Common")
 
 
 def getConfig() -> dict:
-    LOGGER.debug(f"Reading config/config.yml")
+    LOGGER.info(f"Reading config/config.yml")
     with open("config/config.yml", "r") as file:
         config = yaml.load(file, Loader=yaml.SafeLoader)
     LOGGER.debug(f"Config: {config}")
@@ -28,7 +28,7 @@ def saveConfig(path:str, config:dict) -> None:
     LOGGER.debug(f"Saving config: {config}")
     with open(path, 'w') as file:
         yaml.dump(config, file)
-    LOGGER.debug(f"Saved config at {path}")
+    LOGGER.info(f"Saved config at {path}")
 
 
 def checkAndCreateDir(directory:str) -> bool:

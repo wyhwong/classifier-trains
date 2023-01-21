@@ -24,21 +24,30 @@ def getTransforms(
                      transforms.Normalize(mean, std)]
 
     if hflipProb > 0:
+        LOGGER.debug(f"Spatial augmentation added: {hflipProb=}.")
         spatialAugmentation.append(transforms.RandomHorizontalFlip(hflipProb))
     if vflipProb > 0:
+        LOGGER.debug(f"Spatial augmentation added: {vflipProb=}.")
         spatialAugmentation.append(transforms.RandomVerticalFlip(vflipProb))
-    if maxRotate > 9:
+    if maxRotate > 0:
+        LOGGER.debug(f"Spatial augmentation added: {maxRotate=}.")
         spatialAugmentation.append(transforms.RandomRotation(maxRotate))
     if centorCrop:
+        LOGGER.debug(f"Spatial augmentation added: center crop.")
         spatialAugmentation.append(transforms.CenterCrop((height, width)))
     if randomCrop:
+        LOGGER.debug(f"Spatial augmentation added: random crop.")
         spatialAugmentation.append(transforms.RandomCrop((height, width)))
 
     if grayScale:
+        LOGGER.debug(f"Color augmentation added: grayscale.")
         colorAugmentation.append(transforms.Grayscale(3))
     if randomColorAugmentation:
-        colorAugmentation.append(transforms.ColorJitter(brightness=.5, hue=.3))
+        brightness, hue = 0.5, 0.3
+        LOGGER.debug(f"Color augmentation added: coloer jitter with {brightness=}, {hue=}.")
+        colorAugmentation.append(transforms.ColorJitter(brightness=brightness, hue=hue))
 
+    LOGGER.info(f"Constructing transforms.compose for trainset: \n\t{spatialAugmentation=}, \n\t{colorAugmentation=}, \n\t{resizeAndPadding=}, \n\t{normalization=}.")
     data_transforms = {
         'train': transforms.Compose(
             spatialAugmentation + colorAugmentation + resizeAndPadding + normalization
@@ -47,6 +56,7 @@ def getTransforms(
             resizeAndPadding + normalization
         ]),
     }
+    LOGGER.info(f"Constructed transfroms.compose.")
     return data_transforms
 
 
@@ -71,10 +81,11 @@ class Resize:
         else:
             height, width, _ = image.shape
             if height > width:
-                width = int(height / self.height * self.width)
+                width = int(width / height * self.height)
+                image = cv2.resize(image, (width, self.height), interpolation=self.interpolation)
             else:
-                height = int(width / self.width * self.height)
-            image = cv2.resize(image, (width, height), interpolation=self.interpolation)
+                height = int(height / width * self.width)
+                image = cv2.resize(image, (self.width, height), interpolation=self.interpolation)
             outputImage = np.zeros((self.height, self.width, 3), dtype=float)
             if self.padding == "bottomRight":
                 outputImage[:height,:width,] = image
@@ -88,5 +99,5 @@ class Resize:
 
 
 class PilToCV2:
-    def __call__(image):
+    def __call__(self, image):
         return np.array(image)

@@ -6,14 +6,16 @@ setup:
   enableExport: false
 
 model:
-  arch: resnet10
+  arch: resnet18
   numClasses: 2
   weights: DEFAULT
   unfreezeAllParams: false
 
 dataset:
-  trainsetDir: dataset/train/
+  trainsetDir: /dataset/train/
   valsetDir: /dataset/val/
+  batchSize: 8
+  numWorkers: 4
 
 preprocessing:
   width: 48
@@ -33,8 +35,7 @@ preprocessing:
 
 training:
   trainModel:
-    numEpochs: 15
-    batchSize: 8
+    numEpochs: 3
     standard: loss                          # available choice: loss, acc
 
   scheduler:

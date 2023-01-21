@@ -1,5 +1,5 @@
 import torch
-from time import time
+from datetime import datetime
 from copy import deepcopy
 
 from .common import getLogger
@@ -12,23 +12,24 @@ AVAILABLE_SCHEDULER = ["step", "cosine"]
 
 
 def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, standard):
-    trainingStart = time()
-    LOGGER.info(f"Start time of training {trainingStart}")
-    bestModel = model
+    trainingStart = datetime.now()
+    LOGGER.info(f"Start time of training {trainingStart}.")
+    LOGGER.info(f"Training using device: {DEVICE}")
+    bestWeights = deepcopy(model.state_dict())
     trainLoss = {"Train": [], "Val": []}
     trainAcc = {"Train": [], "Val": []}
     bestRecord = 0
 
-    for epoch in range(numEpochs):
-        LOGGER.info(f'Epoch {epoch}/{numEpochs - 1}')
+    for epoch in range(1, numEpochs+1):
+        LOGGER.info(f'Epoch {epoch}/{numEpochs}')
         LOGGER.info('-' * 20)
 
         for phase in ['train', 'val']:
             if phase == 'train':
-                LOGGER.debug(f'The {epoch}-th epoch training started')
+                LOGGER.debug(f'The {epoch}-th epoch training started.')
                 model.train()
             else:
-                LOGGER.debug(f'The {epoch}-th epoch validation started')
+                LOGGER.debug(f'The {epoch}-th epoch validation started.')
                 model.eval()
 
             epochLoss = 0.0
@@ -56,65 +57,71 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
             epochLoss = epochLoss / len(dataloaders[phase].dataset)
             epochAcc = epochCorrects.double() / len(dataloaders[phase].dataset)
 
-            LOGGER.info(f'{phase} Loss: {epochLoss:.4f} Acc: {epochAcc:.4f}')
+            LOGGER.info(f'{phase} Loss: {epochLoss:.4f} Acc: {epochAcc:.4f}.')
 
             if phase == 'val':
                 if standard == "loss" and epochLoss < bestRecord:
                     bestRecord = epochLoss
-                    bestModel = deepcopy(model)
+                    bestWeights = deepcopy(model.state_dict())
                 if standard == "acc" and epochAcc > bestRecord:
                     bestRecord = epochAcc
-                    bestModel = deepcopy(model)
+                    bestWeights = deepcopy(model.state_dict())
 
             trainAcc[phase].append(epochAcc)
             trainLoss[phase].append(epochLoss)
 
-    timeElapsed = time() - trainingStart
-    LOGGER.info(f'Training complete in {timeElapsed // 60:.0f}m {timeElapsed % 60:.0f}s')
-    LOGGER.info(f'Best val Acc: {bestRecord:4f}')
+    lastWeights = deepcopy(model.state_dict())
+    trainingEnd = datetime.now()
+    timeElapsed = (trainingEnd - trainingStart).total_seconds()
+    LOGGER.info(f"Training complete at {trainingEnd}")
+    LOGGER.info(f'Training complete in {timeElapsed // 60:.0f}m {timeElapsed % 60:.0f}s.')
+    LOGGER.info(f'Best val {standard}: {bestRecord:4f}.')
+    return model, bestWeights, lastWeights, trainLoss, trainAcc
 
-    return bestModel, model, trainLoss, trainAcc
 
-
-def getOptimizer(optimizer="adam", lr=1e-3, momentum=0.9, weight_decay=0, alpha=0.99, betas=(0.9, 0.999)):
-    if optimizer.lower() not in AVAILABLE_OPTIMIZER:
+def getOptimizer(params, name="adam", lr=1e-3, momentum=0.9, weight_decay=0, alpha=0.99, betas=(0.9, 0.999)):
+    if name.lower() not in AVAILABLE_OPTIMIZER:
         raise NotImplementedError("The optimizer is not implemented in this TAO-like pytorch classifier.")
-    if optimizer.lower() == "sgd":
-        LOGGER.debug(f"Creating optimizer {optimizer}, {lr=}, {momentum=}, {weight_decay=}.")
-        return torch.optim.SGD(lr=lr,
+    if name.lower() == "sgd":
+        LOGGER.debug(f"Creating optimizer {name}, {lr=}, {momentum=}, {weight_decay=}.")
+        return torch.optim.SGD(params,
+                               lr=lr,
                                momentum=momentum,
                                weight_decay=weight_decay)
-    elif optimizer.lower() == "rmsprop":
-        LOGGER.debug(f"Creating optimizer {optimizer}, {lr=}, {momentum=}, {weight_decay=}, {alpha=}.")
-        return torch.optim.RMSprop(lr=lr,
+    elif name.lower() == "rmsprop":
+        LOGGER.debug(f"Creating optimizer {name}, {lr=}, {momentum=}, {weight_decay=}, {alpha=}.")
+        return torch.optim.RMSprop(params,
+                                   lr=lr,
                                    momentum=momentum,
                                    weight_decay=weight_decay,
                                    alpha=alpha)
-    elif optimizer.lower() == "adam":
-        LOGGER.debug(f"Creating optimizer {optimizer}, {betas=}, {weight_decay=}.")
-        return torch.optim.Adam(lr=lr,
+    elif name.lower() == "adam":
+        LOGGER.debug(f"Creating optimizer {name}, {betas=}, {weight_decay=}.")
+        return torch.optim.Adam(params,
+                                lr=lr,
                                 betas=betas,
                                 weight_decay=weight_decay)
-    elif optimizer.lower() == "adamw ":
-        LOGGER.debug(f"Creating optimizer {optimizer}, {betas=}, {weight_decay=}.")
-        return torch.optim.AdamW(lr=lr,
+    elif name.lower() == "adamw ":
+        LOGGER.debug(f"Creating optimizer {name}, {betas=}, {weight_decay=}.")
+        return torch.optim.AdamW(params,
+                                 lr=lr,
                                  betas=betas,
                                  weight_decay=weight_decay)
 
 
-def getScheduler(scheduler, optimizer:torch.optim, numEpochs, step_size=30, gamma=0.1, minlr=0):
-    if scheduler.lower() not in AVAILABLE_SCHEDULER:
+def getScheduler(name:str, optimizer:torch.optim, numEpochs:int, stepSize=30, gamma=0.1, lrMin=0):
+    if name.lower() not in AVAILABLE_SCHEDULER:
         raise NotImplementedError("The scheduler is not implemented in this TAO-like pytorch classifier.")
-    if scheduler.lower() == "step":
-        LOGGER.debug(f"Creating scheduler {scheduler}, {step_size=}, {gamma=}.")
+    if name.lower() == "step":
+        LOGGER.debug(f"Creating scheduler {name}, {stepSize=}, {gamma=}.")
         return torch.optim.lr_scheduler.StepLR(optimizer=optimizer,
-                                               step_size=step_size,
+                                               step_size=stepSize,
                                                gamma=gamma)
-    elif scheduler.lower() == "cosine":
-        LOGGER.debug(f"Creating scheduler {scheduler}, {numEpochs=}, {minlr=}")
+    elif name.lower() == "cosine":
+        LOGGER.debug(f"Creating scheduler {name}, {numEpochs=}, {lrMin=}")
         return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer,
                                                           T_max=numEpochs,
-                                                          eta_min=minlr)
+                                                          eta_min=lrMin)
 
 
 def getPreview(dataset):
