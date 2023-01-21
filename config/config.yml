@@ -1,0 +1,27 @@
+seed: 314159
+
+training:
+  data:
+    trainsetDir: "dataset/train/"
+    valsetDir: "/dataset/val/"
+  numEpochs: 15
+  batchSize: 8
+  standard: loss # available choice: loss, acc
+
+  scheduler:
+    name: step                              # ["step", "cosine"]
+    lrMin: 0
+    stepSize: 30                            # Only for step
+    gamma: 0.1                              # Only for step
+
+  optimizer:
+    name: adam                              # ["sgd", "rmsprop", "adam", "adamw"]
+    lr: 0.001
+    weight_decay: 0
+    momentum: 0.9                           # Only for sgd / rmsprop
+    alpha: 0.99                             # Only for rmsprop
+    betas: [0.9, 0.999]                     # Only for adam / adamw
+
+model:
+  arch: "resnet10"
+  numClasses: 2
