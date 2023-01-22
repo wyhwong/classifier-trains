@@ -1,6 +1,6 @@
 setup:
   seed: 314159
-  outputDir: /results
+  outputDir: ./results
   enableTraining: true
   enableEvaluation: false
   enableExport: false

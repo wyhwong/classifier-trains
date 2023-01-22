@@ -15,9 +15,7 @@ def getTransforms(
         maxRotate:float, centorCrop:bool, randomCrop:bool, grayScale:bool,
         randomColorAugmentation: bool
     ) -> dict:
-
-    spatialAugmentation = []
-    colorAugmentation = []
+    spatialAugmentation, colorAugmentation = [], []
     resizeAndPadding = [PilToCV2(),
                         Resize(width, height, interpolation, maintainAspectRatio, padding)]
     normalization = [transforms.ToTensor(),
@@ -74,6 +72,7 @@ class Resize:
         self.interpolation = getattr(cv2, interpolation.upper())
         self.maintainAspectRatio = maintainAspectRatio
         self.padding = padding
+        LOGGER.debug(f"Resize layer initialized: {width=}, {height=}, {interpolation=}, {maintainAspectRatio=}, {padding=}.")
 
     def __call__(self, image:np.ndarray) -> np.ndarray:
         if not self.maintainAspectRatio:
@@ -99,5 +98,8 @@ class Resize:
 
 
 class PilToCV2:
+    def __init__(self):
+        LOGGER.debug(f"PilToCV2 layer initialized.")
+
     def __call__(self, image):
         return np.array(image)

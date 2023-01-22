@@ -15,8 +15,8 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
     LOGGER.info(f"Start time of training {trainingStart}.")
     LOGGER.info(f"Training using device: {DEVICE}")
     bestWeights = deepcopy(model.state_dict())
-    trainLoss = {"Train": [], "Val": []}
-    trainAcc = {"Train": [], "Val": []}
+    trainLoss = {"train": [], "val": []}
+    trainAcc = {"train": [], "val": []}
     bestRecord = 0
 
     for epoch in range(1, numEpochs+1):
@@ -61,14 +61,19 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
 
             if phase == 'val':
                 if standard == "loss" and epochLoss < bestRecord:
+                    LOGGER.info(f"New Record: {epochLoss=} < {bestRecord}.")
                     bestRecord = epochLoss
                     bestWeights = deepcopy(model.state_dict())
+                    LOGGER.debug(f"Updated best models.")
                 if standard == "acc" and epochAcc > bestRecord:
+                    LOGGER.info(f"New Record: {epochAcc=} > {bestRecord}.")
                     bestRecord = epochAcc
                     bestWeights = deepcopy(model.state_dict())
+                    LOGGER.debug(f"Updated best models.")
 
             trainAcc[phase].append(epochAcc)
             trainLoss[phase].append(epochLoss)
+            LOGGER.debug(f"Updated {trainAcc=}, {trainLoss=}.")
 
     lastWeights = deepcopy(model.state_dict())
     trainingEnd = datetime.now()

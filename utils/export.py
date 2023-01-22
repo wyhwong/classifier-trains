@@ -6,7 +6,7 @@ from .common import getLogger
 LOGGER = getLogger("Export")
 
 
-def exportModelToONNX(model, height, width, exportPath) -> None:
+def exportModelToONNX(model, height:int, width:int, exportPath:str) -> None:
     LOGGER.debug(f"Changing model to evaluation mode.")
     model.eval()
     LOGGER.debug(f"Generating a random input for exporting.")
@@ -23,7 +23,7 @@ def exportModelToONNX(model, height, width, exportPath) -> None:
     LOGGER.info(f"Successfully exported the model: {exportPath=}.")
 
 
-def checkModelIsValid(modelPath:str):
+def checkModelIsValid(modelPath:str) -> None:
     LOGGER.info(f"Checking onnx model at {modelPath}")
     onnx_model = onnx.load(modelPath)
     onnx.checker.check_model(onnx_model)

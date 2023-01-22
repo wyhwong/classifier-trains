@@ -7,7 +7,7 @@ from utils.common import getConfig, getLogger, saveConfig, checkAndCreateDir
 from utils.model import initializeModel, loadModel, saveWeights
 from utils.preprocessing import getTransforms
 from utils.training import trainModel, getOptimizer, getScheduler, getPreview
-from utils.export import exportModelToONNX
+from utils.export import exportModelToONNX, checkModelIsValid
 from utils.evaluation import evaluateModel
 from utils.visualization import visualizeAccAndLoss
 
@@ -72,12 +72,14 @@ def main():
                               height=config["preprocessing"]["height"],
                               width=config["preprocessing"]["width"],
                               exportPath=f"{OUTPUTDIR}/lastModel.onnx")
+            checkModelIsValid(modelPath=f"{OUTPUTDIR}/lastModel.onnx")
         if config["export"]["exportBestWeight"]:
             model.load_state_dict(bestWeights)
             exportModelToONNX(model=model,
                               height=config["preprocessing"]["height"],
                               width=config["preprocessing"]["width"],
-                              exportPath=f"{OUTPUTDIR}/bestModel.onnx") 
+                              exportPath=f"{OUTPUTDIR}/bestModel.onnx")
+            checkModelIsValid(modelPath=f"{OUTPUTDIR}/bestModel.onnx")
         LOGGER.info("Export phase ended.")
 
     if EVAL:
