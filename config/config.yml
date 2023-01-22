@@ -1,12 +1,12 @@
 setup:
   seed: 314159
-  outputDir: ./results
+  outputDir: /results
   enableTraining: true
   enableEvaluation: false
   enableExport: false
 
 model:
-  arch: alexnet
+  arch: resnet18
   numClasses: 2
   weights: DEFAULT
   unfreezeAllParams: false

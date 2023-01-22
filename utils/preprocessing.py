@@ -50,9 +50,9 @@ def getTransforms(
         'train': transforms.Compose(
             spatialAugmentation + colorAugmentation + resizeAndPadding + normalization
         ),
-        'val': transforms.Compose([
+        'val': transforms.Compose(
             resizeAndPadding + normalization
-        ]),
+        ),
     }
     LOGGER.info(f"Constructed transfroms.compose.")
     return data_transforms
@@ -76,15 +76,17 @@ class Resize:
 
     def __call__(self, image:np.ndarray) -> np.ndarray:
         if not self.maintainAspectRatio:
-            return cv2.resize(image, (self.height, self.width), interpolation=self.interpolation)
+            return cv2.resize(image, self.dim, interpolation=self.interpolation)
         else:
             height, width, _ = image.shape
             if height > width:
-                width = int(width / height * self.height)
-                image = cv2.resize(image, (width, self.height), interpolation=self.interpolation)
+                width = int(width * (self.height / height))
+                height = self.height
+                image = cv2.resize(image, (width, height), interpolation=self.interpolation)
             else:
-                height = int(height / width * self.width)
-                image = cv2.resize(image, (self.width, height), interpolation=self.interpolation)
+                height = int(height * (self.width / width))
+                width = self.width
+                image = cv2.resize(image, (width, height), interpolation=self.interpolation)
             outputImage = np.zeros((self.height, self.width, 3), dtype=float)
             if self.padding == "bottomRight":
                 outputImage[:height,:width,] = image
@@ -103,3 +105,12 @@ class PilToCV2:
 
     def __call__(self, image):
         return np.array(image)
+
+
+class Denormalize:
+    def __init__(self, mean:np.ndarray, std:np.ndarray):
+        self.denormalize = transforms.Normalize(-1*mean/std, 1/std)
+        LOGGER.debug(f"Denormalize layer initialized.")
+
+    def __call__(self, image):
+        return self.denormalize(image)

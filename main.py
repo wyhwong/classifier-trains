@@ -20,7 +20,6 @@ EXPORT = SETUP["enableExport"]
 LOGGER = getLogger("Main")
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
 checkAndCreateDir(OUTPUTDIR)
 torch.manual_seed(SEED)
 np.random.seed(SEED)
@@ -46,8 +45,10 @@ def main():
                         save=True)
         for phase in ["train", "val"]:
             getDatasetPreview(dataset=imageDatasets[phase],
-                            outputDir=OUTPUTDIR,
-                            filenameRemark=phase)
+                              outputDir=OUTPUTDIR,
+                              mean=np.array(config["preprocessing"]["mean"]),
+                              std=np.array(config["preprocessing"]["std"]),
+                              filenameRemark=phase)
         criterion = torch.nn.CrossEntropyLoss()
         model = initializeModel(**config["model"])
         optimizer = getOptimizer(params=model.parameters(),

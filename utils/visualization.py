@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import numpy as np
 
 from .common import getLogger
+from .preprocessing import Denormalize
 
 LOGGER = getLogger("Visualization")
 
@@ -54,7 +56,19 @@ def visualizeAccAndLoss(trainLoss:dict, trainAcc:dict, outputDir:str, close=True
         plt.close()
 
 
-def getDatasetPreview(dataset, outputDir:str, filenameRemark="", close=True) -> None:
+def getDatasetPreview(
+        dataset, mean:np.ndarray, std:np.ndarray, outputDir:str,
+        nrows=4, ncols=4, filenameRemark="", close=True
+    ) -> None:
+    fig, axes = plt.subplots(nrows, ncols, figsize=(10, 10))
+    images = iter(dataset)
+    denormalizer = Denormalize(mean, std)
+    for row in range(nrows):
+        for col in range(ncols):
+            img = next(images)[0]
+            img = denormalizer(img)
+            img = img.numpy().transpose(1, 2, 0).astype(int)
+            axes[row][col].imshow(img)
     plt.savefig(f"{outputDir}/datasetPreview_{filenameRemark}.jpg", facecolor="w")
     LOGGER.debug("Plotted the training/validation accuracy during training.")
     if close:
