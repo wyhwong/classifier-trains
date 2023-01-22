@@ -1,4 +1,5 @@
 import torch
+import yaml
 from datetime import datetime
 from copy import deepcopy
 
@@ -129,5 +130,14 @@ def getScheduler(name:str, optimizer:torch.optim, numEpochs:int, stepSize=30, ga
                                                           eta_min=lrMin)
 
 
-def getPreview(dataset):
-    pass
+def getClassMapping(dataset, savepath=None, save=False) -> dict:
+    mapping = dataset.class_to_idx
+    LOGGER.info(f"Reading class mapping in the dataset: {mapping}")
+    if save:
+        if savepath is None:
+            raise ValueError("The savepath cannot be None if save=True")
+        LOGGER.debug(f"Saving mapping")
+        with open(savepath, 'w') as file:
+            yaml.dump(mapping, file)
+        LOGGER.info(f"Saved mapping at {savepath}")
+    return mapping

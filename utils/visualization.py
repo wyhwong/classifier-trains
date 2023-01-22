@@ -52,3 +52,11 @@ def visualizeAccAndLoss(trainLoss:dict, trainAcc:dict, outputDir:str, close=True
     if close:
         LOGGER.debug("Closed the plot.")
         plt.close()
+
+
+def getDatasetPreview(dataset, outputDir:str, filenameRemark="", close=True) -> None:
+    plt.savefig(f"{outputDir}/datasetPreview_{filenameRemark}.jpg", facecolor="w")
+    LOGGER.debug("Plotted the training/validation accuracy during training.")
+    if close:
+        LOGGER.debug("Closed the plot.")
+        plt.close()

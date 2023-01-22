@@ -6,10 +6,10 @@ from torchvision import datasets
 from utils.common import getConfig, getLogger, saveConfig, checkAndCreateDir
 from utils.model import initializeModel, loadModel, saveWeights
 from utils.preprocessing import getTransforms
-from utils.training import trainModel, getOptimizer, getScheduler, getPreview
+from utils.training import trainModel, getOptimizer, getScheduler, getClassMapping
 from utils.export import exportModelToONNX, checkModelIsValid
 from utils.evaluation import evaluateModel
-from utils.visualization import visualizeAccAndLoss
+from utils.visualization import visualizeAccAndLoss, getDatasetPreview
 
 SETUP = getConfig()["setup"]
 SEED = SETUP["seed"]
@@ -41,6 +41,13 @@ def main():
                                                       batch_size=config["dataset"]["batchSize"],
                                                       shuffle=True,
                                                       num_workers=config["dataset"]["numWorkers"]) for x in ["train", "val"]}
+        getClassMapping(dataset=imageDatasets["train"],
+                        savepath=f"{OUTPUTDIR}/classMapping.yml",
+                        save=True)
+        for phase in ["train", "val"]:
+            getDatasetPreview(dataset=imageDatasets[phase],
+                            outputDir=OUTPUTDIR,
+                            filenameRemark=phase)
         criterion = torch.nn.CrossEntropyLoss()
         model = initializeModel(**config["model"])
         optimizer = getOptimizer(params=model.parameters(),
@@ -48,7 +55,6 @@ def main():
         scheduler = getScheduler(optimizer=optimizer,
                                  numEpochs=config["training"]["trainModel"]["numEpochs"],
                                  **config["training"]["scheduler"])
-        # getPreview()
         LOGGER.info("Loaded all parameters, training starts.")
         model, bestWeights, lastWeights, trainLoss, trainAcc = trainModel(model=model,
                                                                           dataloaders=dataloaders,
