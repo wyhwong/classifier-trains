@@ -29,6 +29,7 @@ def initializePlot(
 def visualizeAccAndLoss(trainLoss:dict, trainAcc:dict, outputDir:str, close=True) -> None:
     LOGGER.debug(f"Plotting the training/validation loss during training: {trainLoss}")
     loss = pd.DataFrame(trainLoss)
+    loss.to_csv(f"{outputDir}/loss.csv", index=False)
     _, ax = initializePlot(height=10,
                            width=10,
                            title="Training/Validation Loss against Number of Epochs",
@@ -43,6 +44,7 @@ def visualizeAccAndLoss(trainLoss:dict, trainAcc:dict, outputDir:str, close=True
 
     LOGGER.debug(f"Plotting the training/validation accuracy during training: {trainAcc}")
     acc = pd.DataFrame(trainAcc)
+    acc.to_csv(f"{outputDir}/acc.csv", index=False)
     _, ax = initializePlot(height=10,
                            width=10,
                            title="Training/Validation Accuracy against Number of Epochs",
@@ -60,7 +62,7 @@ def getDatasetPreview(
         dataset, mean:np.ndarray, std:np.ndarray, outputDir:str,
         nrows=4, ncols=4, filenameRemark="", close=True
     ) -> None:
-    fig, axes = plt.subplots(nrows, ncols, figsize=(10, 10))
+    _, axes = initializePlot(nrows=nrows, ncols=ncols, height=10, width=10, title="Preview of Dataset")
     images = iter(dataset)
     denormalizer = Denormalize(mean, std)
     for row in range(nrows):
@@ -69,6 +71,7 @@ def getDatasetPreview(
             img = denormalizer(img)
             img = img.numpy().transpose(1, 2, 0).astype(int)
             axes[row][col].imshow(img)
+            axes[row][col].axis("off")
     plt.savefig(f"{outputDir}/datasetPreview_{filenameRemark}.jpg", facecolor="w")
     LOGGER.debug("Plotted the training/validation accuracy during training.")
     if close:

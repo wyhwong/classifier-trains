@@ -1,6 +1,6 @@
 setup:
   seed: 314159
-  outputDir: /results
+  outputDir: /results                        # directory for results WITHIN Docker container
   enableTraining: true
   enableEvaluation: false
   enableExport: false
@@ -12,17 +12,17 @@ model:
   unfreezeAllParams: false
 
 dataset:
-  trainsetDir: /dataset/train/
-  valsetDir: /dataset/val/
+  trainsetDir: /dataset/train/              # directory of trainset WITHIN Docker container
+  valsetDir: /dataset/val/                  # directory of valset WITHIN Docker container
   batchSize: 8
   numWorkers: 4
 
 preprocessing:
   width: 48
   height: 48
-  interpolation: INTER_CUBIC
+  interpolation: INTER_CUBIC                
   maintainAspectRatio: true
-  padding: bottomRight
+  padding: bottomRight                      # ["bottomLeft", "bottomRight", "topLeft", "topRight"]
   mean: [0.485, 0.456, 0.406]
   std: [0.229, 0.224, 0.225]
   hflipProb: 0.5
@@ -52,7 +52,7 @@ training:
     alpha: 0.99                             # Only for rmsprop
     betas: [0.9, 0.999]                     # Only for adam / adamw
 
-evaluation:
+evaluation:                                 # Not ready in use
   evalsetDir: /dataset/eval
   modelPath: /results/bestModel.pt
 

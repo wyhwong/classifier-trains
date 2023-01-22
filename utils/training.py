@@ -15,6 +15,7 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
     trainingStart = datetime.now()
     LOGGER.info(f"Start time of training {trainingStart}.")
     LOGGER.info(f"Training using device: {DEVICE}")
+    model.to(DEVICE)
     bestWeights = deepcopy(model.state_dict())
     trainLoss = {"train": [], "val": []}
     trainAcc = {"train": [], "val": []}
@@ -41,16 +42,13 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
                 optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'train'):
-                    outputs = model(inputs)
+                    outputs = model(inputs.float())
                     loss = criterion(outputs, labels)
                     _, preds = torch.max(outputs, 1)
 
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
-                        if scheduler:
-                            scheduler.step()
-                            LOGGER.info(f"Learning rate in this epoch: {scheduler.get_last_lr()}.")
 
                 epochLoss += loss.item() * inputs.size(0)
                 epochCorrects += torch.sum(preds == labels.data)
@@ -58,6 +56,9 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
             epochLoss = epochLoss / len(dataloaders[phase].dataset)
             epochAcc = epochCorrects.double() / len(dataloaders[phase].dataset)
 
+            if scheduler:
+                scheduler.step()
+                LOGGER.info(f"Last learning rate in this epoch: {scheduler.get_last_lr()}.")
             LOGGER.info(f"{phase} Loss: {epochLoss:.4f} Acc: {epochAcc:.4f}.")
 
             if phase == 'val':
@@ -72,8 +73,8 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
                     bestWeights = deepcopy(model.state_dict())
                     LOGGER.debug(f"Updated best models.")
 
-            trainAcc[phase].append(epochAcc)
-            trainLoss[phase].append(epochLoss)
+            trainAcc[phase].append(float(epochAcc))
+            trainLoss[phase].append(float(epochLoss))
             LOGGER.debug(f"Updated {trainAcc=}, {trainLoss=}.")
 
     lastWeights = deepcopy(model.state_dict())

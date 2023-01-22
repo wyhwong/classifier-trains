@@ -64,7 +64,9 @@ def main():
                                                                           scheduler=scheduler,
                                                                           **config["training"]["trainModel"])
         LOGGER.info("Training ended, visualizing results.")
-        visualizeAccAndLoss(trainLoss=trainLoss, trainAcc=trainAcc, outputDir=OUTPUTDIR)
+        visualizeAccAndLoss(trainLoss=trainLoss,
+                            trainAcc=trainAcc,
+                            outputDir=OUTPUTDIR)
         LOGGER.info("Training phase ended.")
 
     if EXPORT:

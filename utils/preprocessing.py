@@ -66,8 +66,8 @@ class Resize:
             raise NotImplementedError(f"Resizing with {padding} padding is invalid or not implemented.")
         if interpolation.upper() not in AVAILABLE_INTERPOLATION:
             raise NotImplementedError(f"Resizing with {interpolation} interpolation is invalid or not implemented.")
-        self.width = width
-        self.height = height
+        self.inputWidth = width
+        self.inputHeight = height
         self.dim = (width, height)
         self.interpolation = getattr(cv2, interpolation.upper())
         self.maintainAspectRatio = maintainAspectRatio
@@ -78,24 +78,24 @@ class Resize:
         if not self.maintainAspectRatio:
             return cv2.resize(image, self.dim, interpolation=self.interpolation)
         else:
-            height, width, _ = image.shape
-            if height > width:
-                width = int(width * (self.height / height))
-                height = self.height
-                image = cv2.resize(image, (width, height), interpolation=self.interpolation)
+            imageHeight, imageWidth, _ = image.shape
+            if imageHeight > imageWidth:
+                imageWidth = int(imageWidth * (self.inputHeight / imageHeight))
+                imageHeight = self.inputHeight
+                image = cv2.resize(image, (imageWidth, imageHeight), interpolation=self.interpolation)
             else:
-                height = int(height * (self.width / width))
-                width = self.width
-                image = cv2.resize(image, (width, height), interpolation=self.interpolation)
-            outputImage = np.zeros((self.height, self.width, 3), dtype=float)
+                imageHeight = int(imageHeight * (self.inputWidth / imageWidth))
+                imageWidth = self.inputWidth
+                image = cv2.resize(image, (imageWidth, imageHeight), interpolation=self.interpolation)
+            outputImage = np.zeros((self.inputHeight, self.inputWidth, 3), dtype=float)
             if self.padding == "bottomRight":
-                outputImage[:height,:width,] = image
+                outputImage[:imageHeight,:imageWidth,] = image
             elif self.padding == "bottomLeft":
-                outputImage[:height,self.width-width:,] = image
+                outputImage[:imageHeight,self.inputWidth-imageWidth:,] = image
             elif self.padding == "topLeft":
-                outputImage[self.height-height:,:width,] = image
+                outputImage[self.inputHeight-imageHeight:,:imageWidth,] = image
             else:
-                outputImage[self.height-height:,self.width-width:,] = image
+                outputImage[self.inputHeight-imageHeight:,self.inputWidth-imageWidth:,] = image
             return outputImage
 
 
