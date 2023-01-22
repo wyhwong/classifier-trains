@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 
 from .common import getLogger
 
 LOGGER = getLogger("Visualization")
+
 
 def initializePlot(
         nrows=1, ncols=1, height=6, width=10, title="", xlabel="", ylabel="",
@@ -20,5 +23,32 @@ def initializePlot(
     LOGGER.debug("Initialized subplots")
     return fig, axes
 
-def visualizeAccAndLoss(trainLoss, trainAcc):
-    pass
+
+def visualizeAccAndLoss(trainLoss:dict, trainAcc:dict, outputDir:str, close=True) -> None:
+    LOGGER.debug(f"Plotting the training/validation loss during training: {trainLoss}")
+    loss = pd.DataFrame(trainLoss)
+    _, ax = initializePlot(height=10,
+                           width=10,
+                           title="Training/Validation Loss against Number of Epochs",
+                           xlabel="Number of Epochs",
+                           ylabel="Training/Validation Loss")
+    sns.lineplot(data=loss, ax=ax)
+    plt.savefig(f"{outputDir}/lossHistory.jpg", facecolor="w")
+    LOGGER.debug("Plotted the training/validation loss during training.")
+    if close:
+        LOGGER.debug("Closed the plot.")
+        plt.close()
+
+    LOGGER.debug(f"Plotting the training/validation accuracy during training: {trainAcc}")
+    acc = pd.DataFrame(trainAcc)
+    _, ax = initializePlot(height=10,
+                           width=10,
+                           title="Training/Validation Accuracy against Number of Epochs",
+                           xlabel="Number of Epochs",
+                           ylabel="Training/Validation Accuracy")
+    sns.lineplot(data=acc, ax=ax)
+    plt.savefig(f"{outputDir}/accHistory.jpg", facecolor="w")
+    LOGGER.debug("Plotted the training/validation accuracy during training.")
+    if close:
+        LOGGER.debug("Closed the plot.")
+        plt.close()

@@ -1,12 +1,12 @@
 setup:
   seed: 314159
-  outputDir: ./results
+  outputDir: /results
   enableTraining: true
   enableEvaluation: false
   enableExport: false
 
 model:
-  arch: resnet18
+  arch: alexnet
   numClasses: 2
   weights: DEFAULT
   unfreezeAllParams: false
@@ -23,8 +23,8 @@ preprocessing:
   interpolation: INTER_CUBIC
   maintainAspectRatio: true
   padding: bottomRight
-  mean: [0.5, 0.5, 0.5]
-  std: [0.5, 0.5, 0.5]
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
   hflipProb: 0.5
   vflipProb: 0.5
   maxRotate: 10

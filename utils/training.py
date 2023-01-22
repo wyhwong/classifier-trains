@@ -4,7 +4,6 @@ from copy import deepcopy
 
 from .common import getLogger
 
-
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LOGGER = getLogger("Training")
 AVAILABLE_OPTIMIZER = ["sgd", "rmsprop", "adam", "adamw"]
@@ -50,6 +49,7 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
                         optimizer.step()
                         if scheduler:
                             scheduler.step()
+                            LOGGER.info(f"Learning rate in this epoch: {scheduler.get_last_lr()}.")
 
                 epochLoss += loss.item() * inputs.size(0)
                 epochCorrects += torch.sum(preds == labels.data)
@@ -57,7 +57,7 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
             epochLoss = epochLoss / len(dataloaders[phase].dataset)
             epochAcc = epochCorrects.double() / len(dataloaders[phase].dataset)
 
-            LOGGER.info(f'{phase} Loss: {epochLoss:.4f} Acc: {epochAcc:.4f}.')
+            LOGGER.info(f"{phase} Loss: {epochLoss:.4f} Acc: {epochAcc:.4f}.")
 
             if phase == 'val':
                 if standard == "loss" and epochLoss < bestRecord:

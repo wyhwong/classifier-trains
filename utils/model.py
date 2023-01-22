@@ -1,5 +1,5 @@
-import torchvision
 import torch
+import torchvision
 
 from .common import getLogger
 
@@ -48,7 +48,7 @@ def unfreezeAllParams(model) -> None:
     LOGGER.info(f'Unfreezed all parameters in the model.')
 
 
-def loadModel(model, modelPath):
+def loadModel(model, modelPath:str) -> None:
     LOGGER.info(f"Loading weights from local file: {modelPath}.")
     weights = torch.load(modelPath)
     model.load_state_dict(weights)

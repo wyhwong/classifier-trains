@@ -20,9 +20,11 @@ EXPORT = SETUP["enableExport"]
 LOGGER = getLogger("Main")
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 checkAndCreateDir(OUTPUTDIR)
 torch.manual_seed(SEED)
 np.random.seed(SEED)
+
 
 def main():
     config = getConfig()
@@ -55,7 +57,7 @@ def main():
                                                                           scheduler=scheduler,
                                                                           **config["training"]["trainModel"])
         LOGGER.info("Training ended, visualizing results.")
-        visualizeAccAndLoss(trainLoss, trainAcc)
+        visualizeAccAndLoss(trainLoss=trainLoss, trainAcc=trainAcc, outputDir=OUTPUTDIR)
         LOGGER.info("Training phase ended.")
 
     if EXPORT:
@@ -66,10 +68,16 @@ def main():
             saveWeights(weights=bestWeights, exportPath=f"{OUTPUTDIR}/bestModel.pt")
         if config["export"]["exportLastWeight"]:
             model.load_state_dict(lastWeights)
-            exportModelToONNX(model=model, exportPath=f"{OUTPUTDIR}/lastModel.onnx")
+            exportModelToONNX(model=model,
+                              height=config["preprocessing"]["height"],
+                              width=config["preprocessing"]["width"],
+                              exportPath=f"{OUTPUTDIR}/lastModel.onnx")
         if config["export"]["exportBestWeight"]:
             model.load_state_dict(bestWeights)
-            exportModelToONNX(model=model, exportPath=f"{OUTPUTDIR}/bestModel.onnx") 
+            exportModelToONNX(model=model,
+                              height=config["preprocessing"]["height"],
+                              width=config["preprocessing"]["width"],
+                              exportPath=f"{OUTPUTDIR}/bestModel.onnx") 
         LOGGER.info("Export phase ended.")
 
     if EVAL:
@@ -81,7 +89,7 @@ def main():
                                                   shuffle=False,
                                                   num_workers=config["dataset"]["numWorkers"])
         model = initializeModel(**config["model"])
-        loadModel(modelPath=config["evaluation"]["modelPath"])
+        loadModel(model=model, modelPath=config["evaluation"]["modelPath"])
         evaluateModel(model=model, dataloader=dataloader,
                       resultsDir=f"{OUTPUTDIR}/modelEval")
         LOGGER.info("Evaluation phase ended.")
