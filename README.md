@@ -17,28 +17,28 @@ dataset=${PWD}/dataset config=${PWD}/config/config.yml outputDir=${PWD}/results 
 ```
 
 ## Structure for dataset
-```bash
+```
 Dataset Directory
 ├── train
 │   ├── <class1>
-│   │   ├── <image 1>
+│   │   ├── <image1>
 │   │   └── ...
 │   └── <class2>
-│       ├── <image 1>
+│       ├── <image1>
 │       └── ...
 ├── val
 │   ├── <class1>
-│   │   ├── <image 1>
+│   │   ├── <image1>
 │   │   └── ...
 │   └── <class2>
-│       ├── <image 1>
+│       ├── <image1>
 │       └── ...
 └── eval
     ├── <class1>
-    │   ├── <image 1>
+    │   ├── <image1>
     │   └── ...
     └── <class2>
-        ├── <image 1>
+        ├── <image1>
         └── ...
 ```
 
