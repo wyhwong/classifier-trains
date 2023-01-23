@@ -10,7 +10,7 @@ build:
 train:
 	docker run --rm -it --name Pytorch-classifier-training \
 			   --gpus all \
-         	   -v ${outputDir}:/results \
+			   -v ${outputDir}:/results \
 			   -v ${dataset}:/dataset \
 			   -v ${config}:/workspace/config/config.yml \
 			   --env-file .env \
