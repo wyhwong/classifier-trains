@@ -38,13 +38,3 @@ def checkAndCreateDir(directory:str) -> bool:
         LOGGER.info(f"{directory} does not exist, creating one.")
         os.mkdir(directory)
     return exist
-
-
-def getSeed() -> int:
-    LOGGER.debug(f"Getting seed from config/config.yml")
-    seed = getConfig()["seed"]
-    if type(seed) != int:
-        LOGGER.warning("Obtained seed is not an integer, forcing seed to be integer.")
-        seed = int(seed)
-    LOGGER.info(f"Seed for numpy/torch random: {seed}")
-    return seed

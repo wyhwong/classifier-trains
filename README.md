@@ -1,7 +1,7 @@
 # TAO-like PyTorch Classifier Trainer
-This repository aims to provide a fast general training pipeline for PyTorch classifier models. Like TAO classification, all parameters are configurable in .yml config to minimize the need of programming.
+This repository aims to provide a primitive tool for simple training with PyTorch classifier models. Like TAO classification, all parameters are configurable in .yml config to minimize the need of modifying scripts.
 
-## Description and Usuage
+## Description and Usage
 Get config ready, get dataset ready, no coding (hopefully :D), start PyTorch training.
 
 ```bash
@@ -16,7 +16,7 @@ dataset=<path to image dataset> config=<path to yml config> outputDir=<path to o
 dataset=${PWD}/dataset config=${PWD}/config/config.yml outputDir=${PWD}/results make train
 ```
 
-## Structure for dataset
+## Folder Structure for Dataset
 ```
 Dataset Directory
 ├── train
