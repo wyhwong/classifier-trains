@@ -24,10 +24,10 @@ def getConfig() -> dict:
     return config
 
 
-def saveConfig(path:str, config:dict) -> None:
-    LOGGER.debug(f"Saving config: {config}")
+def saveDictAsYml(path:str, inputDict:dict) -> None:
+    LOGGER.debug(f"Saving dict: {inputDict}")
     with open(path, 'w') as file:
-        yaml.dump(config, file)
+        yaml.dump(inputDict, file)
     LOGGER.info(f"Saved config at {path}")
 
 

@@ -55,7 +55,7 @@ def loadModel(model, modelPath:str) -> None:
     LOGGER.info(f"Loaded weights from loacl file, {model}.")
 
 
-def saveWeights(weights, modelPath:str) -> None:
-    LOGGER.info(f"Saving model weights at {modelPath}.")
-    torch.save(weights, modelPath)
+def saveWeights(weights, exportPath:str) -> None:
+    LOGGER.info(f"Saving model weights at {exportPath}.")
+    torch.save(weights, exportPath)
     LOGGER.info(f"Saved model weights.")

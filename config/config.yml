@@ -3,7 +3,7 @@ setup:
   outputDir: /results                        # directory for results WITHIN Docker container
   enableTraining: true
   enableEvaluation: false
-  enableExport: false
+  enableExport: true
 
 model:
   arch: resnet18
@@ -35,7 +35,7 @@ preprocessing:
 
 training:
   trainModel:
-    numEpochs: 3
+    numEpochs: 10
     standard: loss                          # available choice: loss, acc
 
   scheduler:

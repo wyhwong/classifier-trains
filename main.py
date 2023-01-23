@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from torchvision import datasets
 
-from utils.common import getConfig, getLogger, saveConfig, checkAndCreateDir
+from utils.common import getConfig, getLogger, saveDictAsYml, checkAndCreateDir
 from utils.model import initializeModel, loadModel, saveWeights
 from utils.preprocessing import getTransforms
 from utils.training import trainModel, getOptimizer, getScheduler, getClassMapping
@@ -27,7 +27,7 @@ np.random.seed(SEED)
 
 def main():
     config = getConfig()
-    saveConfig(path=f"{OUTPUTDIR}/config.yml", config=config)
+    saveDictAsYml(path=f"{OUTPUTDIR}/config.yml", inputDict=config)
     LOGGER.info(f"Initializing training using {DEVICE=}")
     if TRAIN or EVAL:
         dataTranforms = getTransforms(**config["preprocessing"])

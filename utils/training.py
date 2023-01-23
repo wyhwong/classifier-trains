@@ -1,17 +1,19 @@
 import torch
-import yaml
 from datetime import datetime
 from copy import deepcopy
 
-from .common import getLogger
+from .common import getLogger, saveDictAsYml
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LOGGER = getLogger("Training")
 AVAILABLE_OPTIMIZER = ["sgd", "rmsprop", "adam", "adamw"]
 AVAILABLE_SCHEDULER = ["step", "cosine"]
+AVAILABLE_STANDARD = ["loss", "acc"]
 
 
-def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, standard):
+def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs:int, standard:str):
+    if standard not in AVAILABLE_STANDARD:
+        raise NotImplementedError(f"Training with {standard=} is invalid or not implemented.")
     trainingStart = datetime.now()
     LOGGER.info(f"Start time of training {trainingStart}.")
     LOGGER.info(f"Training using device: {DEVICE}")
@@ -19,9 +21,10 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
     bestWeights = deepcopy(model.state_dict())
     trainLoss = {"train": [], "val": []}
     trainAcc = {"train": [], "val": []}
-    bestRecord = 0
+    bestRecord = None
 
     for epoch in range(1, numEpochs+1):
+        LOGGER.info('-' * 40)
         LOGGER.info(f'Epoch {epoch}/{numEpochs}')
         LOGGER.info('-' * 20)
 
@@ -56,10 +59,16 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs, s
             epochLoss = epochLoss / len(dataloaders[phase].dataset)
             epochAcc = epochCorrects.double() / len(dataloaders[phase].dataset)
 
-            if scheduler:
+            if scheduler and phase == "train":
                 scheduler.step()
                 LOGGER.info(f"Last learning rate in this epoch: {scheduler.get_last_lr()}.")
             LOGGER.info(f"{phase} Loss: {epochLoss:.4f} Acc: {epochAcc:.4f}.")
+
+            if phase == 'val' and bestRecord is None:
+                if standard == "loss":
+                    bestRecord = epochLoss
+                if standard == "acc":
+                    bestRecord = epochAcc
 
             if phase == 'val':
                 if standard == "loss" and epochLoss < bestRecord:
@@ -137,8 +146,5 @@ def getClassMapping(dataset, savepath=None, save=False) -> dict:
     if save:
         if savepath is None:
             raise ValueError("The savepath cannot be None if save=True")
-        LOGGER.debug(f"Saving mapping")
-        with open(savepath, 'w') as file:
-            yaml.dump(mapping, file)
-        LOGGER.info(f"Saved mapping at {savepath}")
+        saveDictAsYml(path=savepath, inputDict=mapping)
     return mapping

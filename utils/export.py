@@ -4,7 +4,7 @@ import onnx
 from .common import getLogger
 
 LOGGER = getLogger("Export")
-
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 def exportModelToONNX(model, height:int, width:int, exportPath:str) -> None:
     LOGGER.debug(f"Changing model to evaluation mode.")
@@ -13,7 +13,7 @@ def exportModelToONNX(model, height:int, width:int, exportPath:str) -> None:
     x = torch.randn(1, 3, height, width, requires_grad=True)
     LOGGER.debug(f"Exporting the model: {exportPath=}.")
     torch.onnx.export(model,
-                      x,
+                      x.to(DEVICE),
                       exportPath,
                       export_params=True,
                       opset_version=10,
