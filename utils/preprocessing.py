@@ -60,8 +60,6 @@ def getTransforms(
 
 class Resize:
     def __init__(self, width:int, height:int, interpolation:str, maintainAspectRatio:bool, padding:str) -> None:
-        if width != height:
-            raise NotImplementedError("Resizing with non-squared output size is not implemented.")
         if padding not in AVAILABLE_PADDING:
             raise NotImplementedError(f"Resizing with {padding} padding is invalid or not implemented.")
         if interpolation.upper() not in AVAILABLE_INTERPOLATION:
@@ -79,14 +77,13 @@ class Resize:
             return cv2.resize(image, self.dim, interpolation=self.interpolation)
         else:
             imageHeight, imageWidth, _ = image.shape
-            if imageHeight > imageWidth:
-                imageWidth = int(imageWidth * (self.inputHeight / imageHeight))
-                imageHeight = self.inputHeight
-                image = cv2.resize(image, (imageWidth, imageHeight), interpolation=self.interpolation)
-            else:
+            if imageHeight / self.inputHeight < imageWidth / self.inputWidth:
                 imageHeight = int(imageHeight * (self.inputWidth / imageWidth))
                 imageWidth = self.inputWidth
-                image = cv2.resize(image, (imageWidth, imageHeight), interpolation=self.interpolation)
+            else:
+                imageWidth = int(imageWidth * (self.inputHeight / imageHeight))
+                imageHeight = self.inputHeight
+            image = cv2.resize(image, (imageWidth, imageHeight), interpolation=self.interpolation)
             outputImage = np.zeros((self.inputHeight, self.inputWidth, 3), dtype=float)
             if self.padding == "bottomRight":
                 outputImage[:imageHeight,:imageWidth,] = image
