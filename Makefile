@@ -12,6 +12,6 @@ train:
 			   --gpus all \
 			   -v ${dataset}:/dataset \
 			   -v ${config}:/workspace/config/config.yml \
-               -v ${outputDir}:/results \
+         -v ${outputDir}:/results \
 			   --env-file .env \
 			   wyhwong/tao-like-pytorch-classifier
