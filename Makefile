@@ -10,8 +10,8 @@ build:
 train:
 	docker run --rm -it --name Pytorch-classifier-training \
 			   --gpus all \
+         	   -v ${outputDir}:/results \
 			   -v ${dataset}:/dataset \
 			   -v ${config}:/workspace/config/config.yml \
-         -v ${outputDir}:/results \
 			   --env-file .env \
 			   wyhwong/tao-like-pytorch-classifier
