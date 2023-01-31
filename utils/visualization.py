@@ -73,7 +73,7 @@ def getDatasetPreview(
             axes[row][col].imshow(img)
             axes[row][col].axis("off")
     plt.savefig(f"{outputDir}/datasetPreview_{filenameRemark}.jpg", facecolor="w")
-    LOGGER.debug("Plotted the training/validation accuracy during training.")
+    LOGGER.debug(f"Plotted the preview of the dataset, remark: {filenameRemark}.")
     if close:
         LOGGER.debug("Closed the plot.")
         plt.close()
