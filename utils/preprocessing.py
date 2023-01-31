@@ -91,8 +91,12 @@ class Resize:
                 outputImage[:imageHeight,self.inputWidth-imageWidth:,] = image
             elif self.padding == "topLeft":
                 outputImage[self.inputHeight-imageHeight:,:imageWidth,] = image
-            else:
+            elif self.padding == "topRight":
                 outputImage[self.inputHeight-imageHeight:,self.inputWidth-imageWidth:,] = image
+            elif self.padding == "center":
+                topLeftX = int((self.inputWidth - imageWidth) / 2)
+                topLeftY = int((self.inputHeight - imageHeight) / 2)
+                outputImage[topLeftY:topLeftY+imageHeight,topLeftX:topLeftX+imageWidth,] = image
             return outputImage
 
 
