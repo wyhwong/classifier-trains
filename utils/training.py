@@ -1,6 +1,7 @@
 import torch
 from datetime import datetime
 from copy import deepcopy
+from tqdm import tqdm
 
 from .common import getLogger, saveDictAsYml
 
@@ -38,7 +39,7 @@ def trainModel(model, dataloaders, criterion, optimizer, scheduler, numEpochs:in
 
             epochLoss = 0.0
             epochCorrects = 0
-            for inputs, labels in dataloaders[phase]:
+            for inputs, labels in tqdm(dataloaders[phase]):
                 inputs = inputs.to(DEVICE)
                 labels = labels.to(DEVICE)
 
@@ -117,7 +118,7 @@ def getOptimizer(params, name="adam", lr=1e-3, momentum=0.9, weight_decay=0, alp
                                 lr=lr,
                                 betas=betas,
                                 weight_decay=weight_decay)
-    elif name.lower() == "adamw ":
+    elif name.lower() == "adamw":
         LOGGER.debug(f"Creating optimizer {name}, {betas=}, {weight_decay=}.")
         return torch.optim.AdamW(params,
                                  lr=lr,
