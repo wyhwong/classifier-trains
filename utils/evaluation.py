@@ -1,7 +1,7 @@
-from .common import getLogger
+from .logger import get_logger
 
-LOGGER = getLogger("Evaluate")
+LOGGER = get_logger("Evaluate")
 
 
-def evaluateModel(model, dataloader, resultsDir:str) -> None:
+def evaluate_model(model, dataloader, results_dir: str) -> None:
     pass

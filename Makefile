@@ -16,5 +16,5 @@ train:
 			   -v ${dataset}:/dataset \
 			   -v ${config}:/workspace/config/config.yml \
 			   --shm-size={shmSize} \
-			   --env LOGGER_LEVEL=${loglevel} \
+			   --env LOGLEVEL=${loglevel} \
 			   wyhwong/tao-like-pytorch-classifier:v0.0.1

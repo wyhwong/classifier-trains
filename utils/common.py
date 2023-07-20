@@ -1,37 +1,29 @@
 import os
 import yaml
-import logging
+from .logger import get_logger
+
+LOGGER = get_logger("Common")
 
 
-def getLogger(logger_name: str) -> logging.Logger:
-    format = "%(asctime)s [%(name)s | %(levelname)s]: %(message)s"
-    datefmt = '%Y-%m-%d %H:%M:%S'
-    logger = logging.getLogger(logger_name)
-    level = int(os.getenv("LOGGER_LEVEL"))
-    logging.basicConfig(level=level, format=format, datefmt=datefmt)
-    logger.debug(f"Logger started, level={level}")
-    return logger
+def get_config() -> dict:
+    return load_yml("configs/config.yml")
 
 
-LOGGER = getLogger("Common")
-
-
-def getConfig() -> dict:
-    LOGGER.info(f"Reading config/config.yml")
+def load_yml(ymlpath: str) -> dict:
+    LOGGER.info(f"Read yml: {ymlpath}")
     with open("config/config.yml", "r") as file:
-        config = yaml.load(file, Loader=yaml.SafeLoader)
-    LOGGER.debug(f"Config: {config}")
-    return config
+        yml_content = yaml.load(file, Loader=yaml.SafeLoader)
+    return yml_content
 
 
-def saveDictAsYml(path:str, inputDict:dict) -> None:
-    LOGGER.debug(f"Saving dict: {inputDict}")
-    with open(path, 'w') as file:
-        yaml.dump(inputDict, file)
-    LOGGER.info(f"Saved config at {path}")
+def save_dict_as_yml(ymlpath: str, input_dict: dict) -> None:
+    LOGGER.debug(f"Saving dict: {input_dict}")
+    with open(ymlpath, "w") as file:
+        yaml.dump(input_dict, file)
+    LOGGER.info(f"Saved config at {ymlpath}")
 
 
-def checkAndCreateDir(directory:str) -> bool:
+def check_and_create_dir(directory: str) -> bool:
     exist = os.path.isdir(directory)
     LOGGER.debug(f"{directory} exists: {exist}")
     if not exist:

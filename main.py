@@ -3,106 +3,119 @@ import torch
 import numpy as np
 from torchvision import datasets
 
-from utils.common import getConfig, getLogger, saveDictAsYml, checkAndCreateDir
-from utils.model import initializeModel, loadModel, saveWeights
-from utils.preprocessing import getTransforms
-from utils.training import trainModel, getOptimizer, getScheduler, getClassMapping
-from utils.export import exportModelToONNX, checkModelIsValid
-from utils.evaluation import evaluateModel
-from utils.visualization import visualizeAccAndLoss, getDatasetPreview
+from utils.common import get_config, save_dict_as_yml, check_and_create_dir
+from utils.logger import get_logger
+from utils.model import initialize_model, load_model, save_weights
+from utils.preprocessing import get_transforms
+from utils.training import trainModel, get_optimizer, get_scheduler, get_class_mapping
+from utils.export import export_model_to_onnx, check_model_is_valid
+from utils.evaluation import evaluate_model
+from utils.visualization import visualize_acc_and_loss, get_dataset_preview
 
-SETUP = getConfig()["setup"]
+SETUP = get_config()["setup"]
 SEED = SETUP["seed"]
 OUTPUTDIR = SETUP["outputDir"]
 TRAIN = SETUP["enableTraining"]
 EVAL = SETUP["enableEvaluation"]
 EXPORT = SETUP["enableExport"]
-LOGGER = getLogger("Main")
+LOGGER = get_logger("Main")
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-checkAndCreateDir(OUTPUTDIR)
+check_and_create_dir(OUTPUTDIR)
 torch.manual_seed(SEED)
 np.random.seed(SEED)
 
 
 def main():
-    config = getConfig()
-    saveDictAsYml(path=f"{OUTPUTDIR}/config.yml", inputDict=config)
+    config = get_config()
+    save_dict_as_yml(ymlpath=f"{OUTPUTDIR}/config.yml", input_dict=config)
     LOGGER.info(f"Initializing training using {DEVICE=}")
     if TRAIN or EVAL:
-        dataTranforms = getTransforms(**config["preprocessing"])
+        data_tranforms = get_transforms(**config["preprocessing"])
 
     if TRAIN:
         LOGGER.info("Starting phase: Training, loading necessary parameters.")
-        imageDatasets = {x: datasets.ImageFolder(config["dataset"][f"{x}setDir"],
-                                                 dataTranforms[x]) for x in ["train", "val"]}
-        dataloaders = {x: torch.utils.data.DataLoader(imageDatasets[x],
-                                                      batch_size=config["dataset"]["batchSize"],
-                                                      shuffle=True,
-                                                      num_workers=config["dataset"]["numWorkers"]) for x in ["train", "val"]}
-        getClassMapping(dataset=imageDatasets["train"],
-                        savepath=f"{OUTPUTDIR}/classMapping.yml",
-                        save=True)
+        image_datasets = {
+            x: datasets.ImageFolder(config["dataset"][f"{x}setDir"], data_tranforms[x]) for x in ["train", "val"]
+        }
+        dataloaders = {
+            x: torch.utils.data.DataLoader(
+                image_datasets[x],
+                batch_size=config["dataset"]["batchSize"],
+                shuffle=True,
+                num_workers=config["dataset"]["numWorkers"],
+            )
+            for x in ["train", "val"]
+        }
+        get_class_mapping(dataset=image_datasets["train"], savepath=f"{OUTPUTDIR}/classMapping.yml", save=True)
         for phase in ["train", "val"]:
-            getDatasetPreview(dataset=imageDatasets[phase],
-                              outputDir=OUTPUTDIR,
-                              mean=np.array(config["preprocessing"]["mean"]),
-                              std=np.array(config["preprocessing"]["std"]),
-                              filenameRemark=phase)
+            get_dataset_preview(
+                dataset=image_datasets[phase],
+                mean=np.array(config["preprocessing"]["mean"]),
+                std=np.array(config["preprocessing"]["std"]),
+                filename_remark=phase,
+                output_dir=OUTPUTDIR,
+                savefig=True,
+            )
         criterion = torch.nn.CrossEntropyLoss()
-        model = initializeModel(**config["model"])
-        optimizer = getOptimizer(params=model.parameters(),
-                                 **config["training"]["optimizer"])
-        scheduler = getScheduler(optimizer=optimizer,
-                                 numEpochs=config["training"]["trainModel"]["numEpochs"],
-                                 **config["training"]["scheduler"])
+        model = initialize_model(**config["model"])
+        optimizer = get_optimizer(params=model.parameters(), **config["training"]["optimizer"])
+        scheduler = get_scheduler(
+            optimizer=optimizer,
+            num_epochs=config["training"]["trainModel"]["numEpochs"],
+            **config["training"]["scheduler"],
+        )
         LOGGER.info("Loaded all parameters, training starts.")
-        model, bestWeights, lastWeights, trainLoss, trainAcc = trainModel(model=model,
-                                                                          dataloaders=dataloaders,
-                                                                          criterion=criterion,
-                                                                          optimizer=optimizer,
-                                                                          scheduler=scheduler,
-                                                                          **config["training"]["trainModel"])
+        model, best_weights, last_weights, train_loss, train_acc = trainModel(
+            model=model,
+            dataloaders=dataloaders,
+            criterion=criterion,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            **config["training"]["trainModel"],
+        )
         LOGGER.info("Training ended, visualizing results.")
-        visualizeAccAndLoss(trainLoss=trainLoss,
-                            trainAcc=trainAcc,
-                            outputDir=OUTPUTDIR)
+        visualize_acc_and_loss(train_loss=train_loss, train_acc=train_acc, output_dir=OUTPUTDIR, savefig=True)
         LOGGER.info("Training phase ended.")
 
     if EXPORT:
         LOGGER.info("Starting phase: Export.")
         if config["export"]["saveLastWeight"]:
-            saveWeights(weights=lastWeights, exportPath=f"{OUTPUTDIR}/lastModel.pt")
+            save_weights(weights=last_weights, export_path=f"{OUTPUTDIR}/lastModel.pt")
         if config["export"]["saveBestWeight"]:
-            saveWeights(weights=bestWeights, exportPath=f"{OUTPUTDIR}/bestModel.pt")
+            save_weights(weights=best_weights, export_path=f"{OUTPUTDIR}/bestModel.pt")
         if config["export"]["exportLastWeight"]:
-            model.load_state_dict(lastWeights)
-            exportModelToONNX(model=model,
-                              height=config["preprocessing"]["height"],
-                              width=config["preprocessing"]["width"],
-                              exportPath=f"{OUTPUTDIR}/lastModel.onnx")
-            checkModelIsValid(modelPath=f"{OUTPUTDIR}/lastModel.onnx")
+            model.load_state_dict(last_weights)
+            export_model_to_onnx(
+                model=model,
+                input_height=config["preprocessing"]["height"],
+                input_width=config["preprocessing"]["width"],
+                export_path=f"{OUTPUTDIR}/lastModel.onnx",
+            )
+            check_model_is_valid(model_path=f"{OUTPUTDIR}/lastModel.onnx")
         if config["export"]["exportBestWeight"]:
-            model.load_state_dict(bestWeights)
-            exportModelToONNX(model=model,
-                              height=config["preprocessing"]["height"],
-                              width=config["preprocessing"]["width"],
-                              exportPath=f"{OUTPUTDIR}/bestModel.onnx")
-            checkModelIsValid(modelPath=f"{OUTPUTDIR}/bestModel.onnx")
+            model.load_state_dict(best_weights)
+            export_model_to_onnx(
+                model=model,
+                input_height=config["preprocessing"]["height"],
+                input_width=config["preprocessing"]["width"],
+                export_path=f"{OUTPUTDIR}/bestModel.onnx",
+            )
+            check_model_is_valid(model_path=f"{OUTPUTDIR}/bestModel.onnx")
         LOGGER.info("Export phase ended.")
 
     if EVAL:
         LOGGER.info("Starting phase: Evaluation.")
-        imageDataset = datasets.ImageFolder(config["evaluation"][f"evalsetDir"],
-                                            dataTranforms["val"])
-        dataloader = torch.utils.data.DataLoader(imageDataset,
-                                                  batch_size=config["dataset"]["batchSize"],
-                                                  shuffle=False,
-                                                  num_workers=config["dataset"]["numWorkers"])
-        model = initializeModel(**config["model"])
-        loadModel(model=model, modelPath=config["evaluation"]["modelPath"])
-        evaluateModel(model=model, dataloader=dataloader,
-                      resultsDir=f"{OUTPUTDIR}/modelEval")
+        image_dataset = datasets.ImageFolder(config["evaluation"][f"evalsetDir"], data_tranforms["val"])
+        dataloader = torch.utils.data.DataLoader(
+            image_dataset,
+            batch_size=config["dataset"]["batchSize"],
+            shuffle=False,
+            num_workers=config["dataset"]["numWorkers"],
+        )
+        model = initialize_model(**config["model"])
+        load_model(model=model, model_path=config["evaluation"]["modelPath"])
+        evaluate_model(model=model, dataloader=dataloader, results_dir=f"{OUTPUTDIR}/modelEval")
         LOGGER.info("Evaluation phase ended.")
 
 
