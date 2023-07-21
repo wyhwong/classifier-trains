@@ -9,7 +9,7 @@ from .common import check_and_create_dir
 from .logger import get_logger
 from .preprocessing import Denormalize
 
-LOGGER = get_logger("Visualization")
+LOGGER = get_logger("utils/visualization")
 
 
 @dataclass
@@ -37,20 +37,17 @@ def initialize_plot(nrows=1, ncols=1, figsize=(10, 6), labels=Labels(), padding=
     return fig, axes
 
 
-def savefig_and_close(plot_filename: str, output_dir=None, savefig=False, close=True) -> None:
-    if savefig:
-        if output_dir is None:
-            raise ValueError(f"output_dir must not be empty if savefig is True.")
-        check_and_create_dir(dirpath=output_dir)
-        savepath = f"{output_dir}/{plot_filename}"
+def savefig_and_close(filename: str, output_dir=None, close=True) -> None:
+    if output_dir:
+        check_and_create_dir(output_dir)
+        savepath = f"{output_dir}/{filename}"
         plt.savefig(savepath, facecolor="w")
-        LOGGER.debug(f"Saved plot at {savepath}.")
+        LOGGER.info(f"Saved plot at {savepath}.")
     if close:
         plt.close()
-        LOGGER.debug("Closed plot.")
 
 
-def visualize_acc_and_loss(train_loss: dict, train_acc: dict, output_dir=None, savefig=False, close=True) -> None:
+def visualize_acc_and_loss(train_loss: dict, train_acc: dict, output_dir=None, close=True) -> None:
     LOGGER.debug(f"Plotting the training/validation loss during training: {train_loss}")
     loss = pd.DataFrame(train_loss)
     loss.to_csv(f"{output_dir}/loss.csv", index=False)
@@ -62,7 +59,7 @@ def visualize_acc_and_loss(train_loss: dict, train_acc: dict, output_dir=None, s
     )
     _, ax = initialize_plot(figsize=(10, 10), labels=labels)
     sns.lineplot(data=loss, ax=ax)
-    savefig_and_close("lossHistory.jpg", output_dir, savefig, close)
+    savefig_and_close("lossHistory.jpg", output_dir, close)
 
     LOGGER.debug(f"Plotting the training/validation accuracy during training: {train_acc}")
     acc = pd.DataFrame(train_acc)
@@ -75,15 +72,15 @@ def visualize_acc_and_loss(train_loss: dict, train_acc: dict, output_dir=None, s
     )
     _, ax = initialize_plot(figsize=(10, 10), labels=labels)
     sns.lineplot(data=acc, ax=ax)
-    savefig_and_close("accHistory.jpg", output_dir, savefig, close)
+    savefig_and_close("accHistory.jpg", output_dir, close)
 
 
-def get_dataset_preview(dataset, mean, std, filename_remark="", output_dir=None, savefig=False, close=True) -> None:
+def get_dataset_preview(dataset, mean: list, std: list, filename_remark="", output_dir=None, close=True) -> None:
     nrows, ncols = 4, 4
-    labels = Labels(title="Preview of Dataset")
-    _, axes = initialize_plot(nrows=nrows, ncols=ncols, figsize=(10, 10), labels=labels)
+    labels = Labels("Preview of Dataset")
+    _, axes = initialize_plot(nrows, ncols, (10, 10), labels)
     images = iter(dataset)
-    denormalizer = Denormalize(mean, std)
+    denormalizer = Denormalize(np.array(mean), np.array(std))
     for row in range(nrows):
         for col in range(ncols):
             img = next(images)[0]
@@ -91,4 +88,4 @@ def get_dataset_preview(dataset, mean, std, filename_remark="", output_dir=None,
             img = img.numpy().transpose(1, 2, 0).astype(int)
             axes[row][col].imshow(img)
             axes[row][col].axis("off")
-    savefig_and_close(f"datasetPreview_{filename_remark}.jpg", output_dir, savefig, close)
+    savefig_and_close(f"datasetPreview_{filename_remark}.jpg", output_dir, close)

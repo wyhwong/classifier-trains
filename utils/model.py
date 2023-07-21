@@ -30,9 +30,8 @@ AVAILABLE_MODELS = [
 
 def initialize_model(arch: str, weights: str, num_classes: int, unfreeze_all_params: bool) -> torchvision.models:
     if arch.lower() in AVAILABLE_MODELS:
-        LOGGER.info(f"Targeted arch {arch} in available models, extracting.")
         model = getattr(torchvision.models, arch)(weights=weights)
-        LOGGER.debug(f"Extracted model: {model}.")
+        LOGGER.info(f"Extracted model: {model}.")
 
     LOGGER.debug("Modifying the output layer of the model.")
     if "resnet" in arch:
@@ -51,7 +50,7 @@ def initialize_model(arch: str, weights: str, num_classes: int, unfreeze_all_par
         model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
     else:
         raise NotImplementedError("The model is not implemented in this TAO-like pytorch classifier.")
-    LOGGER.debug("Modified the output layer of the model.")
+    LOGGER.info("Modified the output layer of the model.")
 
     if unfreeze_all_params:
         model = unfreeze_all_params(model)
@@ -61,7 +60,7 @@ def initialize_model(arch: str, weights: str, num_classes: int, unfreeze_all_par
 def unfreeze_all_params(model) -> None:
     for param in model.parameters():
         param.requires_grad = True
-    LOGGER.info(f"Unfreezed all parameters in the model.")
+    LOGGER.info("Unfreezed all parameters in the model.")
 
 
 def load_model(model, model_path: str) -> None:

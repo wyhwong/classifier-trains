@@ -13,7 +13,7 @@ make build
 dataset=<path to image dataset> config=<path to yml config> outputDir=<path to output folder> make train
 
 # Example
-dataset=${PWD}/dataset config=${PWD}/config/config.yml outputDir=${PWD}/results make train
+dataset=${PWD}/dataset config=${PWD}/configs/train.yml outputDir=${PWD}/results make train
 ```
 
 ## Folder Structure for Dataset

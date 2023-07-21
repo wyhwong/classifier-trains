@@ -13,9 +13,10 @@ AVAILABLE_SCHEDULER = ["step", "cosine"]
 AVAILABLE_STANDARD = ["loss", "acc"]
 
 
-def trainModel(model, dataloaders, criterion, optimizer, scheduler, num_epochs: int, standard: str):
+def train_model(model, dataloaders, criterion, optimizer, scheduler, num_epochs: int, standard: str):
     if standard not in AVAILABLE_STANDARD:
         raise NotImplementedError(f"Training with {standard=} is invalid or not implemented.")
+
     training_start = datetime.now()
     LOGGER.info(f"Start time of training {training_start}.")
     LOGGER.info(f"Training using device: {DEVICE}")
@@ -125,11 +126,9 @@ def get_scheduler(name: str, optimizer: torch.optim, num_epochs: int, step_size=
         return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=num_epochs, eta_min=lr_min)
 
 
-def get_class_mapping(dataset, savepath=None, save=False) -> dict:
+def get_class_mapping(dataset, savepath: str = None) -> dict:
     mapping = dataset.class_to_idx
     LOGGER.info(f"Reading class mapping in the dataset: {mapping}")
-    if save:
-        if savepath is None:
-            raise ValueError("The savepath cannot be None if save=True")
-        save_dict_as_yml(ymlpath=savepath, input_dict=mapping)
+    if savepath:
+        save_dict_as_yml(savepath, mapping)
     return mapping

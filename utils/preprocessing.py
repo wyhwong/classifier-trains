@@ -4,7 +4,7 @@ from torchvision import transforms
 
 from .logger import get_logger
 
-LOGGER = get_logger("Preprocessing")
+LOGGER = get_logger("utils/preprocessing")
 AVAILABLE_INTERPOLATION = ["INTER_NEAREST", "INTER_LINEAR", "INTER_AREA", "INTER_CUBIC", "INTER_LANCZOS4"]
 AVAILABLE_PADDING = ["topLeft", "topRight", "bottomLeft", "bottomRight", None]
 
@@ -60,7 +60,7 @@ def get_transforms(
         "train": transforms.Compose(spatial_augmentation + color_augmentation + resize_and_padding + normalization),
         "val": transforms.Compose(resize_and_padding + normalization),
     }
-    LOGGER.info(f"Constructed transfroms.compose.")
+    LOGGER.info("Constructed transfroms.compose.")
     return data_transforms
 
 
@@ -124,17 +124,17 @@ class Resize:
 
 
 class PilToCV2:
-    def __init__(self):
-        LOGGER.debug(f"PilToCV2 layer initialized.")
+    def __init__(self) -> None:
+        LOGGER.debug("PilToCV2 layer initialized.")
 
-    def __call__(self, image):
+    def __call__(self, image) -> np.ndarray:
         return np.array(image)
 
 
 class Denormalize:
-    def __init__(self, mean: np.ndarray, std: np.ndarray):
+    def __init__(self, mean: np.ndarray, std: np.ndarray) -> None:
         self.denormalize = transforms.Normalize(-1 * mean / std, 1 / std)
-        LOGGER.debug(f"Denormalize layer initialized.")
+        LOGGER.debug("Denormalize layer initialized.")
 
-    def __call__(self, image):
+    def __call__(self, image) -> np.ndarray:
         return self.denormalize(image)

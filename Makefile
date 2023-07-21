@@ -1,20 +1,25 @@
 export DOCKER_BUILDKIT=1
 
 dataset?=${PWD}/dataset
-config?=${PWD}/config/config.yml
+config?=${PWD}/configs/train.yml
 outputDir?=${PWD}/results
 shmSize?=8gb
-loglevel=20
+version?=devel
+loglevel?=20
 
 build:
-	docker build -t wyhwong/tao-like-pytorch-classifier:v0.0.1 .
+	mkdir -p ./results
+	docker build -t local/TCPytorch:${version} \
+				 --build-arg USERNAME=$(shell whoami) \
+			     --build-arg USER_ID=$(shell id -u) \
+			     --build-arg GROUP_ID=$(shell id -g) .
 
 train:
-	docker run --rm -it --name Pytorch-classifier-training \
+	docker run --rm -it --name tcpytorch \
 			   --gpus all \
 			   -v ${outputDir}:/results \
 			   -v ${dataset}:/dataset \
-			   -v ${config}:/workspace/config/config.yml \
+			   -v ${config}:/home/${USERNAME}/workspace/configs/train.yml \
 			   --shm-size={shmSize} \
 			   --env LOGLEVEL=${loglevel} \
-			   wyhwong/tao-like-pytorch-classifier:v0.0.1
+			   local/TCPytorch:${version}
