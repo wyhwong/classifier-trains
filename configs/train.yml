@@ -52,8 +52,9 @@ training:
     alpha: 0.99                             # Only for rmsprop
     betas: [0.9, 0.999]                     # Only for adam / adamw
 
-evaluation:                                 # Not ready in use
+evaluation:
   evalsetDir: /dataset/eval
+  mappingPath: /results/classMapping.yml
   modelPath: /results/bestModel.pt
 
 export:

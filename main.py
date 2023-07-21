@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from torchvision import datasets
 
-from utils.common import get_config, save_dict_as_yml, check_and_create_dir
+from utils.common import get_config, save_dict_as_yml, check_and_create_dir, load_yml
 from utils.logger import get_logger
 from utils.model import initialize_model, load_model, save_weights
 from utils.preprocessing import get_transforms
@@ -114,7 +114,8 @@ def main():
         )
         model = initialize_model(**configs["model"])
         load_model(model, configs["evaluation"]["modelPath"])
-        evaluate_model(model, dataloader, f"{OUTPUTDIR}/modelEval")
+        classes = load_yml(configs["evaluation"]["mappingPath"]).keys()
+        evaluate_model(model, dataloader, classes, OUTPUTDIR)
         LOGGER.info("Evaluation phase ended.")
 
 
