@@ -1,7 +1,7 @@
 import os
 import logging
 
-LOGLEVEL = int(os.getenv("LOGLEVEL", 20))
+LOGLEVEL = int(os.getenv("LOGLEVEL", "20"))
 LOGFMT = "%(asctime)s [%(name)s | %(levelname)s]: %(message)s"
 DATEFMT = "%Y-%m-%d %H:%M:%S"
 logging.basicConfig(format=LOGFMT, datefmt=DATEFMT, level=LOGLEVEL)

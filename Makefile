@@ -6,13 +6,15 @@ outputDir?=${PWD}/results
 shmSize?=8gb
 version?=devel
 loglevel?=20
+timezone?=Asia/Hong_Kong
 
 build:
 	mkdir -p ./results
-	docker build -t local/TCPytorch:${version} \
+	docker build -t local/tcpytorch:${version} \
 				 --build-arg USERNAME=$(shell whoami) \
-			     --build-arg USER_ID=$(shell id -u) \
-			     --build-arg GROUP_ID=$(shell id -g) .
+				 --build-arg USER_ID=$(shell id -u) \
+				 --build-arg GROUP_ID=$(shell id -g) \
+				 --build-arg TZ=${timezone} .
 
 train:
 	docker run --rm -it --name tcpytorch \
@@ -22,4 +24,4 @@ train:
 			   -v ${config}:/home/${USERNAME}/workspace/configs/train.yml \
 			   --shm-size={shmSize} \
 			   --env LOGLEVEL=${loglevel} \
-			   local/TCPytorch:${version}
+			   local/tcpytorch:${version}

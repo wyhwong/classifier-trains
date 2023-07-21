@@ -17,7 +17,6 @@ def load_yml(filepath: str) -> dict:
 
 
 def save_dict_as_yml(filepath: str, input_dict: dict) -> None:
-    LOGGER.debug(f"Saving dict: {input_dict}")
     with open(filepath, "w") as file:
         yaml.dump(input_dict, file)
     LOGGER.info(f"Saved config at {filepath}")

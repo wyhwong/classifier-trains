@@ -18,7 +18,7 @@ OUTPUTDIR = SETUP["outputDir"]
 TRAIN = SETUP["enableTraining"]
 EVAL = SETUP["enableEvaluation"]
 EXPORT = SETUP["enableExport"]
-LOGGER = get_logger("Main")
+LOGGER = get_logger("main", OUTPUTDIR)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 check_and_create_dir(OUTPUTDIR)

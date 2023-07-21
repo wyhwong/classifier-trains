@@ -1,4 +1,4 @@
-# TAO-like Classifier PyTorch-training (TCP)
+# TAO-like Classifier training pipeline using PyTorch (TCP)
 This repository aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in .yml config to minimize the need of modifying scripts.
 
 ## Description and Usage
@@ -41,8 +41,6 @@ Dataset Directory
         ├── <image1>
         └── ...
 ```
-
-Note: Evaluation function is not ready.
 
 ## Author
 [@wyhwong](https://github.com/wyhwong)
