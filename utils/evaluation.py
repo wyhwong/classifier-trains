@@ -24,7 +24,7 @@ def evaluate_model(model, dataloader, classes: list, output_dir=None, close=True
         inputs = inputs.to(DEVICE)
         labels = labels.to(DEVICE)
 
-        outputs = model(inputs)
+        outputs = model(inputs.float())
 
         outputs = (torch.max(torch.exp(outputs), 1)[1]).data.cpu().numpy()
         y_pred.extend(outputs)

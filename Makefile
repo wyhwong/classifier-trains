@@ -1,27 +1,26 @@
 export DOCKER_BUILDKIT=1
 
-dataset?=${PWD}/dataset
-config?=${PWD}/configs/train.yml
-outputDir?=${PWD}/results
-shmSize?=8gb
-version?=devel
-loglevel?=20
-timezone?=Asia/Hong_Kong
+DATASET?=${PWD}/dataset
+CONFIG?=${PWD}/configs/train.yml
+OUTPUT_DIR?=${PWD}/results
+VERSION?=devel
+LOGLEVEL?=20
+TZ?=Asia/Hong_Kong
 
 build:
 	mkdir -p ./results
-	docker build -t local/tcpytorch:${version} \
+	docker build -t tcpytorch:${VERSION} \
 				 --build-arg USERNAME=$(shell whoami) \
 				 --build-arg USER_ID=$(shell id -u) \
 				 --build-arg GROUP_ID=$(shell id -g) \
-				 --build-arg TZ=${timezone} .
+				 --build-arg TZ=${TZ} .
 
 train:
 	docker run --rm -it --name tcpytorch \
 			   --gpus all \
-			   -v ${outputDir}:/results \
-			   -v ${dataset}:/dataset \
-			   -v ${config}:/home/${USERNAME}/workspace/configs/train.yml \
-			   --shm-size={shmSize} \
-			   --env LOGLEVEL=${loglevel} \
-			   local/tcpytorch:${version}
+			   -v ${OUTPUT_DIR}:/results \
+			   -v ${DATASET}:/dataset \
+			   -v ${CONFIG}:/home/${USERNAME}/workspace/configs/train.yml \
+			   -v ./:/home/${USERNAME}/workspace \
+			   --env LOGLEVEL=${LOGLEVEL} \
+			   tcpytorch:${VERSION}

@@ -1,64 +1,65 @@
+experiment_label:
+
 setup:
   seed: 314159
-  outputDir: /results                        # directory for results WITHIN Docker container
-  enableTraining: true
-  enableEvaluation: false
-  enableExport: true
+  enable_training: true
+  enable_evaluation: true
+  enable_export: true
 
 model:
   arch: resnet18
-  numClasses: 2
+  num_classes: 2
   weights: DEFAULT
-  unfreezeAllParams: false
+  unfreeze_all_params: false
 
 dataset:
-  trainsetDir: /dataset/train/              # directory of trainset WITHIN Docker container
-  valsetDir: /dataset/val/                  # directory of valset WITHIN Docker container
-  batchSize: 8
-  numWorkers: 4
+  trainset_dir: /dataset/train/ # directory of trainset WITHIN Docker container
+  valset_dir: /dataset/val/ # directory of valset WITHIN Docker container
+  batch_size: 8
+  num_workers: 4
 
 preprocessing:
   width: 48
   height: 48
-  interpolation: INTER_CUBIC                
-  maintainAspectRatio: true
-  padding: bottomRight                      # ["bottomLeft", "bottomRight", "topLeft", "topRight"]
+  interpolation: INTER_CUBIC
+  maintain_aspect_ratio: true
+  padding: bottomRight # ["bottomLeft", "bottomRight", "topLeft", "topRight"]
   mean: [0.485, 0.456, 0.406]
   std: [0.229, 0.224, 0.225]
-  hflipProb: 0.5
-  vflipProb: 0.5
-  maxRotate: 10
-  centorCrop: false
-  randomCrop: false
-  grayScale: false
-  randomColorAugmentation: false
+  hflip_prob: 0.5
+  vflip_prob: 0.5
+  max_rotate: 10
+  centor_crop: false
+  random_crop: false
+  gray_scale: false
+  random_color_augmentation: false
 
 training:
-  trainModel:
-    numEpochs: 10
-    standard: loss                          # available choice: loss, acc
+  train_model:
+    num_epochs: 10
+    standard: loss # available choice: loss, acc
 
   scheduler:
-    name: step                              # ["step", "cosine"]
-    lrMin: 0
-    stepSize: 30                            # Only for step
-    gamma: 0.1                              # Only for step
+    name: step # ["step", "cosine"]
+    lr_min: 0
+    step_size: 30 # Only for step
+    gamma: 0.1 # Only for step
 
   optimizer:
-    name: adam                              # ["sgd", "rmsprop", "adam", "adamw"]
+    name: adam # ["sgd", "rmsprop", "adam", "adamw"]
     lr: 0.001
     weight_decay: 0
-    momentum: 0.9                           # Only for sgd / rmsprop
-    alpha: 0.99                             # Only for rmsprop
-    betas: [0.9, 0.999]                     # Only for adam / adamw
+    momentum: 0.9 # Only for sgd / rmsprop
+    alpha: 0.99 # Only for rmsprop
+    betas: [0.9, 0.999] # Only for adam / adamw
 
 evaluation:
-  evalsetDir: /dataset/eval
-  mappingPath: /results/classMapping.yml
-  modelPath: /results/bestModel.pt
+  evalset_dir: /dataset/val
+  mapping_path: OUTPUT_DIR/classMapping.yml
+  weights_path: OUTPUT_DIR/bestModel.pt
 
 export:
-  saveLastWeight: true
-  saveBestWeight: true
-  exportLastWeight: true
-  exportBestWeight: true
+  save_last_weight: true
+  save_best_weight: true
+  export_last_weight: true
+  export_best_weight: true
