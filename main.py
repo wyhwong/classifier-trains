@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+import os
 import torch
 import numpy as np
-from glob import glob
 from torchvision import datasets
 
 from utils.common import get_config, save_dict_as_yml, check_and_create_dir, load_yml
@@ -19,7 +19,7 @@ TRAIN = SETUP["enable_training"]
 EVAL = SETUP["enable_evaluation"]
 EXPORT = SETUP["enable_export"]
 LOGGER = get_logger("main")
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = os.getenv("DEVICE")
 check_and_create_dir(OUTPUT_DIR)
 torch.manual_seed(SEED)
 np.random.seed(SEED)
@@ -28,7 +28,7 @@ np.random.seed(SEED)
 def main():
     configs = get_config()
     save_dict_as_yml(f"{OUTPUT_DIR}/train.yml", configs)
-    LOGGER.info(f"Initializing training using {DEVICE=}")
+    LOGGER.info("Initializing training using %s", DEVICE)
     if TRAIN or EVAL:
         data_tranforms = get_transforms(**configs["preprocessing"])
 
@@ -104,7 +104,7 @@ def main():
 
     if EVAL:
         LOGGER.info("Starting phase: Evaluation.")
-        image_dataset = datasets.ImageFolder(configs["evaluation"][f"evalset_dir"], data_tranforms["val"])
+        image_dataset = datasets.ImageFolder(configs["evaluation"]["evalset_dir"], data_tranforms["val"])
         dataloader = torch.utils.data.DataLoader(
             image_dataset,
             batch_size=configs["dataset"]["batch_size"],

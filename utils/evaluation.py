@@ -1,3 +1,4 @@
+import os
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -10,7 +11,7 @@ from .visualization import Labels, initialize_plot, savefig_and_close
 from .logger import get_logger
 
 LOGGER = get_logger("utils/evaluation")
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = os.getenv("DEVICE")
 
 
 def evaluate_model(model, dataloader, classes: list, output_dir=None, close=True) -> None:

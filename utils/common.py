@@ -10,7 +10,7 @@ def get_config() -> dict:
 
 
 def load_yml(filepath: str) -> dict:
-    LOGGER.debug(f"Read yml: {filepath}")
+    LOGGER.debug("Read yml: %s", filepath)
     with open(filepath, "r") as file:
         yml_content = yaml.load(file, Loader=yaml.SafeLoader)
     return yml_content
@@ -19,13 +19,12 @@ def load_yml(filepath: str) -> dict:
 def save_dict_as_yml(filepath: str, input_dict: dict) -> None:
     with open(filepath, "w") as file:
         yaml.dump(input_dict, file)
-    LOGGER.info(f"Saved config at {filepath}")
+    LOGGER.info("Saved config at %s", filepath)
 
 
 def check_and_create_dir(dirpath: str) -> bool:
     exist = os.path.isdir(dirpath)
-    LOGGER.debug(f"{dirpath} exists: {exist}")
     if not exist:
-        LOGGER.info(f"{dirpath} does not exist, creating one.")
+        LOGGER.info("%s does not exist, created", dirpath)
         os.mkdir(dirpath)
     return exist

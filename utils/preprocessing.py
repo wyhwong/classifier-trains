@@ -30,13 +30,13 @@ def get_transforms(
     normalization = [transforms.ToTensor(), transforms.Normalize(mean, std)]
 
     if hflip_prob > 0:
-        LOGGER.debug(f"Spatial augmentation added: {hflip_prob=}.")
+        LOGGER.debug("Spatial augmentation added: hflip_prob=%.2f", hflip_prob)
         spatial_augmentation.append(transforms.RandomHorizontalFlip(hflip_prob))
     if vflip_prob > 0:
-        LOGGER.debug(f"Spatial augmentation added: {vflip_prob=}.")
+        LOGGER.debug("Spatial augmentation added: vflip_prob=%.2f", vflip_prob)
         spatial_augmentation.append(transforms.RandomVerticalFlip(vflip_prob))
     if max_rotate > 0:
-        LOGGER.debug(f"Spatial augmentation added: {max_rotate=}.")
+        LOGGER.debug("Spatial augmentation added: max_rotate=%.2f", max_rotate)
         spatial_augmentation.append(transforms.RandomRotation(max_rotate))
     if centor_crop:
         LOGGER.debug("Spatial augmentation added: center crop.")
@@ -50,12 +50,14 @@ def get_transforms(
         color_augmentation.append(transforms.Grayscale(3))
     if random_color_augmentation:
         brightness, hue = 0.5, 0.3
-        LOGGER.debug(f"Color augmentation added: coloer jitter with {brightness=}, {hue=}.")
+        LOGGER.debug("Color augmentation added: coloer jitter with brightness=%.2f, hue=%.2f", brightness, hue)
         color_augmentation.append(transforms.ColorJitter(brightness=brightness, hue=hue))
 
-    LOGGER.info(
-        f"Constructing transforms.compose for trainset: \n\t{spatial_augmentation=}, \n\t{color_augmentation=}, \n\t{resize_and_padding=}, \n\t{normalization=}."
-    )
+    construction_message = "Constructing transforms.compose for trainset: "
+    for transform in [spatial_augmentation, color_augmentation, resize_and_padding, normalization]:
+        construction_message += f"\n\t{transform}"
+    LOGGER.info(construction_message)
+
     data_transforms = {
         "train": transforms.Compose(spatial_augmentation + color_augmentation + resize_and_padding + normalization),
         "val": transforms.Compose(resize_and_padding + normalization),
@@ -77,7 +79,12 @@ class Resize:
         self.maintain_aspect_ratio = maintain_aspect_ratio
         self.padding = padding
         LOGGER.debug(
-            f"Resize layer initialized: {width=}, {height=}, {interpolation=}, {maintain_aspect_ratio=}, {padding=}."
+            "Resize layer initialized: %.2f, %.2f, %s, %b, %s.",
+            width,
+            height,
+            interpolation,
+            maintain_aspect_ratio,
+            padding,
         )
 
     def __call__(self, image: np.ndarray) -> np.ndarray:

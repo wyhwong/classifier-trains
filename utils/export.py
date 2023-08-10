@@ -1,10 +1,11 @@
+import os
 import torch
 import onnx
 
 from .logger import get_logger
 
 LOGGER = get_logger("utils/export")
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = os.getenv("DEVICE")
 
 
 def export_model_to_onnx(model, input_height: int, input_width: int, export_path: str) -> None:
@@ -20,10 +21,10 @@ def export_model_to_onnx(model, input_height: int, input_width: int, export_path
         input_names=["input"],
         output_names=["output"],
     )
-    LOGGER.info(f"Exported the model: {export_path=}.")
+    LOGGER.info("Exported the model: %s.", export_path)
 
 
 def check_model_is_valid(model_path: str) -> None:
     onnx_model = onnx.load(model_path)
     onnx.checker.check_model(onnx_model)
-    LOGGER.info(f"Checked onnx model at {model_path}.")
+    LOGGER.info("Checked onnx model at %s.", model_path)

@@ -31,7 +31,7 @@ AVAILABLE_MODELS = [
 def initialize_model(arch: str, weights: str, num_classes: int, unfreeze_all_params: bool) -> torchvision.models:
     if arch.lower() in AVAILABLE_MODELS:
         model = getattr(torchvision.models, arch)(weights=weights)
-        LOGGER.info(f"Extracted model: {model}.")
+        LOGGER.info("Extracted model: %s", model)
 
     LOGGER.debug("Modifying the output layer of the model.")
     if "resnet" in arch:
@@ -66,9 +66,9 @@ def unfreeze_all_params(model) -> None:
 def load_model(model, model_path: str) -> None:
     weights = torch.load(model_path)
     model.load_state_dict(weights)
-    LOGGER.info(f"Loaded weights from loacl file, {model}.")
+    LOGGER.info("Loaded weights from loacl file: %s", model)
 
 
 def save_weights(weights, export_path: str) -> None:
     torch.save(weights, export_path)
-    LOGGER.info(f"Saved model weights at {export_path}.")
+    LOGGER.info("Saved model weights at %s.", export_path)
