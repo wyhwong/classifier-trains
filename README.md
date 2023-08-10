@@ -10,10 +10,10 @@ make build
 
 # Modify config/config.yml according to your needs
 # Then start training
-dataset=<path to image dataset> config=<path to yml config> outputDir=<path to output folder> make train
+DATASET=<path to image dataset> CONFIG=<path to yml config> OUTPUT_DIR=<path to output folder> make train
 
 # Example
-dataset=${PWD}/dataset config=${PWD}/configs/train.yml outputDir=${PWD}/results make train
+DATASET=${PWD}/dataset CONFIG=${PWD}/configs/train.yml OUTPUT_DIR=${PWD}/results make train
 ```
 
 ## Folder Structure for Dataset
