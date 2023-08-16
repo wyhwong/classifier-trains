@@ -3,7 +3,7 @@ export DOCKER_BUILDKIT=1
 DATASET?=${PWD}/dataset
 CONFIG?=${PWD}/configs/train.yml
 OUTPUT_DIR?=${PWD}/results
-VERSION?=devel
+VERSION?=1.0.0
 DEVICE?=cuda
 LOGLEVEL?=20
 

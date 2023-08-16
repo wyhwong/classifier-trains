@@ -36,7 +36,7 @@ preprocessing:
 
 training:
   train_model:
-    num_epochs: 10
+    num_epochs: 100
     standard: loss # available choice: loss, acc
 
   scheduler:

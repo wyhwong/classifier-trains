@@ -41,24 +41,7 @@ def get_predictions(model, dataloader):
 
 
 def evaluate_model(model, dataloader, classes: list, output_dir=None, close=True) -> None:
-    y_pred = []
-    y_true = []
-
-    model.to(DEVICE)
-    model.eval()
-
-    for inputs, labels in tqdm(dataloader):
-        inputs = inputs.to(DEVICE)
-        labels = labels.to(DEVICE)
-
-        outputs = model(inputs.float())
-
-        outputs = (torch.max(torch.exp(outputs), 1)[1]).data.cpu().numpy()
-        y_pred.extend(outputs)
-
-        labels = labels.data.cpu().numpy()
-        y_true.extend(labels)
-
+    y_true, y_pred, _ = get_predictions(model, dataloader)
     metric = confusion_matrix(y_true, y_pred)
     metric_df = pd.DataFrame(
         metric / np.sum(metric, axis=1)[:, None],
@@ -80,22 +63,7 @@ def visualize_roc_curve(model_configs, dataloader, classes: list, output_dir=Non
         model = initialize_model(model_config["arch"], "DEFAULT", len(classes), False)
         load_model(model, model_config["path"])
 
-        y_pred_prob[model_name] = []
-        y_true[model_name] = []
-
-        model.to(DEVICE)
-        model.eval()
-
-        for inputs, labels in tqdm(dataloader):
-            inputs = inputs.to(DEVICE)
-            labels = labels.to(DEVICE)
-
-            outputs = model(inputs.float())
-            y_pred_prob[model_name].extend(outputs.detach().cpu().numpy())
-
-            labels = labels.data.cpu().numpy()
-            y_true[model_name].extend(labels)
-
+        y_true[model_name], _, y_pred_prob[model_name] = get_predictions(model, dataloader)
         y_pred_prob[model_name] = np.array(y_pred_prob[model_name])
         # Change y_true to onehot format
         y_true_tensor = torch.tensor(y_true[model_name])
@@ -111,9 +79,9 @@ def visualize_roc_curve(model_configs, dataloader, classes: list, output_dir=Non
             model_name = model_config["name"]
             fpr, tpr, _ = roc_curve(y_true[model_name][:, obj_index], y_pred_prob[model_name][:, obj_index])
             auc = roc_auc_score(y_true[model_name][:, obj_index], y_pred_prob[model_name][:, obj_index])
-            sns.lineplot(x=fpr, y=tpr, label=f"{model_config['name']}: AUC={auc}", ax=ax)
+            sns.lineplot(x=fpr, y=tpr, label=f"{model_config['name']}: AUC={auc:.4f}", ax=ax, errorbar=None)
 
-        sns.lineplot(x=[0, 1], y=[0, 1])
+        sns.lineplot(x=[0, 1], y=[0, 1], ax=ax, linestyle="--", errorbar=None)
         ax.set(xlim=[0.0, 1.0], ylim=[0.0, 1.05])
         plt.legend(loc="lower right")
-        savefig_and_close("roc_curve.png", output_dir, close)
+        savefig_and_close(f"roc_curve_{obj_class}.png", output_dir, close)
