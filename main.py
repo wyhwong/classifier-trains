@@ -10,7 +10,7 @@ from utils.model import initialize_model, load_model, save_weights
 from utils.preprocessing import get_transforms
 from utils.training import train_model, get_optimizer, get_scheduler, get_class_mapping
 from utils.export import export_model_to_onnx, check_model_is_valid
-from utils.evaluation import evaluate_model
+from utils.evaluation import evaluate_model, visualize_roc_curve
 from utils.visualization import visualize_acc_and_loss, get_dataset_preview
 
 SETUP = get_config()["setup"]
@@ -104,7 +104,8 @@ def main():
 
     if EVAL:
         LOGGER.info("Starting phase: Evaluation.")
-        image_dataset = datasets.ImageFolder(configs["evaluation"]["evalset_dir"], data_tranforms["val"])
+        eval_configs = configs["evaluation"]
+        image_dataset = datasets.ImageFolder(eval_configs["evalset_dir"], data_tranforms["val"])
         dataloader = torch.utils.data.DataLoader(
             image_dataset,
             batch_size=configs["dataset"]["batch_size"],
@@ -112,12 +113,17 @@ def main():
             num_workers=configs["dataset"]["num_workers"],
         )
         model = initialize_model(**configs["model"])
-        weights_path = configs["evaluation"]["weights_path"].replace("OUTPUT_DIR", OUTPUT_DIR)
+        weights_path = eval_configs["weights_path"].replace("OUTPUT_DIR", OUTPUT_DIR)
         load_model(model, weights_path)
-        mapping_path = configs["evaluation"]["mapping_path"].replace("OUTPUT_DIR", OUTPUT_DIR)
+        mapping_path = eval_configs["mapping_path"].replace("OUTPUT_DIR", OUTPUT_DIR)
         classes = load_yml(mapping_path).keys()
         evaluate_model(model, dataloader, classes, OUTPUT_DIR)
         LOGGER.info("Evaluation phase ended.")
+
+        if eval_configs["roc_curve"]:
+            for model_config in eval_configs["roc_curve"]:
+                model_config["path"] = model_config["path"].replace("OUTPUT_DIR", OUTPUT_DIR)
+            visualize_roc_curve(eval_configs["roc_curve"], dataloader, classes, OUTPUT_DIR)
 
 
 if __name__ == "__main__":

@@ -57,6 +57,10 @@ evaluation:
   evalset_dir: /dataset/val
   mapping_path: OUTPUT_DIR/classMapping.yml
   weights_path: OUTPUT_DIR/bestModel.pt
+  roc_curve:
+    - name: default
+      path: OUTPUT_DIR/bestModel.pt
+      arch: resnet18
 
 export:
   save_last_weight: true
