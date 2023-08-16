@@ -1,5 +1,5 @@
 # TAO-like Classifier training pipeline using PyTorch (TCP)
-This repository aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in .yml config to minimize the need of modifying scripts.
+This repository aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in [train.yml](./train.yml) to minimize the need of modifying scripts.
 
 ## Description and Usage
 Get config ready, get dataset ready, no coding (hopefully :D), start PyTorch training.
@@ -8,12 +8,12 @@ Get config ready, get dataset ready, no coding (hopefully :D), start PyTorch tra
 # Build Docker image
 make build
 
-# Modify configs/train.yml according to your needs
+# Modify train.yml according to your needs
 # Then start training
 DATASET=<path to image dataset> CONFIG=<path to yml config> OUTPUT_DIR=<path to output folder> make train
 
-# Example
-DATASET=${PWD}/dataset CONFIG=${PWD}/configs/train.yml OUTPUT_DIR=${PWD}/results make train
+# Example (also default values)
+DATASET=./dataset CONFIG=./train.yml OUTPUT_DIR=./results make train
 ```
 
 ## Folder Structure for Dataset

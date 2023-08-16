@@ -1,8 +1,8 @@
 export DOCKER_BUILDKIT=1
 
-DATASET?=${PWD}/dataset
-CONFIG?=${PWD}/configs/train.yml
-OUTPUT_DIR?=${PWD}/results
+DATASET?=./dataset
+CONFIG?=./train.yml
+OUTPUT_DIR?=./results
 VERSION?=1.0.0
 DEVICE?=cuda
 LOGLEVEL?=20
@@ -13,7 +13,7 @@ USER_ID?=$(shell id -u)
 GROUP_ID?=$(shell id -g)
 
 build:
-	mkdir -p ./results
+	mkdir -p ${OUTPUT_DIR}
 	docker build -t tcpytorch:${VERSION} \
 				 --build-arg USERNAME=${USERNAME} \
 				 --build-arg USER_ID=${USER_ID} \
@@ -25,8 +25,8 @@ train:
 			   --gpus all \
 			   -v ${OUTPUT_DIR}:/results \
 			   -v ${DATASET}:/dataset \
-			   -v ${CONFIG}:/home/${USERNAME}/workspace/configs/train.yml \
-			   -v ./:/home/${USERNAME}/workspace \
+			   -v ${CONFIG}:/train.yml \
+			   -v ./TCPyTorch:/home/${USERNAME}/workspace \
 			   --env LOGLEVEL=${LOGLEVEL} \
 			   --env DEVICE=${DEVICE} \
 			   tcpytorch:${VERSION}

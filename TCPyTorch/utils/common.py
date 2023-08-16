@@ -6,7 +6,7 @@ LOGGER = get_logger("utils/common")
 
 
 def get_config() -> dict:
-    return load_yml("configs/train.yml")
+    return load_yml("/train.yml")
 
 
 def load_yml(filepath: str) -> dict:
