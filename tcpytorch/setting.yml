@@ -1,13 +1,12 @@
 experiment_label:
 
 setup:
-  seed: 314159
   enable_training: true
   enable_evaluation: true
   enable_export: true
 
 model:
-  arch: resnet18
+  backbone: resnet18
   num_classes: 2
   weights: DEFAULT
   unfreeze_all_params: false
@@ -21,23 +20,28 @@ dataset:
 preprocessing:
   width: 48
   height: 48
-  interpolation: INTER_CUBIC
-  maintain_aspect_ratio: true
-  padding: bottomRight # ["bottomLeft", "bottomRight", "topLeft", "topRight"]
   mean: [0.485, 0.456, 0.406]
   std: [0.229, 0.224, 0.225]
-  hflip_prob: 0.5
-  vflip_prob: 0.5
-  max_rotate: 10
-  centor_crop: false
-  random_crop: false
-  gray_scale: false
-  random_color_augmentation: false
+
+  resize_and_padding:
+    interpolation: INTER_CUBIC
+    maintain_aspect_ratio: true
+    padding: bottomRight # ["bottomLeft", "bottomRight", "topLeft", "topRight"]
+
+  spatial:
+    hflip_prob: 0.5
+    vflip_prob: 0.5
+    max_rotate: 10
+    centor_crop: false
+    random_crop: false
+
+  color:
+    gray_scale: false
+    random_color_augmentation: false
 
 training:
-  train_model:
-    num_epochs: 100
-    standard: loss # available choice: loss, acc
+  num_epochs: 100
+  standard: loss # available choice: loss, acc
 
   scheduler:
     name: step # ["step", "cosine"]
@@ -55,12 +59,12 @@ training:
 
 evaluation:
   evalset_dir: /dataset/val
-  mapping_path: OUTPUT_DIR/classMapping.yml
-  weights_path: OUTPUT_DIR/bestModel.pt
-  roc_curve:
+  mapping_path: $OUTPUT_DIR/class_mapping.yml
+  
+  models:
     - name: default
-      path: OUTPUT_DIR/bestModel.pt
-      arch: resnet18
+      path: $OUTPUT_DIR/best_model.pt
+      backbone: resnet18
 
 export:
   save_last_weight: true
