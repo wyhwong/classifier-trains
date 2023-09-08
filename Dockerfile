@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
 RUN apt-get update && \
     apt-get install -y tzdata ffmpeg libsm6 libxext6
@@ -14,5 +14,6 @@ RUN groupadd --gid ${GROUP_ID} ${USERNAME} && \
     adduser --disabled-password --gecos '' --uid ${USER_ID} --gid ${GROUP_ID} ${USERNAME}
 
 USER ${USERNAME}
+COPY ./TCPyTorch /home/${USERNAME}/workspace
 WORKDIR /home/${USERNAME}/workspace
 CMD ["python3", "main.py"]

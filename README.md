@@ -1,4 +1,4 @@
-# TAO-like Classifier training pipeline using PyTorch (TCP)
+# TAO-like Classifier training pipeline using PyTorch (TCPyTorch)
 This repository aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in [train.yml](./train.yml) to minimize the need of modifying scripts.
 
 ## Description and Usage
@@ -56,8 +56,7 @@ By default, the pipeline will output the following:
 
 ## To Be Developed
 
-1. Upgrade to PyTorch 2
-2. Implement detector training
+1. Implement detector training
 
 ## Author
 [@wyhwong](https://github.com/wyhwong)

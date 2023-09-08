@@ -3,6 +3,7 @@ import torchvision
 
 import utils.logger
 import utils.constants
+import utils.env
 
 LOGGER = utils.logger.get_logger("utils/model")
 
@@ -59,6 +60,16 @@ def initialize_model(
 
     if unfreeze_all_params:
         model = unfreeze_all_params(model)
+
+    # To enable PyTorch 2 compiler for optimized performance
+    # (Only support CUDA capability >= 7.0)
+    if (
+        utils.env.DEVICE == "cuda"
+        and torch.cuda.get_device_properties("cuda").major >= 7
+    ):
+        LOGGER.info("Enabled PyTorch 2 compiler for optimized performance.")
+        model = torch.compile(model)
+
     return model
 
 

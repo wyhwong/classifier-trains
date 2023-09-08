@@ -26,7 +26,6 @@ train:
 			   -v ${OUTPUT_DIR}:/results \
 			   -v ${DATASET}:/dataset \
 			   -v ${CONFIG}:/train.yml \
-			   -v ./TCPyTorch:/home/${USERNAME}/workspace \
 			   --env LOGLEVEL=${LOGLEVEL} \
 			   --env DEVICE=${DEVICE} \
 			   tcpytorch:${VERSION}

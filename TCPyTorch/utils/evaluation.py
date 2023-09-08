@@ -17,7 +17,7 @@ LOGGER = utils.logger.get_logger("utils/evaluation")
 
 def get_predictions(
     model: torchvision.models, dataloader: torchvision.datasets.ImageFolder
-):
+) -> tuple:
     """
     Get the predictions of the model with the given dataloader.
 
