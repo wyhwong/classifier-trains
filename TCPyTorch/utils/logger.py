@@ -1,23 +1,37 @@
-import os
-import yaml
 import logging
-from glob import glob
 
-LOGLEVEL = int(os.getenv("LOGLEVEL", "20"))
-LOGFMT = "%(asctime)s [%(name)s | %(levelname)s]: %(message)s"
-DATEFMT = "%Y-%m-%d %H:%M:%S"
-LABEL = yaml.safe_load(open("/train.yml")).get("experiment_label", "noLabel")
-OUTPUT_DIR = f"/results/{int(len(glob('/results/*'))+1)}_{LABEL}"
-os.mkdir(OUTPUT_DIR)
-logging.basicConfig(format=LOGFMT, datefmt=DATEFMT, level=LOGLEVEL)
+import utils.constants
+import utils.env
+
+logging.basicConfig(
+    format=utils.constants.LOGFMT,
+    datefmt=utils.constants.DATEFMT,
+    level=utils.env.LOGLEVEL,
+)
 
 
-def get_logger(logger_name: str, log_filepath=f"{OUTPUT_DIR}/output.log") -> logging.Logger:
+def get_logger(
+    logger_name: str, log_filepath=f"{utils.env.OUTPUT_DIR}/output.log"
+) -> logging.Logger:
+    """
+    Get the logger with the given logger_name and log_filepath.
+
+    Parameters
+    ----------
+    logger_name: str, required, the name of the logger.
+    log_filepath: str, optional, the filepath of the log file.
+
+    Returns
+    -------
+    logger: logging.Logger, the logger.
+    """
     logger = logging.getLogger(logger_name)
-    logger.setLevel(LOGLEVEL)
+    logger.setLevel(utils.env.LOGLEVEL)
     if log_filepath:
         handler = logging.FileHandler(filename=log_filepath)
-        formatter = logging.Formatter(fmt=LOGFMT, datefmt=DATEFMT)
+        formatter = logging.Formatter(
+            fmt=utils.constants.LOGFMT, datefmt=utils.constants.DATEFMT
+        )
         handler.setFormatter(fmt=formatter)
         logger.addHandler(handler)
     return logger

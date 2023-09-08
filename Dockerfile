@@ -2,7 +2,8 @@ FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
 
 RUN apt-get update && \
     apt-get install -y tzdata ffmpeg libsm6 libxext6
-RUN pip3 install pyyaml numpy matplotlib pandas seaborn opencv-python onnx scikit-learn
+RUN pip3 install pyyaml==6.0 numpy==1.22.3 pandas==2.0.3 matplotlib==3.7.2 \
+    seaborn==0.12.2 opencv-python==4.8.0.76 onnx==1.14.1 scikit-learn==1.3.0
 
 ARG USERNAME
 ARG USER_ID
