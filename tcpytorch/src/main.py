@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import torch
 import numpy as np
-from torchvision import datasets
-
+import torch
 import utils
+from torchvision import datasets
 
 
 SETUP = utils.common.get_config()["setup"]
@@ -16,6 +15,9 @@ utils.common.check_and_create_dir(utils.env.OUTPUT_DIR)
 torch.manual_seed(SEED)
 np.random.seed(SEED)
 
+OUTPUT_DIR = f"/results/{int(len(glob('/results/*'))+1)}_{LABEL}"
+os.mkdir(OUTPUT_DIR)
+
 
 def main():
     configs = utils.common.get_config()
@@ -27,10 +29,7 @@ def main():
     if TRAIN:
         LOGGER.info("Starting phase: Training, loading necessary parameters.")
         image_datasets = {
-            x: datasets.ImageFolder(
-                configs["dataset"][f"{x}set_dir"], data_tranforms[x]
-            )
-            for x in ["train", "val"]
+            x: datasets.ImageFolder(configs["dataset"][f"{x}set_dir"], data_tranforms[x]) for x in ["train", "val"]
         }
         dataloaders = {
             x: torch.utils.data.DataLoader(
@@ -41,9 +40,7 @@ def main():
             )
             for x in ["train", "val"]
         }
-        utils.training.get_class_mapping(
-            image_datasets["train"], f"{utils.env.OUTPUT_DIR}/classMapping.yml"
-        )
+        utils.training.get_class_mapping(image_datasets["train"], f"{utils.env.OUTPUT_DIR}/classMapping.yml")
         for phase in ["train", "val"]:
             utils.visualization.get_dataset_preview(
                 dataset=image_datasets[phase],
@@ -54,9 +51,7 @@ def main():
             )
         criterion = torch.nn.CrossEntropyLoss()
         model = utils.model.initialize_model(**configs["model"])
-        optimizer = utils.training.get_optimizer(
-            params=model.parameters(), **configs["training"]["optimizer"]
-        )
+        optimizer = utils.training.get_optimizer(params=model.parameters(), **configs["training"]["optimizer"])
         scheduler = utils.training.get_scheduler(
             optimizer=optimizer,
             num_epochs=configs["training"]["train_model"]["num_epochs"],
@@ -86,13 +81,9 @@ def main():
     if EXPORT:
         LOGGER.info("Starting phase: Export.")
         if configs["export"]["save_last_weight"]:
-            utils.model.save_weights(
-                last_weights, f"{utils.env.OUTPUT_DIR}/lastModel.pt"
-            )
+            utils.model.save_weights(last_weights, f"{utils.env.OUTPUT_DIR}/lastModel.pt")
         if configs["export"]["save_best_weight"]:
-            utils.model.save_weights(
-                best_weights, f"{utils.env.OUTPUT_DIR}/bestModel.pt"
-            )
+            utils.model.save_weights(best_weights, f"{utils.env.OUTPUT_DIR}/bestModel.pt")
         if configs["export"]["export_last_weight"]:
             model.load_state_dict(last_weights)
             utils.export.export_model_to_onnx(
@@ -101,9 +92,7 @@ def main():
                 input_width=configs["preprocessing"]["width"],
                 export_path=f"{utils.env.OUTPUT_DIR}/lastModel.onnx",
             )
-            utils.export.check_model_is_valid(
-                model_path=f"{utils.env.OUTPUT_DIR}/lastModel.onnx"
-            )
+            utils.export.check_model_is_valid(model_path=f"{utils.env.OUTPUT_DIR}/lastModel.onnx")
         if configs["export"]["export_best_weight"]:
             model.load_state_dict(best_weights)
             utils.export.export_model_to_onnx(
@@ -118,9 +107,7 @@ def main():
     if EVAL:
         LOGGER.info("Starting phase: Evaluation.")
         eval_configs = configs["evaluation"]
-        image_dataset = datasets.ImageFolder(
-            eval_configs["evalset_dir"], data_tranforms["val"]
-        )
+        image_dataset = datasets.ImageFolder(eval_configs["evalset_dir"], data_tranforms["val"])
         dataloader = torch.utils.data.DataLoader(
             image_dataset,
             batch_size=configs["dataset"]["batch_size"],
@@ -128,27 +115,17 @@ def main():
             num_workers=configs["dataset"]["num_workers"],
         )
         model = utils.model.initialize_model(**configs["model"])
-        weights_path = eval_configs["weights_path"].replace(
-            "OUTPUT_DIR", utils.env.OUTPUT_DIR
-        )
+        weights_path = eval_configs["weights_path"].replace("OUTPUT_DIR", utils.env.OUTPUT_DIR)
         utils.model.load_model(model, weights_path)
-        mapping_path = eval_configs["mapping_path"].replace(
-            "OUTPUT_DIR", utils.env.OUTPUT_DIR
-        )
+        mapping_path = eval_configs["mapping_path"].replace("OUTPUT_DIR", utils.env.OUTPUT_DIR)
         classes = utils.common.load_yml(mapping_path).keys()
-        utils.evaluation.evaluate_model(
-            model, dataloader, classes, utils.env.OUTPUT_DIR
-        )
+        utils.evaluation.evaluate_model(model, dataloader, classes, utils.env.OUTPUT_DIR)
         LOGGER.info("Evaluation phase ended.")
 
         if eval_configs["roc_curve"]:
             for model_config in eval_configs["roc_curve"]:
-                model_config["path"] = model_config["path"].replace(
-                    "OUTPUT_DIR", utils.env.OUTPUT_DIR
-                )
-            utils.evaluation.visualize_roc_curve(
-                eval_configs["roc_curve"], dataloader, classes, utils.env.OUTPUT_DIR
-            )
+                model_config["path"] = model_config["path"].replace("OUTPUT_DIR", utils.env.OUTPUT_DIR)
+            utils.evaluation.visualize_roc_curve(eval_configs["roc_curve"], dataloader, classes, utils.env.OUTPUT_DIR)
 
 
 if __name__ == "__main__":
