@@ -1,6 +1,6 @@
 import numpy as np
 
-import core.preprocessing
+import core.data.preprocessing
 import core.visualization.base as base
 import schemas.visualization as schemas
 
@@ -17,7 +17,7 @@ def get_dataset_preview(
     labels = schemas.Labels("Preview of Dataset")
     _, axes = base.initialize_plot(nrows, ncols, (10, 10), labels)
     images = iter(dataset)
-    denormalizer = core.preprocessing.Denormalize(np.array(mean), np.array(std))
+    denormalizer = tcpytorch.src.core.data.preprocessing.Denormalize(np.array(mean), np.array(std))
     for row in range(nrows):
         for col in range(ncols):
             img = next(images)[0]

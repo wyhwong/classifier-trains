@@ -1,10 +1,10 @@
 from typing import Any
 
-import core.training
-import core.preprocessing
-import core.visualization
+import core.data.preprocessing
 import core.model
+import core.training
 import core.utils
+import core.visualization
 
 
 class ModelFacade:

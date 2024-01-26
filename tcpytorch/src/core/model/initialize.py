@@ -1,4 +1,3 @@
-import onnx
 import torch
 import torchvision
 
@@ -101,106 +100,109 @@ def unfreeze_all_params_in_model(model: torchvision.models) -> None:
     local_logger.info("Unfreezed all parameters in the model.")
 
 
-def load_model(model: torchvision.models, model_path: str) -> None:
+def get_optimizer(
+    params: torch.nn.Module.parameters,
+    optimizier=schemas.constants.OptimizerType,
+    lr=1e-3,
+    momentum=0.9,
+    weight_decay=0.0,
+    alpha=0.99,
+    betas=(0.9, 0.999),
+) -> torch.optim:
     """
-    Loads the weights of a PyTorch model from a given file path.
+    Get optimizer for the model.
 
     Args:
     -----
-        model (torchvision.models):
-            The PyTorch model to load the weights into.
+        params: torch.nn.Module.parameters
+            Parameters of the model.
 
-        model_path (str):
-            The file path to the saved model weights.
+        optimizier: schemas.constants.OptimizerType
+            Optimizer type.
+
+        lr: float, optional
+            Learning rate for the optimizer.
+
+        momentum: float, optional
+            Momentum for the optimizer.
+
+        weight_decay: float, optional
+            Weight decay for the optimizer.
+
+        alpha: float, optional
+            Alpha for the optimizer.
+
+        betas: tuple, optional
+            Betas for the optimizer.
 
     Returns:
-    -----
-        None
+    --------
+        optimizer: torch.optim
+            Optimizer for the model.
     """
 
-    weights = torch.load(model_path)
-    model.load_state_dict(weights)
-    local_logger.info("Loaded weights from local file: %s.", model)
+    local_logger.info("Creating optimizer: %s", optimizier.value)
+    if optimizier is schemas.constants.OptimizerType.SGD:
+        return torch.optim.SGD(params, lr=lr, momentum=momentum, weight_decay=weight_decay)
+
+    if optimizier is schemas.constants.OptimizerType.RMSPROP:
+        return torch.optim.RMSprop(params, lr=lr, momentum=momentum, weight_decay=weight_decay, alpha=alpha)
+
+    if optimizier is schemas.constants.OptimizerType.ADAM:
+        return torch.optim.Adam(params, lr=lr, betas=betas, weight_decay=weight_decay)
+
+    if optimizier is schemas.constants.OptimizerType.ADAMW:
+        return torch.optim.AdamW(params, lr=lr, betas=betas, weight_decay=weight_decay)
 
 
-def save_weights(weights: torch.nn.Module.state_dict, export_path: str) -> None:
+def get_scheduler(
+    scheduler: schemas.constants.SchedulerType,
+    optimizer: torch.optim,
+    num_epochs: int,
+    step_size: int = 30,
+    gamma: float = 0.1,
+    lr_min: float = 0.0,
+) -> torch.optim.lr_scheduler:
     """
-    Save the model weights to a file.
+    Get scheduler for the optimizer.
 
     Args:
     -----
-        weights (torch.nn.Module.state_dict):
-            The model weights to be saved.
+        scheduler: schemas.constants.SchedulerType
+            Scheduler type.
 
-        export_path (str):
-            The path where the weights will be saved.
+        optimizer: torch.optim
+            Optimizer to apply scheduler.
 
-    Returns:
-    -----
-        None
-    """
+        num_epochs: int
+            Number of epochs to train.
 
-    torch.save(weights, export_path)
-    local_logger.info("Saved model weights at %s.", export_path)
+        step_size: int, optional
+            Step size for the scheduler.
 
+        gamma: float, optional
+            Gamma for the scheduler.
 
-def export_model_to_onnx(
-    model: torchvision.models,
-    input_height: int,
-    input_width: int,
-    export_path: str,
-) -> None:
-    """
-    Export the PyTorch model to ONNX format.
-
-    Args:
-    -----
-        model (torchvision.models):
-            The PyTorch model to be exported.
-
-        input_height (int):
-            The height of the input tensor.
-
-        input_width (int):
-            The width of the input tensor.
-
-        export_path (str):
-            The path to save the exported ONNX model.
+        lr_min: float, optional
+            Minimum learning rate for the scheduler.
 
     Returns:
-    -----
-        None
+    --------
+        scheduler: torch.optim.lr_scheduler
+            Scheduler for the optimizer.
     """
 
-    model.eval()
-    x = torch.randn(1, 3, input_height, input_width, requires_grad=True)
-    torch.onnx.export(
-        model,
-        x.to(env.DEVICE),
-        export_path,
-        export_params=True,
-        opset_version=10,
-        do_constant_folding=True,
-        input_names=["input"],
-        output_names=["output"],
+    local_logger.info("Creating scheduler: %s for optimizer.", scheduler.value)
+    local_logger.info(
+        "The number of epochs: %d, step_size: %d, gamma: %.4f, lr_min: %.4f",
+        num_epochs,
+        step_size,
+        gamma,
+        lr_min,
     )
-    local_logger.info("Exported the model at %s.", export_path)
 
+    if scheduler is schemas.constants.SchedulerType.STEP:
+        return torch.optim.lr_scheduler.StepLR(optimizer=optimizer, step_size=step_size, gamma=gamma)
 
-def check_model_is_valid(model_path: str) -> None:
-    """
-    Check if the ONNX model at the given path is valid.
-
-    Args:
-    -----
-        model_path (str):
-            The path to the ONNX model file.
-
-    Returns:
-    -----
-        None
-    """
-
-    onnx_model = onnx.load(model_path)
-    onnx.checker.check_model(onnx_model)
-    local_logger.info("Checked ONNX model at %s.", model_path)
+    if scheduler is schemas.constants.SchedulerType.COSINE:
+        return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=num_epochs, eta_min=lr_min)
