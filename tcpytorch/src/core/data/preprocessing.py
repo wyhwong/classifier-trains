@@ -279,45 +279,48 @@ class Resize:
 
         if not self.maintain_aspect_ratio:
             return cv2.resize(image, self.dim, interpolation=self.interpolation)
-        else:
-            image_height, image_width, _ = image.shape
-            if image_height / self.input_height < image_width / self.input_width:
-                image_height = int(image_height * (self.input_width / image_width))
-                image_width = self.input_width
-            else:
-                image_width = int(image_width * (self.input_height / image_height))
-                image_height = self.input_height
-            image = cv2.resize(image, (image_width, image_height), interpolation=self.interpolation)
-            output_image = np.zeros((self.input_height, self.input_width, 3), dtype=float)
-            if self.padding is schemas.constants.PaddingType.BOTTOMRIGHT:
-                output_image[
-                    :image_height,
-                    :image_width,
-                ] = image
-            elif self.padding is schemas.constants.PaddingType.BOTTOMLEFT:
-                output_image[
-                    :image_height,
-                    self.input_width - image_width :,
-                ] = image
-            elif self.padding is schemas.constants.PaddingType.TOPLEFT:
-                output_image[
-                    self.input_height - image_height :,
-                    :image_width,
-                ] = image
-            elif self.padding is schemas.constants.PaddingType.TOPRIGHT:
-                output_image[
-                    self.input_height - image_height :,
-                    self.input_width - image_width :,
-                ] = image
-            elif self.padding is schemas.constants.PaddingType.CENTER:
-                left = int((self.input_width - image_width) / 2)
-                top = int((self.input_height - image_height) / 2)
-                output_image[
-                    top : top + image_height,
-                    left : left + image_width,
-                ] = image
 
-            return output_image
+        image_height, image_width, _ = image.shape
+        # Resize the image to fit the input size while maintaining the aspect ratio.
+        if image_height / self.input_height < image_width / self.input_width:
+            image_height = int(image_height * (self.input_width / image_width))
+            image_width = self.input_width
+        else:
+            image_width = int(image_width * (self.input_height / image_height))
+            image_height = self.input_height
+
+        image = cv2.resize(image, (image_width, image_height), interpolation=self.interpolation)
+        output_image = np.zeros((self.input_height, self.input_width, 3), dtype=float)
+
+        if self.padding is schemas.constants.PaddingType.BOTTOMRIGHT:
+            output_image[
+                :image_height,
+                :image_width,
+            ] = image
+        elif self.padding is schemas.constants.PaddingType.BOTTOMLEFT:
+            output_image[
+                :image_height,
+                self.input_width - image_width :,
+            ] = image
+        elif self.padding is schemas.constants.PaddingType.TOPLEFT:
+            output_image[
+                self.input_height - image_height :,
+                :image_width,
+            ] = image
+        elif self.padding is schemas.constants.PaddingType.TOPRIGHT:
+            output_image[
+                self.input_height - image_height :,
+                self.input_width - image_width :,
+            ] = image
+        elif self.padding is schemas.constants.PaddingType.CENTER:
+            left = int((self.input_width - image_width) / 2)
+            top = int((self.input_height - image_height) / 2)
+            output_image[
+                top : top + image_height,
+                left : left + image_width,
+            ] = image
+
+        return output_image
 
 
 class PilToCV2:

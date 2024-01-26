@@ -106,7 +106,7 @@ def unfreeze_all_params_in_model(model: torchvision.models) -> None:
     local_logger.info("Unfreezed all parameters in the model.")
 
 
-def get_optimizer(
+def initialize_optimizer(
     params: torch.nn.Module.parameters,
     optimizier=schemas.constants.OptimizerType,
     lr=1e-3,
@@ -170,7 +170,7 @@ def get_optimizer(
         return torch.optim.AdamW(params, lr=lr, betas=betas, weight_decay=weight_decay)
 
 
-def get_scheduler(
+def initialize_scheduler(
     scheduler: schemas.constants.SchedulerType,
     optimizer: torch.optim,
     num_epochs: int,

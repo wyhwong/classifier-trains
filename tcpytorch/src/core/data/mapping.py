@@ -9,7 +9,7 @@ import logger
 local_logger = logger.get_logger(__name__)
 
 
-def get_class_mapping(
+def save_class_mapping(
     dataset: torchvision.datasets.ImageFolder,
     savepath: Optional[str],
 ) -> dict[str, str]:
@@ -26,8 +26,7 @@ def get_class_mapping(
 
     Returns:
     --------
-        mapping: dict[str, str]
-            Class mapping of the dataset.
+        none
     """
 
     mapping = dataset.class_to_idx
@@ -36,5 +35,3 @@ def get_class_mapping(
     if savepath:
         core.utils.save_as_yml(savepath, mapping)
         local_logger.info("Saved class mapping to %s.", savepath)
-
-    return mapping

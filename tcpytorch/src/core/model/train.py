@@ -16,13 +16,13 @@ local_logger = logger.get_logger(__name__)
 
 def train_model(
     model: torchvision.models,
-    dataloaders: dict[str, torchvision.datasets.ImageFolder],
+    dataloaders: dict[schemas.constants.Phase, torchvision.datasets.ImageFolder],
     criterion: torch.nn.Module,
     optimizer: torch.optim,
     scheduler: torch.optim.lr_scheduler,
     num_epochs: int,
     best_criteria: schemas.constants.BestCriteria,
-) -> tuple:
+):
     """
     Train the model.
 
@@ -31,7 +31,7 @@ def train_model(
         model: torchvision.models
             Model to train.
 
-        dataloaders: dict[str, torchvision.datasets.ImageFolder]
+        dataloaders: dict[schemas.constants.Phase, torchvision.datasets.ImageFolder]
             Dataloaders for training and validation.
 
         criterion: torch.nn.Module
@@ -60,10 +60,10 @@ def train_model(
         last_weights: dict
             Last weights of the model.
 
-        train_loss: dict[str, list]
+        loss: dict[schemas.constants.Phase, list]
             Training loss of the model.
 
-        train_acc: dict[str, list]
+        accuracy: dict[schemas.constants.Phase, list]
             Training accuracy of the model.
     """
 
@@ -71,11 +71,19 @@ def train_model(
     local_logger.info("Start time of training: %s", training_start)
     local_logger.info("Training using device: %s", env.DEVICE)
 
+    # Initialize the best weights and the loss/accuracy record
     best_weights = deepcopy(model.state_dict())
-    train_loss: dict[str, list] = {"train": [], "val": []}
-    train_acc: dict[str, list] = {"train": [], "val": []}
+    loss: dict[schemas.constants.Phase, list[float]] = {
+        schemas.constants.Phase.TRAINING: [],
+        schemas.constants.Phase.VALIDATION: [],
+    }
+    accuracy: dict[schemas.constants.Phase, list[float]] = {
+        schemas.constants.Phase.TRAINING: [],
+        schemas.constants.Phase.VALIDATION: [],
+    }
     best_record = np.inf if best_criteria is schemas.constants.BestCriteria.LOSS else -np.inf
 
+    # Start training
     for epoch in range(1, num_epochs + 1):
         local_logger.info("-" * 40)
         local_logger.info("Epoch %d/%d", epoch, num_epochs)
@@ -91,7 +99,7 @@ def train_model(
 
             epoch_loss = np.inf
             epoch_corrects = 0
-            for inputs, labels in tqdm(dataloaders[phase.value]):
+            for inputs, labels in tqdm(dataloaders[phase]):
                 inputs = inputs.to(env.DEVICE)
                 labels = labels.to(env.DEVICE)
 
@@ -131,13 +139,19 @@ def train_model(
                     best_weights = deepcopy(model.state_dict())
                     local_logger.debug("Updated best models.")
 
-            train_acc[phase.value].append(float(epoch_acc))
-            train_loss[phase.value].append(float(epoch_loss))
-            local_logger.debug("Updated train_acc, train_loss: %.4f, %.4f", epoch_acc, epoch_loss)
+            accuracy[phase].append(float(epoch_acc))
+            loss[phase].append(float(epoch_loss))
+
+            local_logger.debug(
+                "Updated %s accuracy: %.4f, loss: %.4f",
+                phase.value,
+                epoch_acc,
+                epoch_loss,
+            )
 
     last_weights = deepcopy(model.state_dict())
     time_elapsed = (datetime.now() - training_start).total_seconds()
     local_logger.info("Training complete at %s", datetime.now())
     local_logger.info("Training complete in %dm %ds.", time_elapsed // 60, time_elapsed % 60)
     local_logger.info("Best val %s: %.4f}.", best_criteria, best_record)
-    return model, best_weights, last_weights, train_loss, train_acc
+    return (model, best_weights, last_weights, loss, accuracy)
