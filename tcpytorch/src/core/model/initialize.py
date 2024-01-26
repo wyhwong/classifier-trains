@@ -39,8 +39,14 @@ def initialize_model(
     """
 
     local_logger.info("Initializing model backbone: %s.", backbone.value)
-    model = getattr(torchvision.models, backbone.value)(weights=weights)
+    local_logger.debug(
+        "The path to the pre-trained weights file: %s, the number of classes: %d, unfreeze all parameters: %s.",
+        weights,
+        num_classes,
+        unfreeze_all_params,
+    )
 
+    model = getattr(torchvision.models, backbone.value)(weights=weights)
     # Modify output layer to fit number of classes
     if "resnet" in backbone.value:
         model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
@@ -141,7 +147,16 @@ def get_optimizer(
             Optimizer for the model.
     """
 
-    local_logger.info("Creating optimizer: %s", optimizier.value)
+    local_logger.info("Creating optimizer: %s.", optimizier.value)
+    local_logger.debug(
+        "The learning rate: %.4f, momentum: %.4f, weight_decay: %.4f, alpha: %.4f, betas: %s.",
+        lr,
+        momentum,
+        weight_decay,
+        alpha,
+        betas,
+    )
+
     if optimizier is schemas.constants.OptimizerType.SGD:
         return torch.optim.SGD(params, lr=lr, momentum=momentum, weight_decay=weight_decay)
 
@@ -193,8 +208,8 @@ def get_scheduler(
     """
 
     local_logger.info("Creating scheduler: %s for optimizer.", scheduler.value)
-    local_logger.info(
-        "The number of epochs: %d, step_size: %d, gamma: %.4f, lr_min: %.4f",
+    local_logger.debug(
+        "The number of epochs: %d, step_size: %d, gamma: %.4f, lr_min: %.4f.",
         num_epochs,
         step_size,
         gamma,
