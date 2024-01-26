@@ -2,6 +2,8 @@ import enum
 
 
 class OptimizerType(enum.Enum):
+    """The optimizer type."""
+
     SGD = "sgd"
     RMSPROP = "rmsprop"
     ADAM = "adam"
@@ -9,16 +11,22 @@ class OptimizerType(enum.Enum):
 
 
 class SchedulerType(enum.Enum):
+    """The scheduler type."""
+
     STEP = "step"
     COSINE = "cosine"
 
 
 class BestCriteria(enum.Enum):
+    """The best criteria."""
+
     LOSS = "loss"
     ACCURACY = "accuracy"
 
 
 class InterpolationType(enum.Enum):
+    """The interpolation type."""
+
     INTER_NEAREST = "INTER_NEAREST"
     INTER_LINEAR = "INTER_LINEAR"
     INTER_AREA = "INTER_AREA"
@@ -27,6 +35,8 @@ class InterpolationType(enum.Enum):
 
 
 class PaddingType(enum.Enum):
+    """The padding type."""
+
     TOPLEFT = "top_left"
     TOPRIGHT = "top_right"
     BOTTOMLEFT = "bottom_left"
@@ -36,6 +46,8 @@ class PaddingType(enum.Enum):
 
 
 class ModelBackbone(enum.Enum):
+    """The model backbone."""
+
     RESNET18 = "resnet18"
     RESNET34 = "resnet34"
     RESNET50 = "resnet50"
@@ -56,3 +68,10 @@ class ModelBackbone(enum.Enum):
     DENSENET169 = "densenet169"
     DENSENET201 = "densenet201"
     INCEPTION_V3 = "inception_v3"
+
+
+class Phase(enum.Enum):
+    """The phase."""
+
+    TRAINING = "train"
+    VALIDATION = "val"

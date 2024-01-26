@@ -45,25 +45,28 @@ def initialize_model(
     # Modify output layer to fit number of classes
     if "resnet" in backbone.value:
         model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-    elif "alexnet" in backbone.value:
+
+    if "alexnet" in backbone.value:
         model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, num_classes)
-    elif "vgg" in backbone.value:
+
+    if "vgg" in backbone.value:
         model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, num_classes)
-    elif "squeezenet" in backbone.value:
+
+    if "squeezenet" in backbone.value:
         model.classifier[1] = torch.nn.Conv2d(512, num_classes, kernel_size=(1, 1), stride=(1, 1))
         model.num_classes = num_classes
-    elif "densenet" in backbone.value:
+
+    if "densenet" in backbone.value:
         model.classifier = torch.nn.Linear(model.classifier.in_features, num_classes)
-    elif "inception" in backbone.value:
+
+    if "inception" in backbone.value:
         model.AuxLogits.fc = torch.nn.Linear(model.AuxLogits.fc.in_features, num_classes)
         model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-    else:
-        raise NotImplementedError("The model is not implemented in this TAO-like pytorch classifier.")
 
     local_logger.info("Modified the output layer of the model.")
 
     if unfreeze_all_params:
-        unfreeze_all_params(model)
+        unfreeze_all_params_in_model(model)
 
     # To enable PyTorch 2 compiler for optimized performance
     # (Only support CUDA capability >= 7.0)
@@ -71,10 +74,14 @@ def initialize_model(
         local_logger.info("Enabled PyTorch 2 compiler for optimized performance.")
         model = torch.compile(model)
 
+    # Move the model to the device
+    model.to(env.DEVICE)
+    local_logger.info("Moved the model to %s.", env.DEVICE)
+
     return model
 
 
-def unfreeze_all_params(model: torchvision.models) -> None:
+def unfreeze_all_params_in_model(model: torchvision.models) -> None:
     """
     Unfreezes all parameters in the model by setting `requires_grad` to True for each parameter.
 
@@ -113,7 +120,7 @@ def load_model(model: torchvision.models, model_path: str) -> None:
 
     weights = torch.load(model_path)
     model.load_state_dict(weights)
-    local_logger.info("Loaded weights from local file: %s", model)
+    local_logger.info("Loaded weights from local file: %s.", model)
 
 
 def save_weights(weights: torch.nn.Module.state_dict, export_path: str) -> None:
@@ -177,7 +184,7 @@ def export_model_to_onnx(
         input_names=["input"],
         output_names=["output"],
     )
-    local_logger.info("Exported the model: %s.", export_path)
+    local_logger.info("Exported the model at %s.", export_path)
 
 
 def check_model_is_valid(model_path: str) -> None:

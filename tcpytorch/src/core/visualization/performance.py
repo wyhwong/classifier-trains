@@ -154,7 +154,7 @@ def confusion_matrix(
     return (fig, ax)
 
 
-def roc_curve(
+def roc_curves(
     model_configs: list[dict[str, str]],
     dataloader: torchvision.datasets.ImageFolder,
     classes: list,
