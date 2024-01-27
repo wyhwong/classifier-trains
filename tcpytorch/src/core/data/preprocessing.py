@@ -158,7 +158,7 @@ def get_transforms(
     resize_and_padding: list[torchvision.transforms],
     mean: list,
     std: list,
-) -> dict[str, torchvision.transforms.Compose]:
+) -> dict[schemas.constants.Phase, torchvision.transforms.Compose]:
     """
     Get the data transforms.
 
@@ -200,10 +200,10 @@ def get_transforms(
     local_logger.info(construction_message)
 
     data_transforms = {
-        schemas.constants.Phase.TRAINING.value: torchvision.transforms.Compose(
+        schemas.constants.Phase.TRAINING: torchvision.transforms.Compose(
             spatial_augmentation + color_augmentation + resize_and_padding + normalization
         ),
-        schemas.constants.Phase.VALIDATION.value: torchvision.transforms.Compose(resize_and_padding + normalization),
+        schemas.constants.Phase.VALIDATION: torchvision.transforms.Compose(resize_and_padding + normalization),
     }
     local_logger.info("Constructed torchvision.transforms.compose.")
     return data_transforms
