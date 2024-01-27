@@ -272,6 +272,38 @@ class ModelFacade:
             batch_size=self._setting["dataset"]["batch_size"],
             num_workers=self._setting["dataset"]["num_workers"],
         )
+        mapping = core.utils.load_yml(self._setting["evaluation"]["mapping_path"])
+        models = []
+        model_names = []
+        for model_for_eval in self._setting["evaluation"]["models"]:
+            weights_path = model_for_eval["path"].replace("$OUTPUT_DIR", self._output_dir)
+            model = core.model.initialize.initialize_model(
+                backbone=schemas.constants.ModelBackbone(model_for_eval["backbone"]),
+                weights="DEFAULT",
+                num_classes=len(mapping.keys()),
+                unfreeze_all_params=False,
+            )
+            core.model.load_model(model, weights_path)
+            models.append(model)
+            model_names.append(model_for_eval["name"])
+
+            y_true, y_pred, _ = core.model.inference.predict(model, dataloader)
+            core.visualization.performance.confusion_matrix(
+                y_true=y_true,
+                y_pred=y_pred,
+                output_dir=self._output_dir,
+                filename=f"confusion_matrix_{model_for_eval['name']}.png",
+            )
+
+        core.visualization.performance.roc_curves(
+            models=models,
+            model_names=model_names,
+            dataloader=dataloader,
+            classes=mapping,
+            output_dir=self._output_dir,
+        )
+
+        local_logger.info("Evaluation phase ended.")
 
     def _run_export(self) -> None:
         """

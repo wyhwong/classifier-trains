@@ -161,7 +161,7 @@ def roc_curves(
     models: list[torchvision.models],
     model_names: list[str],
     dataloader: torchvision.datasets.ImageFolder,
-    classes: list,
+    mapping: dict[str, str],
     output_dir=None,
     close=True,
 ) -> None:
@@ -179,8 +179,8 @@ def roc_curves(
         dataloader (torchvision.datasets.ImageFolder):
             Dataloader for the dataset.
 
-        classes (list):
-            List of class labels.
+        mapping (dict[str, str]):
+            Mapping of class names to class indices.
 
         output_dir (str, optional):
             Output directory to save the ROC curve plots. Defaults to None.
@@ -203,12 +203,12 @@ def roc_curves(
         # Change y_true to onehot format
         y_true_tensor = torch.tensor(y_true[model_name])
         y_true_tensor = y_true_tensor.reshape((y_true_tensor.shape[0], 1))
-        y_true[model_name] = torch.zeros(y_true_tensor.shape[0], len(classes))
+        y_true[model_name] = torch.zeros(y_true_tensor.shape[0], len(mapping))
         y_true[model_name].scatter_(dim=1, index=y_true_tensor, value=1)
         y_true[model_name] = np.array(y_true[model_name])
 
     # Plot the ROC curve for each class
-    for obj_index, obj_class in enumerate(classes):
+    for obj_index, obj_class in enumerate(mapping):
         labels = schemas.Labels(f"ROC Curve ({obj_class})", "FPR", "TPR")
         _, ax = base.initialize_plot(figsize=(10, 10), labels=labels)
         for model_name in model_names:

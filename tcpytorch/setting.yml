@@ -59,11 +59,11 @@ training:
 
 evaluation:
   evalset_dir: /dataset/val
-  mapping_path: OUTPUT_DIR/class_mapping.yml
-  weights_path: OUTPUT_DIR/best_model.pt
-  roc_curve:
+  mapping_path: $OUTPUT_DIR/class_mapping.yml
+  
+  models:
     - name: default
-      path: OUTPUT_DIR/best_model.pt
+      path: $OUTPUT_DIR/best_model.pt
       backbone: resnet18
 
 export:
