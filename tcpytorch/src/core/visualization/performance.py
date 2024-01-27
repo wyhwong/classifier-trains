@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import sklearn.metrics
 import torch
 import torchvision
-import sklearn.metrics
 
 import core.model.inference
 import core.visualization.base as base
@@ -193,20 +193,20 @@ def roc_curves(
         None
     """
 
-    confidence = {}
-    y_true = {}
+    confidence: dict[str, np.ndarray] = {}
+    y_true: dict[str, np.ndarray] = {}
 
     # Get the confidence and true labels for each model
     for idx, model in enumerate(models):
         model_name = model_names[idx]
-        y_true[model_name], _, confidence[model_name] = core.model.inference.predict(model, dataloader)
-        confidence[model_name] = np.array(confidence[model_name])
+        model_y_true, _, model_confidence = core.model.inference.predict(model, dataloader)
+        confidence[model_name] = np.array(model_confidence)
         # Change y_true to onehot format
-        y_true_tensor = torch.tensor(y_true[model_name])
+        y_true_tensor = torch.tensor(model_y_true)
         y_true_tensor = y_true_tensor.reshape((y_true_tensor.shape[0], 1))
-        y_true[model_name] = torch.zeros(y_true_tensor.shape[0], len(mapping))
-        y_true[model_name].scatter_(dim=1, index=y_true_tensor, value=1)
-        y_true[model_name] = np.array(y_true[model_name])
+        _y_true_tensor = torch.zeros(y_true_tensor.shape[0], len(mapping))
+        _y_true_tensor.scatter_(dim=1, index=y_true_tensor, value=1)
+        y_true[model_name] = np.array(_y_true_tensor)
 
     # Plot the ROC curve for each class
     for obj_index, obj_class in enumerate(mapping):

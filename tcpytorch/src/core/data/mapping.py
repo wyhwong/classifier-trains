@@ -12,7 +12,7 @@ local_logger = logger.get_logger(__name__)
 def save_class_mapping(
     dataset: torchvision.datasets.ImageFolder,
     savepath: Optional[str],
-) -> dict[str, str]:
+) -> None:
     """
     Get class mapping from the dataset.
 

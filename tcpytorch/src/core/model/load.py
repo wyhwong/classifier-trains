@@ -1,3 +1,5 @@
+from typing import Any
+
 import onnx
 import torch
 import torchvision
@@ -31,14 +33,14 @@ def load_model(model: torchvision.models, model_path: str) -> None:
     local_logger.info("Loaded weights from local file: %s.", model)
 
 
-def save_weights(weights: torch.nn.Module.state_dict, export_path: str) -> None:
+def save_weights(weights: dict[str, Any], export_path: str) -> None:
     """
     Save the model weights to a file.
 
     Args:
     -----
-        weights (torch.nn.Module.state_dict):
-            The model weights to be saved.
+        weights (dict[str, Any]):
+            The model weights to be saved. (state_dict)
 
         export_path (str):
             The path where the weights will be saved.

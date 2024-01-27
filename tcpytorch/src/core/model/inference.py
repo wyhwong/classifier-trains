@@ -1,6 +1,5 @@
 import torch
 import torchvision
-
 from tqdm import tqdm
 
 import env

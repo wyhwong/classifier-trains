@@ -1,0 +1,23 @@
+fail_fast: true
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+
+- repo: https://github.com/PyCQA/bandit
+  rev: 1.7.4
+  hooks:
+  - id: bandit
+    args: ["-c", "./tcpytorch/pyproject.toml"]
+    additional_dependencies: [ "bandit[toml]" ]
+
+- repo: https://github.com/psf/black
+  rev: 22.10.0
+  hooks:
+  - id: black
+    args: ["--config", "./tcpytorch/pyproject.toml"]
+    additional_dependencies: [ "black[toml]" ]
