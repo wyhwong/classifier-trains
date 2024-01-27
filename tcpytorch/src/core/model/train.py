@@ -97,7 +97,7 @@ def train_model(
                 local_logger.debug("The %d-th epoch validation started.", epoch)
                 model.eval()
 
-            epoch_loss = np.inf
+            epoch_loss = 0.0
             epoch_corrects = 0
             for inputs, labels in tqdm(dataloaders[phase]):
                 inputs = inputs.to(env.DEVICE)
@@ -107,18 +107,18 @@ def train_model(
 
                 with torch.set_grad_enabled(phase is schemas.constants.Phase.TRAINING):
                     outputs = model(inputs.float())
-                    loss = criterion(outputs, labels)
+                    prediction_loss = criterion(outputs, labels)
                     _, preds = torch.max(outputs, 1)
 
                     if phase is schemas.constants.Phase.TRAINING:
-                        loss.backward()
+                        prediction_loss.backward()
                         optimizer.step()
 
-                epoch_loss += loss.item() * inputs.size(0)
+                epoch_loss += prediction_loss.item() * inputs.size(0)
                 epoch_corrects += torch.sum(preds == labels.data).double()
 
-            epoch_loss = epoch_loss / len(dataloaders[phase.value].dataset)
-            epoch_acc = epoch_corrects / len(dataloaders[phase.value].dataset)
+            epoch_loss = epoch_loss / len(dataloaders[phase].dataset)
+            epoch_acc = epoch_corrects / len(dataloaders[phase].dataset)
 
             if scheduler and phase is schemas.constants.Phase.TRAINING:
                 scheduler.step()
@@ -144,7 +144,7 @@ def train_model(
 
             local_logger.debug(
                 "Updated %s accuracy: %.4f, loss: %.4f",
-                phase.value,
+                phase,
                 epoch_acc,
                 epoch_loss,
             )

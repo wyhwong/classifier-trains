@@ -197,7 +197,8 @@ def roc_curves(
     y_true = {}
 
     # Get the confidence and true labels for each model
-    for model in models:
+    for idx, model in enumerate(models):
+        model_name = model_names[idx]
         y_true[model_name], _, confidence[model_name] = core.model.inference.predict(model, dataloader)
         confidence[model_name] = np.array(confidence[model_name])
         # Change y_true to onehot format

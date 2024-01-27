@@ -41,7 +41,7 @@ class ModelFacade:
 
         self._setting = setting
         self._output_dir: str = ""
-        self._transforms: dict[schemas.constants.Phase, Any] = {}
+        self._data_transforms: dict[schemas.constants.Phase, Any] = {}
         self._dataloaders: dict[schemas.constants.Phase, torch.utils.data.DataLoader] = {}
         self._model = None
         self._best_weights = {}
@@ -69,7 +69,9 @@ class ModelFacade:
 
         core.utils.check_and_create_dir(env.RESULT_DIR)
         num_experiment = len(glob(f"{env.RESULT_DIR}/*")) + 1
-        self._output_dir = f"{env.RESULT_DIR}/{num_experiment}_" + self._setting["experiment_label"]
+        self._output_dir = f"{env.RESULT_DIR}/{num_experiment}"
+        if self._setting["experiment_label"]:
+            self._output_dir += "_" + self._setting["experiment_label"]
         core.utils.check_and_create_dir(self._output_dir)
         core.utils.save_as_yml(f"{self._output_dir}/setting.yml", self._setting)
 
@@ -110,20 +112,20 @@ class ModelFacade:
             None
         """
 
-        spatial_augmentation = core.data.get_spatial_transforms(
+        spatial_augmentation = core.data.preprocessing.get_spatial_transforms(
             width=self._setting["preprocessing"]["width"],
             height=self._setting["preprocessing"]["height"],
             hflip_prob=self._setting["preprocessing"]["spatial"]["hflip_prob"],
             vflip_prob=self._setting["preprocessing"]["spatial"]["vflip_prob"],
-            max_rotate_degree=self._setting["preprocessing"]["spatial"]["max_rotate"],
+            max_rotate=self._setting["preprocessing"]["spatial"]["max_rotate"],
             centor_crop=self._setting["preprocessing"]["spatial"]["centor_crop"],
             random_crop=self._setting["preprocessing"]["spatial"]["random_crop"],
         )
-        color_augmentation = core.data.get_color_transforms(
+        color_augmentation = core.data.preprocessing.get_color_transforms(
             gray_scale=self._setting["preprocessing"]["color"]["gray_scale"],
             random_color_augmentation=self._setting["preprocessing"]["color"]["random_color_augmentation"],
         )
-        resize_and_padding = core.data.get_resize_and_padding_transforms(
+        resize_and_padding = core.data.preprocessing.get_resize_and_padding_transforms(
             width=self._setting["preprocessing"]["width"],
             height=self._setting["preprocessing"]["height"],
             maintain_aspect_ratio=self._setting["preprocessing"]["resize_and_padding"]["maintain_aspect_ratio"],
@@ -132,7 +134,7 @@ class ModelFacade:
             ),
             padding=schemas.constants.PaddingType(self._setting["preprocessing"]["resize_and_padding"]["padding"]),
         )
-        self._transforms = core.data.get_transforms(
+        self._data_transforms = core.data.preprocessing.get_transforms(
             spatial_augmentation=spatial_augmentation,
             color_augmentation=color_augmentation,
             resize_and_padding=resize_and_padding,
@@ -158,9 +160,9 @@ class ModelFacade:
         for phase in [schemas.constants.Phase.TRAINING, schemas.constants.Phase.VALIDATION]:
             image_dataset = datasets.ImageFolder(
                 self._setting["dataset"][f"{phase.value}set_dir"],
-                self._data_tranforms[phase],
+                self._data_transforms[phase],
             )
-            core.visualization.get_dataset_preview(
+            core.visualization.dataset.get_dataset_preview(
                 dataset=image_dataset,
                 mean=self._setting["preprocessing"]["mean"],
                 std=self._setting["preprocessing"]["std"],
@@ -176,31 +178,9 @@ class ModelFacade:
             )
 
         core.data.mapping.save_class_mapping(
-            dataset=self._dataloaders[schemas.constants.Phase.TRAINING],
+            dataset=image_dataset,
             savepath=f"{self._output_dir}/class_mapping.yml",
         )
-
-    def start(self) -> None:
-        """
-        Start the model facade
-
-        Args:
-        -----
-            None
-
-        Returns:
-        --------
-            None
-        """
-
-        if self._setting["setup"]["enable_training"]:
-            self._run_training()
-
-        if self._setting["setup"]["enable_evaluation"]:
-            self._run_evaluation()
-
-        if self._setting["setup"]["enable_export"]:
-            self._run_export()
 
     def _run_training(self) -> None:
         """
@@ -264,7 +244,7 @@ class ModelFacade:
 
         image_dataset = datasets.ImageFolder(
             self._setting["evaluation"]["evalset_dir"],
-            self._data_tranforms[schemas.constants.Phase.VALIDATION],
+            self._data_transforms[schemas.constants.Phase.VALIDATION],
         )
         dataloader = torch.utils.data.DataLoader(
             image_dataset,
@@ -272,7 +252,16 @@ class ModelFacade:
             batch_size=self._setting["dataset"]["batch_size"],
             num_workers=self._setting["dataset"]["num_workers"],
         )
-        mapping = core.utils.load_yml(self._setting["evaluation"]["mapping_path"])
+        core.visualization.dataset.get_dataset_preview(
+            dataset=image_dataset,
+            mean=self._setting["preprocessing"]["mean"],
+            std=self._setting["preprocessing"]["std"],
+            filename="preview_eval.png",
+            output_dir=self._output_dir,
+        )
+
+        mapping_path = self._setting["evaluation"]["mapping_path"].replace("$OUTPUT_DIR", self._output_dir)
+        mapping = core.utils.load_yml(mapping_path)
         models = []
         model_names = []
         for model_for_eval in self._setting["evaluation"]["models"]:
@@ -283,7 +272,7 @@ class ModelFacade:
                 num_classes=len(mapping.keys()),
                 unfreeze_all_params=False,
             )
-            core.model.load_model(model, weights_path)
+            core.model.load.load_model(model, weights_path)
             models.append(model)
             model_names.append(model_for_eval["name"])
 
@@ -299,7 +288,7 @@ class ModelFacade:
             models=models,
             model_names=model_names,
             dataloader=dataloader,
-            classes=mapping,
+            mapping=mapping,
             output_dir=self._output_dir,
         )
 
@@ -329,23 +318,47 @@ class ModelFacade:
         if self._setting["export"]["export_last_weight"]:
             model_path = f"{self._output_dir}/last_model.onnx"
             self._model.load_state_dict(self._last_weights)
-            core.model.export.export_model_to_onnx(
+            core.model.load.export_model_to_onnx(
                 model=self._model,
                 input_height=self._setting["preprocessing"]["height"],
                 input_width=self._setting["preprocessing"]["width"],
                 export_path=model_path,
             )
-            core.model.export.check_model_is_valid(model_path)
+            core.model.load.check_model_is_valid(model_path)
 
         if self._setting["export"]["export_best_weight"]:
             model_path = f"{self._output_dir}/best_model.onnx"
             self._model.load_state_dict(self._best_weights)
-            core.model.export.export_model_to_onnx(
+            core.model.load.export_model_to_onnx(
                 model=self._model,
                 input_height=self._setting["preprocessing"]["height"],
                 input_width=self._setting["preprocessing"]["width"],
                 export_path=model_path,
             )
-            core.model.export.check_model_is_valid(model_path)
+            core.model.load.check_model_is_valid(model_path)
 
-        logger.info("Export phase ended.")
+        local_logger.info("Export phase ended.")
+
+    def start(self) -> None:
+        """
+        Start the model facade
+
+        Args:
+        -----
+            None
+
+        Returns:
+        --------
+            None
+        """
+
+        if self._setting["setup"]["enable_training"]:
+            self._run_training()
+
+        if self._setting["setup"]["enable_export"]:
+            self._run_export()
+
+        if self._setting["setup"]["enable_evaluation"]:
+            self._run_evaluation()
+
+        local_logger.info("Model facade ended.")
