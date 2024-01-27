@@ -1,17 +1,20 @@
-from typing import Any
 from glob import glob
+from typing import Any
+
 import numpy as np
 import pandas as pd
 import torch
+import torchvision
 import torchvision.datasets as datasets
 
-import env
-import schemas.constants
 import core.data
 import core.model
 import core.utils
 import core.visualization
+import env
 import logger
+import schemas.constants
+
 
 torch.manual_seed(env.RANDOMSEED)
 np.random.seed(env.RANDOMSEED)
@@ -23,7 +26,7 @@ class ModelFacade:
     Facade class for the model
     """
 
-    def __init__(self, setting: dict[str, str]) -> None:
+    def __init__(self, setting: dict[str, Any]) -> None:
         """
         Constructor for the model facade
 
@@ -43,9 +46,9 @@ class ModelFacade:
         self._output_dir: str = ""
         self._data_transforms: dict[schemas.constants.Phase, Any] = {}
         self._dataloaders: dict[schemas.constants.Phase, torch.utils.data.DataLoader] = {}
-        self._model = None
-        self._best_weights = {}
-        self._last_weights = {}
+        self._model: torchvision.models = None
+        self._best_weights: dict[str, Any] = {}
+        self._last_weights: dict[str, Any] = {}
         self._loss = pd.DataFrame()
         self._accuracy = pd.DataFrame()
 

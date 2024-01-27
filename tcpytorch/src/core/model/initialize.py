@@ -1,3 +1,5 @@
+from typing import Any, Iterator
+
 import torch
 import torchvision
 
@@ -107,20 +109,20 @@ def unfreeze_all_params_in_model(model: torchvision.models) -> None:
 
 
 def initialize_optimizer(
-    params: torch.nn.Module.parameters,
+    params: Iterator[Any],
     optimizier=schemas.constants.OptimizerType,
     lr=1e-3,
     momentum=0.9,
     weight_decay=0.0,
     alpha=0.99,
     betas=(0.9, 0.999),
-) -> torch.optim:
+) -> torch.optim.Optimizer:
     """
     Get optimizer for the model.
 
     Args:
     -----
-        params: torch.nn.Module.parameters
+        params: Iterator[Any] (torch.nn.Module.parameters)
             Parameters of the model.
 
         optimizier: schemas.constants.OptimizerType
@@ -143,7 +145,7 @@ def initialize_optimizer(
 
     Returns:
     --------
-        optimizer: torch.optim
+        optimizer: torch.optim.Optimizer
             Optimizer for the model.
     """
 
@@ -169,15 +171,17 @@ def initialize_optimizer(
     if optimizier is schemas.constants.OptimizerType.ADAMW:
         return torch.optim.AdamW(params, lr=lr, betas=betas, weight_decay=weight_decay)
 
+    raise ValueError(f"Invalid optimizer type: {optimizier.value}")
+
 
 def initialize_scheduler(
     scheduler: schemas.constants.SchedulerType,
-    optimizer: torch.optim,
+    optimizer: torch.optim.Optimizer,
     num_epochs: int,
     step_size: int = 30,
     gamma: float = 0.1,
     lr_min: float = 0.0,
-) -> torch.optim.lr_scheduler:
+) -> torch.optim.lr_scheduler.LRScheduler:
     """
     Get scheduler for the optimizer.
 
@@ -186,7 +190,7 @@ def initialize_scheduler(
         scheduler: schemas.constants.SchedulerType
             Scheduler type.
 
-        optimizer: torch.optim
+        optimizer: torch.optim.Optimizer
             Optimizer to apply scheduler.
 
         num_epochs: int
@@ -203,7 +207,7 @@ def initialize_scheduler(
 
     Returns:
     --------
-        scheduler: torch.optim.lr_scheduler
+        scheduler: torch.optim.lr_scheduler.LRScheduler
             Scheduler for the optimizer.
     """
 

@@ -18,8 +18,8 @@ def train_model(
     model: torchvision.models,
     dataloaders: dict[schemas.constants.Phase, torchvision.datasets.ImageFolder],
     criterion: torch.nn.Module,
-    optimizer: torch.optim,
-    scheduler: torch.optim.lr_scheduler,
+    optimizer: torch.optim.Optimizer,
+    scheduler: torch.optim.lr_scheduler.LRScheduler,
     num_epochs: int,
     best_criteria: schemas.constants.BestCriteria,
 ):
@@ -115,7 +115,7 @@ def train_model(
                         optimizer.step()
 
                 epoch_loss += prediction_loss.item() * inputs.size(0)
-                epoch_corrects += torch.sum(preds == labels.data).double()
+                epoch_corrects += int(torch.sum(preds == labels.data))
 
             epoch_loss = epoch_loss / len(dataloaders[phase].dataset)
             epoch_acc = epoch_corrects / len(dataloaders[phase].dataset)
