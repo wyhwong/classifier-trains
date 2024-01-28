@@ -225,3 +225,5 @@ def initialize_scheduler(
 
     if scheduler is schemas.constants.SchedulerType.COSINE:
         return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=num_epochs, eta_min=lr_min)
+
+    raise ValueError(f"Invalid scheduler type: {scheduler.value}")
