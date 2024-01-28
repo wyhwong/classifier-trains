@@ -1,9 +1,9 @@
 export DOCKER_BUILDKIT=1
 
 # For Docker mount
-export DATA_DIR?=./dataset
-export CONFIG_PATH?=./train.yml
-export OUTPUT_DIR?=./results
+export DATA_DIR?=./dataset/
+export CONFIG_PATH?=./setting.yml
+export OUTPUT_DIR?=./results/
 
 # For Docker image
 export VERSION?=devel
@@ -15,11 +15,12 @@ export GROUP_ID?=$(shell id -g)
 export TZ?=Asia/Hong_Kong
 export LOGLEVEL?=10
 export DEVICE?=cuda
+export RANDOM_SEED?=2024
 
 # Build Docker image
 build:
 	mkdir -p ${OUTPUT_DIR}
-	docker build -t tcpytorch:${VERSION} \
+	docker build -t classifier-pipeline:${VERSION} \
 	--build-arg USERNAME=${USERNAME} \
 	--build-arg USER_ID=${USER_ID} \
 	--build-arg GROUP_ID=${GROUP_ID} \
@@ -28,15 +29,17 @@ build:
 
 # Train classifier
 train:
-	docker run --rm -it --name tcpytorch \
+	mkdir -p ${OUTPUT_DIR}
+	docker run --rm -it --name classifier-pipeline \
 	--gpus all \
-	-v ${OUTPUT_DIR}:/results \
-	-v ${DATASET}:/dataset \
-	-v ${CONFIG}:/train.yml \
+	-v ${OUTPUT_DIR}:/home/${USERNAME}/results/ \
+	-v ${DATA_DIR}:/home/${USERNAME}/dataset/ \
+	-v ${CONFIG_PATH}:/home/${USERNAME}/setting.yml \
 	--env TZ=${TZ} \
 	--env LOGLEVEL=${LOGLEVEL} \
 	--env DEVICE=${DEVICE} \
-	tcpytorch:${VERSION}
+	--env RANDOM_SEED=${RANDOM_SEED} \
+	classifier-pipeline:${VERSION}
 
 # Install Python dependencies in poetry environment
 local:

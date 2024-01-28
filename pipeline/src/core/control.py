@@ -16,8 +16,8 @@ import logger
 import schemas.constants
 
 
-torch.manual_seed(env.RANDOMSEED)
-np.random.seed(env.RANDOMSEED)
+torch.manual_seed(env.RANDOM_SEED)
+np.random.seed(env.RANDOM_SEED)
 local_logger = logger.get_logger(__name__)
 
 

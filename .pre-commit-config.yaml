@@ -12,12 +12,12 @@ repos:
   rev: 1.7.4
   hooks:
   - id: bandit
-    args: ["-c", "./tcpytorch/pyproject.toml"]
+    args: ["-c", "./pipeline/pyproject.toml"]
     additional_dependencies: [ "bandit[toml]" ]
 
 - repo: https://github.com/psf/black
   rev: 22.10.0
   hooks:
   - id: black
-    args: ["--config", "./tcpytorch/pyproject.toml"]
+    args: ["--config", "./pipeline/pyproject.toml"]
     additional_dependencies: [ "black[toml]" ]

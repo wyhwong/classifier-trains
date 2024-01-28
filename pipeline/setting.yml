@@ -1,0 +1,92 @@
+experiment_label:
+
+# General settings for facade
+setup:
+  enable_training: true
+  enable_evaluation: true
+  enable_export: true
+
+# Settings about model
+model:
+  # For available choices, see "ModelBackbone" in src/schemas/constants.py
+  backbone: resnet18
+  num_classes: 2
+  weights: DEFAULT
+  unfreeze_all_params: false
+
+# Settings about dataset
+dataset:
+  # For poetry enviorment, input relative path/absolute path to the trainset
+  # For docker enviorment, input ${DATA_DIR}/< path to the trainset within that folder>
+  trainset_dir: ../dataset/train/
+  valset_dir: ../dataset/val/
+  batch_size: 8
+  num_workers: 4
+
+preprocessing:
+  width: 48
+  height: 48
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+  resize_and_padding:
+    # For available choices, see "InterpolationType" in src/schemas/constants.py
+    interpolation: INTER_CUBIC
+    maintain_aspect_ratio: true
+    # For available choices, see "PaddingType" in src/schemas/constants.py
+    padding: bottom_right
+
+  spatial:
+    # Probability in [0., 1.]
+    hflip_prob: 0.5
+    vflip_prob: 0.5
+    max_rotate: 10 # in degrees
+    centor_crop: false
+    random_crop: false
+
+  color:
+    gray_scale: false
+    random_color_augmentation: false
+
+training:
+  num_epochs: 20
+  # available choice: loss, accuracy
+  best_criteria: loss
+
+  scheduler:
+    # For available choices, see "SchedulerType" in src/schemas/constants.py
+    name: step
+    lr_min: 0
+    step_size: 30 # Only for step
+    gamma: 0.1 # Only for step
+
+  optimizer:
+    # For available choices, see "OptimizerType" in src/schemas/constants.py
+    name: adam
+    lr: 0.001
+    weight_decay: 0
+    # Only used for sgd / rmsprop
+    momentum: 0.9
+    # Only used for rmsprop
+    alpha: 0.99
+    # Only used for adam / adamw
+    betas: [0.9, 0.999]
+
+evaluation:
+  # For poetry enviorment, input relative path/absolute path to the trainset
+  # For docker enviorment, input ${DATA_DIR}/< path to the trainset within that folder>
+  evalset_dir: ../dataset/val
+  # Special handling: $OUTPUT_DIR will be replaced by the actual output directory
+  mapping_path: $OUTPUT_DIR/class_mapping.yml
+
+  models:
+    - name: default
+      # Special handling: $OUTPUT_DIR will be replaced by the actual output directory
+      path: $OUTPUT_DIR/best_model.pt
+      backbone: resnet18
+
+export:
+  save_last_weight: true
+  save_best_weight: true
+  export_last_weight: true
+  export_best_weight: true
