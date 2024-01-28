@@ -8,7 +8,7 @@ make build
 
 # Modify setting.yml according to your needs
 # Then start training
-DATA_DIR=< path to image dataset > CONFIG_PATH=< path to yml config > OUTPUT_DIR=< path to output folder > make train
+DATA_DIR=<path to image dataset> CONFIG_PATH=<path to yml config> OUTPUT_DIR=<path to output folder> make train
 
 # Example (also default values)
 DATA_DIR=./dataset CONFIG_PATH=./train.yml OUTPUT_DIR=./results make train
