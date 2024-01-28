@@ -17,6 +17,9 @@ export LOGLEVEL?=10
 export DEVICE?=cuda
 export RANDOM_SEED?=2024
 
+# For Code analysis
+export TEST_REPORT_DIR?=./test_report
+
 # Build Docker image
 build:
 	mkdir -p ${OUTPUT_DIR}
@@ -55,6 +58,9 @@ analyze:
 	poetry run pylint src --rcfile ../.pylintrc
 	poetry run isort src --check-only
 	poetry run mypy src --show-error-codes
+	poetry run radon cc src
+	poetry run pytest --disable-warnings --cov-report=html:${TEST_REPORT_DIR} --cov=src/core src
+	open ${TEST_REPORT_DIR}/index.html
 
 # Upate Python dependencies in poetry environment
 update:
@@ -64,3 +70,8 @@ update:
 format:
 	poetry run black src
 	poetry run isort src
+
+# Run test cases in poetry environment and open coverage report
+test:
+	poetry run pytest --disable-warnings --cov-report=html:${TEST_REPORT_DIR} --cov=src/core src
+	open ${TEST_REPORT_DIR}/index.html
