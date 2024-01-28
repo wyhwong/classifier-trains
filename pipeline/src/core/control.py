@@ -185,6 +185,8 @@ class ModelFacade:
             savepath=f"{self._output_dir}/class_mapping.yml",
         )
 
+        local_logger.info("Initialized dataset.")
+
     def _run_training(self) -> None:
         """
         Run the training phase
