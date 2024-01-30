@@ -12,7 +12,6 @@ def test_ModelFacade():
     This is an end-to-end test but not a functional test.
     The correctness of the result is not checked.
 
-    # TODO: Investigate why the test fails.
     """
 
     directory_label = len(glob("results/*")) + 1
@@ -42,4 +41,3 @@ def test_ModelFacade():
         os.remove(expected_file)
 
     os.rmdir(f"results/{directory_label}_in_test/")
-    os.rmdir("results/")

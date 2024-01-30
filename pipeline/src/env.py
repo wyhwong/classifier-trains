@@ -3,7 +3,7 @@ import os
 
 # For logger
 LOGLEVEL = int(os.getenv("LOGLEVEL", "10"))
-LOGFILE_PATH = os.getenv("LOGFILE_PATH", "../runtime.log")
+LOGFILE_PATH = os.getenv("LOGFILE_PATH", "./runtime.log")
 
 CONFIG_PATH = os.getenv("CONFIG_PATH", "../setting.yml")
 RESULT_DIR = os.getenv("RESULT_DIR", "../results")

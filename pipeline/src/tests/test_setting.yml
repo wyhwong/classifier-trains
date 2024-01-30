@@ -6,7 +6,7 @@ setup:
   enable_export: true
 
 model:
-  backbone: resnet18
+  backbone: vgg11
   num_classes: 2
   weights: DEFAULT
   unfreeze_all_params: false

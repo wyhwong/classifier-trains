@@ -10,7 +10,8 @@ RUN poetry export -f requirements.txt -o requirements.txt --without-hashes --wit
 FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime AS last
 
 RUN apt-get update && \
-    apt-get install -y tzdata ffmpeg libsm6 libxext6
+    apt-get install -y tzdata ffmpeg libsm6 libxext6 && \
+    apt-get clean
 
 # Install dependencies from requirements.txt
 COPY --from=base /requirements.txt /tmp/requirements.txt
