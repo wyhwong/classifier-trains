@@ -15,21 +15,35 @@ matplotlib = "^3.8.2"
 seaborn = "^0.13.1"
 opencv-python = "^4.9.0.80"
 onnx = "^1.15.0"
-scikit-learn = "^1.4.0"
-torch = "^2.1.2"
-torchvision = "^0.16.2"
 tqdm = "^4.66.1"
+# TODO: Migrate to pydantic/lightning/tensorboard
+pydantic = "^2.8.2"
+lightning = "^2.4.0"
+tensorboard = "^2.17.0"
+
+[tool.poetry.group.torch.dependencies]
+torch = {version = "^2.4.0+cu124", source = "pytorch-cuda"}
+torchvision = {version = "^0.19.0+cu124", source = "pytorch-cuda"}
 
 [tool.poetry.group.dev.dependencies]
-pytest = "7.4.4"
+pytest = "^8.1.1"
 pytest-cov = "^4.1.0"
-black = "^23.12.1"
+black = "^24.3.0"
 pylint = "^3.0.3"
 mypy = "^1.8.0"
 bandit = "^1.7.6"
 radon = "^6.0.1"
 isort = "^5.13.2"
 pre-commit = "^3.6.0"
+
+[[tool.poetry.source]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu124"
+priority = "supplemental"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 120
@@ -58,7 +72,3 @@ cc_max = "C"
 average = true
 total_average = true
 show_complexity = true
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
