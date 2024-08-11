@@ -4,11 +4,11 @@ import onnx
 import torch
 import torchvision
 
-import env
-import logger
+import pipeline.env
+import pipeline.logger
 
 
-local_logger = logger.get_logger(__name__)
+local_logger = pipeline.logger.get_logger(__name__)
 
 
 def load_model(model: torchvision.models, model_path: str) -> None:
@@ -86,7 +86,7 @@ def export_model_to_onnx(
     x = torch.randn(1, 3, input_height, input_width, requires_grad=True)
     torch.onnx.export(
         model,
-        x.to(env.DEVICE),
+        x.to(pipeline.env.DEVICE),
         export_path,
         export_params=True,
         opset_version=10,

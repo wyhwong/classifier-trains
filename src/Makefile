@@ -53,25 +53,25 @@ local:
 analyze:
 	poetry install
 	poetry run pre-commit install -f
-	poetry run black src --check
-	poetry run bandit -r src -c pyproject.toml
-	poetry run pylint src --rcfile ../.pylintrc
-	poetry run isort src --check-only
-	poetry run mypy src --show-error-codes
-	poetry run radon cc src
-	poetry run pytest --disable-warnings --cov-report=html:${TEST_REPORT_DIR} --cov=src/core src
+	poetry run black pipeline --check
+	poetry run bandit -r pipeline -c pyproject.toml
+	poetry run pylint pipeline --rcfile ../.pylintrc
+	poetry run isort pipeline --check-only
+	poetry run mypy pipeline --show-error-codes
+	poetry run radon cc pipeline
+	poetry run pytest --disable-warnings --cov-report=html:${TEST_REPORT_DIR} --cov=pipeline/core pipeline
 	open ${TEST_REPORT_DIR}/index.html
 
 # Upate Python dependencies in poetry environment
 update:
 	poetry update
 
-# Format src using black, isort
+# Format pipeline using black, isort
 format:
-	poetry run black src
-	poetry run isort src
+	poetry run black pipeline
+	poetry run isort pipeline
 
 # Run test cases in poetry environment and open coverage report
 test:
-	poetry run pytest --disable-warnings --cov-report=html:${TEST_REPORT_DIR} --cov=src/core src
+	poetry run pytest --disable-warnings --cov-report=html:${TEST_REPORT_DIR} --cov=pipeline/core pipeline
 	open ${TEST_REPORT_DIR}/index.html

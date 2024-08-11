@@ -3,16 +3,16 @@ from typing import Any, Iterator
 import torch
 import torchvision
 
-import env
-import logger
-import schemas.constants
+import pipeline.env
+import pipeline.logger
+import pipeline.schemas.constants
 
 
-local_logger = logger.get_logger(__name__)
+local_logger = pipeline.logger.get_logger(__name__)
 
 
 def initialize_model(
-    backbone: schemas.constants.ModelBackbone,
+    backbone: pipeline.schemas.constants.ModelBackbone,
     weights: str,
     num_classes: int,
     unfreeze_all_params: bool,
@@ -22,7 +22,7 @@ def initialize_model(
 
     Args:
     -----
-        backbone (schemas.constants.ModelBackbone):
+        backbone (pipeline.schemas.constants.ModelBackbone):
             The backbone architecture of the model.
 
         weights (str):
@@ -77,13 +77,13 @@ def initialize_model(
 
     # To enable PyTorch 2 compiler for optimized performance
     # (Only support CUDA capability >= 7.0)
-    if env.DEVICE == "cuda" and torch.cuda.get_device_properties("cuda").major >= 7:
+    if pipeline.env.DEVICE == "cuda" and torch.cuda.get_device_properties("cuda").major >= 7:
         local_logger.info("Enabled PyTorch 2 compiler for optimized performance.")
         model = torch.compile(model)
 
     # Move the model to the device
-    model.to(env.DEVICE)
-    local_logger.info("Moved the model to %s.", env.DEVICE)
+    model.to(pipeline.env.DEVICE)
+    local_logger.info("Moved the model to %s.", pipeline.env.DEVICE)
 
     return model
 
@@ -110,7 +110,7 @@ def unfreeze_all_params_in_model(model: torchvision.models) -> None:
 
 def initialize_optimizer(
     params: Iterator[Any],
-    optimizier=schemas.constants.OptimizerType,
+    optimizier=pipeline.schemas.constants.OptimizerType,
     lr=1e-3,
     momentum=0.9,
     weight_decay=0.0,
@@ -125,7 +125,7 @@ def initialize_optimizer(
         params: Iterator[Any] (torch.nn.Module.parameters)
             Parameters of the model.
 
-        optimizier: schemas.constants.OptimizerType
+        optimizier: pipeline.schemas.constants.OptimizerType
             Optimizer type.
 
         lr: float, optional
@@ -159,23 +159,23 @@ def initialize_optimizer(
         betas,
     )
 
-    if optimizier is schemas.constants.OptimizerType.SGD:
+    if optimizier is pipeline.schemas.constants.OptimizerType.SGD:
         return torch.optim.SGD(params, lr=lr, momentum=momentum, weight_decay=weight_decay)
 
-    if optimizier is schemas.constants.OptimizerType.RMSPROP:
+    if optimizier is pipeline.schemas.constants.OptimizerType.RMSPROP:
         return torch.optim.RMSprop(params, lr=lr, momentum=momentum, weight_decay=weight_decay, alpha=alpha)
 
-    if optimizier is schemas.constants.OptimizerType.ADAM:
+    if optimizier is pipeline.schemas.constants.OptimizerType.ADAM:
         return torch.optim.Adam(params, lr=lr, betas=betas, weight_decay=weight_decay)
 
-    if optimizier is schemas.constants.OptimizerType.ADAMW:
+    if optimizier is pipeline.schemas.constants.OptimizerType.ADAMW:
         return torch.optim.AdamW(params, lr=lr, betas=betas, weight_decay=weight_decay)
 
     raise ValueError(f"Invalid optimizer type: {optimizier.value}")
 
 
 def initialize_scheduler(
-    scheduler: schemas.constants.SchedulerType,
+    scheduler: pipeline.schemas.constants.SchedulerType,
     optimizer: torch.optim.Optimizer,
     num_epochs: int,
     step_size: int = 30,
@@ -187,7 +187,7 @@ def initialize_scheduler(
 
     Args:
     -----
-        scheduler: schemas.constants.SchedulerType
+        scheduler: pipeline.schemas.constants.SchedulerType
             Scheduler type.
 
         optimizer: torch.optim.Optimizer
@@ -220,10 +220,10 @@ def initialize_scheduler(
         lr_min,
     )
 
-    if scheduler is schemas.constants.SchedulerType.STEP:
+    if scheduler is pipeline.schemas.constants.SchedulerType.STEP:
         return torch.optim.lr_scheduler.StepLR(optimizer=optimizer, step_size=step_size, gamma=gamma)
 
-    if scheduler is schemas.constants.SchedulerType.COSINE:
+    if scheduler is pipeline.schemas.constants.SchedulerType.COSINE:
         return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=num_epochs, eta_min=lr_min)
 
     raise ValueError(f"Invalid scheduler type: {scheduler.value}")

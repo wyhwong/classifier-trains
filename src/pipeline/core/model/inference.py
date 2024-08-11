@@ -2,7 +2,7 @@ import torch
 import torchvision
 from tqdm import tqdm
 
-import env
+import pipeline.env
 
 
 def predict(
@@ -36,12 +36,12 @@ def predict(
     confidence = []
     y_true = []
 
-    model.to(env.DEVICE)
+    model.to(pipeline.env.DEVICE)
     model.eval()
 
     for inputs, labels in tqdm(dataloader):
-        inputs = inputs.to(env.DEVICE)
-        labels = labels.to(env.DEVICE)
+        inputs = inputs.to(pipeline.env.DEVICE)
+        labels = labels.to(pipeline.env.DEVICE)
 
         outputs = model(inputs.float())
         confidence.extend(outputs.detach().cpu().numpy())

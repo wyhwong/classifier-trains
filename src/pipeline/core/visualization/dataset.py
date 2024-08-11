@@ -1,9 +1,9 @@
 import numpy as np
 import torch
 
-import core.data.preprocessing
-import core.visualization.base as base
-import schemas.visualization as schemas
+import pipeline.core.data.preprocessing
+import pipeline.core.visualization.base as base
+import pipeline.schemas.visualization as schemas
 
 
 def get_dataset_preview(
@@ -50,7 +50,7 @@ def get_dataset_preview(
     labels = schemas.Labels("Preview of Dataset")
     fig, axes = base.initialize_plot(nrows, ncols, (10, 10), labels)
     images = iter(dataset)
-    denormalizer = core.data.preprocessing.Denormalize(np.array(mean), np.array(std))
+    denormalizer = pipeline.core.data.preprocessing.Denormalize(np.array(mean), np.array(std))
     for row in range(nrows):
         for col in range(ncols):
             img = next(images)[0]

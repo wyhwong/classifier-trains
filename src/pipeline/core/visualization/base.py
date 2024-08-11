@@ -3,12 +3,12 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import core.utils
-import logger
-from schemas.visualization import Labels, Line, Padding
+import pipeline.core.utils
+import pipeline.logger
+from pipeline.schemas.visualization import Labels, Line, Padding
 
 
-local_logger = logger.get_logger(__name__)
+local_logger = pipeline.logger.get_logger(__name__)
 
 
 def initialize_plot(nrows=1, ncols=1, figsize=(10, 6), labels=Labels(), padding=Padding(), fontsize=12):
@@ -193,7 +193,7 @@ def savefig_and_close(filename: Optional[str] = None, output_dir: Optional[str] 
     """
 
     if output_dir:
-        core.utils.check_and_create_dir(output_dir)
+        pipeline.core.utils.check_and_create_dir(output_dir)
         savepath = f"{output_dir}/{filename}"
         plt.savefig(savepath, facecolor="w")
         local_logger.info("Saved figure to %s.", savepath)

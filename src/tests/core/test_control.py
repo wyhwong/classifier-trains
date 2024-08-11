@@ -1,8 +1,8 @@
 import os
 from glob import glob
 
-import core.control
-import core.utils
+import pipeline.core.control
+import pipeline.core.utils
 
 
 def test_ModelFacade():
@@ -15,8 +15,8 @@ def test_ModelFacade():
     """
 
     directory_label = len(glob("results/*")) + 1
-    setting = core.utils.load_yml("src/tests/test_setting.yml")
-    facade = core.control.ModelFacade(setting=setting)
+    setting = pipeline.core.utils.load_yml("pipeline/tests/test_setting.yml")
+    facade = pipeline.core.control.ModelFacade(setting=setting)
     facade.start()
 
     expected_files = [

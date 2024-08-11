@@ -6,15 +6,16 @@ import pandas as pd
 import seaborn as sns
 import sklearn.metrics
 import torch
+from torch import nn
 import torchvision
 
-import core.model.inference
-import core.visualization.base as base
-import logger
-import schemas.visualization as schemas
+import pipeline.core.model.inference
+import pipeline.core.visualization.base as base
+import pipeline.logger
+import pipeline.schemas.visualization as schemas
 
 
-local_logger = logger.get_logger(__name__)
+local_logger = pipeline.logger.get_logger(__name__)
 
 
 def loss_curve(
@@ -158,7 +159,7 @@ def confusion_matrix(
 
 
 def roc_curves(
-    models: list[torchvision.models],
+    models: list[nn.Module],
     model_names: list[str],
     dataloader: torchvision.datasets.ImageFolder,
     mapping: dict[str, str],
@@ -170,7 +171,7 @@ def roc_curves(
 
     Args:
     -----
-        models (list[torchvision.models]):
+        models (list[nn.Module]):
             List of models to generate ROC curves.
 
         model_names (list[str]):
@@ -199,7 +200,7 @@ def roc_curves(
     # Get the confidence and true labels for each model
     for idx, model in enumerate(models):
         model_name = model_names[idx]
-        model_y_true, _, model_confidence = core.model.inference.predict(model, dataloader)
+        model_y_true, _, model_confidence = pipeline.core.model.inference.predict(model, dataloader)
         confidence[model_name] = np.array(model_confidence)
         # Change y_true to onehot format
         y_true_tensor = torch.tensor(model_y_true)

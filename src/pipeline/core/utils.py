@@ -3,7 +3,7 @@ import os
 
 import yaml
 
-import logger
+import pipeline.logger
 
 
 local_logger = logger.get_logger(__name__)
