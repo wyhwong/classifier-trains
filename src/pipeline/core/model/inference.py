@@ -1,20 +1,21 @@
 import torch
 import torchvision
+from torch import nn
 from tqdm import tqdm
 
 import pipeline.env
 
 
 def predict(
-    model: torchvision.models,
+    model: nn.Module,
     dataloader: torchvision.datasets.ImageFolder,
-) -> tuple[list, list, list]:
+) -> tuple[list[float], list[float], list[float]]:
     """
     Get predictions from a trained model.
 
     Args:
     -----
-        model (torchvision.models):
+        model (nn.Module):
             The trained model.
 
         dataloader (torchvision.datasets.ImageFolder):

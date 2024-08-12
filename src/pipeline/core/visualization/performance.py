@@ -6,8 +6,8 @@ import pandas as pd
 import seaborn as sns
 import sklearn.metrics
 import torch
-from torch import nn
 import torchvision
+from torch import nn
 
 import pipeline.core.model.inference
 import pipeline.core.visualization.base as base

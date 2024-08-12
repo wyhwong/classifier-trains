@@ -28,13 +28,11 @@ class Labels:
     title: str, the title of the plot.
     xlabel: str, the x-axis label of the plot.
     ylabel: str, the y-axis label of the plot.
-    zlabel: str, the z-axis label of the plot.
     """
 
     title: str = ""
     xlabel: str = ""
     ylabel: str = ""
-    zlabel: str = ""
 
 
 @dataclass

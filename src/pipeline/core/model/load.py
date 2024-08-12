@@ -2,7 +2,7 @@ from typing import Any
 
 import onnx
 import torch
-import torchvision
+from torch import nn
 
 import pipeline.env
 import pipeline.logger
@@ -11,13 +11,13 @@ import pipeline.logger
 local_logger = pipeline.logger.get_logger(__name__)
 
 
-def load_model(model: torchvision.models, model_path: str) -> None:
+def load_model(model: nn.Module, model_path: str) -> None:
     """
     Loads the weights of a PyTorch model from a given file path.
 
     Args:
     -----
-        model (torchvision.models):
+        model (nn.Module):
             The PyTorch model to load the weights into.
 
         model_path (str):
@@ -55,7 +55,7 @@ def save_weights(weights: dict[str, Any], export_path: str) -> None:
 
 
 def export_model_to_onnx(
-    model: torchvision.models,
+    model: nn.Module,
     input_height: int,
     input_width: int,
     export_path: str,

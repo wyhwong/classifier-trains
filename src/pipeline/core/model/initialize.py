@@ -2,77 +2,57 @@ from typing import Any, Iterator
 
 import torch
 import torchvision
+from torch import nn
 
 import pipeline.env
 import pipeline.logger
-import pipeline.schemas.constants
+from pipeline.schemas import config
 
 
 local_logger = pipeline.logger.get_logger(__name__)
 
 
-def initialize_model(
-    backbone: pipeline.schemas.constants.ModelBackbone,
-    weights: str,
-    num_classes: int,
-    unfreeze_all_params: bool,
-) -> torchvision.models:
+def initialize_model(model_config: config.ModelConfig) -> nn.Module:
     """
     Initializes a model with the specified backbone, weights, and number of classes.
 
     Args:
     -----
-        backbone (pipeline.schemas.constants.ModelBackbone):
-            The backbone architecture of the model.
-
-        weights (str):
-            The path to the pre-trained weights file.
-
-        num_classes (int):
-            The number of classes in the dataset.
-
-        unfreeze_all_params (bool):
-            Whether to unfreeze all parameters of the model.
+        model_config (pipeline.schemas.config.ModelConfig):
 
     Returns:
     -----
-        model (torchvision.models):
+        model (nn.Module):
             The initialized model.
     """
 
-    local_logger.info("Initializing model backbone: %s.", backbone.value)
-    local_logger.debug(
-        "The path to the pre-trained weights file: %s, the number of classes: %d, unfreeze all parameters: %s.",
-        weights,
-        num_classes,
-        unfreeze_all_params,
-    )
+    local_logger.info("Initializing model with the following configuration: %s.", model_config)
 
-    model = getattr(torchvision.models, backbone.value)(weights=weights)
+    model = getattr(torchvision.models, model_config.backbone)(weights=model_config.weights)
     # Modify output layer to fit number of classes
-    if "resnet" in backbone.value:
-        model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+    if "resnet" in model_config.backbone:
+        model.fc = torch.nn.Linear(model.fc.in_features, model_config.num_classes)
 
-    if "alexnet" in backbone.value:
-        model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, num_classes)
+    if "alexnet" in model_config.backbone:
+        model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, model_config.num_classes)
 
-    if "vgg" in backbone.value:
-        model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, num_classes)
+    if "vgg" in model_config.backbone:
+        model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, model_config.num_classes)
 
-    if "squeezenet" in backbone.value:
-        model.classifier[1] = torch.nn.Conv2d(512, num_classes, kernel_size=(1, 1), stride=(1, 1))
-        model.num_classes = num_classes
+    if "squeezenet" in model_config.backbone:
+        model.classifier[1] = torch.nn.Conv2d(512, model_config.num_classes, kernel_size=(1, 1), stride=(1, 1))
+        model.num_classes = model_config.num_classes
 
-    if "densenet" in backbone.value:
-        model.classifier = torch.nn.Linear(model.classifier.in_features, num_classes)
+    if "densenet" in model_config.backbone:
+        model.classifier = torch.nn.Linear(model.classifier.in_features, model_config.num_classes)
 
-    if "inception" in backbone.value:
-        model.AuxLogits.fc = torch.nn.Linear(model.AuxLogits.fc.in_features, num_classes)
-        model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+    if "inception" in model_config.backbone:
+        model.AuxLogits.fc = torch.nn.Linear(model.AuxLogits.fc.in_features, model_config.num_classes)
+        model.fc = torch.nn.Linear(model.fc.in_features, model_config.num_classes)
 
     local_logger.info("Modified the output layer of the model.")
 
-    if unfreeze_all_params:
+    if model_config.unfreeze_all_params:
         unfreeze_all_params_in_model(model)
 
     # To enable PyTorch 2 compiler for optimized performance
@@ -88,13 +68,13 @@ def initialize_model(
     return model
 
 
-def unfreeze_all_params_in_model(model: torchvision.models) -> None:
+def unfreeze_all_params_in_model(model: nn.Module) -> None:
     """
     Unfreezes all parameters in the model by setting `requires_grad` to True for each parameter.
 
     Args:
     -----
-        model (torchvision.models):
+        model (nn.Module):
             The model whose parameters need to be unfrozen.
 
     Returns:
@@ -110,12 +90,7 @@ def unfreeze_all_params_in_model(model: torchvision.models) -> None:
 
 def initialize_optimizer(
     params: Iterator[Any],
-    optimizier=pipeline.schemas.constants.OptimizerType,
-    lr=1e-3,
-    momentum=0.9,
-    weight_decay=0.0,
-    alpha=0.99,
-    betas=(0.9, 0.999),
+    optimizer_config: config.OptimizerConfig,
 ) -> torch.optim.Optimizer:
     """
     Get optimizer for the model.
@@ -125,23 +100,8 @@ def initialize_optimizer(
         params: Iterator[Any] (torch.nn.Module.parameters)
             Parameters of the model.
 
-        optimizier: pipeline.schemas.constants.OptimizerType
-            Optimizer type.
-
-        lr: float, optional
-            Learning rate for the optimizer.
-
-        momentum: float, optional
-            Momentum for the optimizer.
-
-        weight_decay: float, optional
-            Weight decay for the optimizer.
-
-        alpha: float, optional
-            Alpha for the optimizer.
-
-        betas: tuple, optional
-            Betas for the optimizer.
+        optimizer_config: pipeline.schemas.config.OptimizerConfig
+            Optimizer configuration.
 
     Returns:
     --------
@@ -149,61 +109,59 @@ def initialize_optimizer(
             Optimizer for the model.
     """
 
-    local_logger.info("Creating optimizer: %s.", optimizier.value)
-    local_logger.debug(
-        "The learning rate: %.4f, momentum: %.4f, weight_decay: %.4f, alpha: %.4f, betas: %s.",
-        lr,
-        momentum,
-        weight_decay,
-        alpha,
-        betas,
-    )
+    local_logger.info("Creating optimizer with config %s", optimizer_config)
 
-    if optimizier is pipeline.schemas.constants.OptimizerType.SGD:
-        return torch.optim.SGD(params, lr=lr, momentum=momentum, weight_decay=weight_decay)
+    if optimizer_config.optimizier is pipeline.schemas.constants.OptimizerType.SGD:
+        return torch.optim.SGD(
+            params,
+            lr=optimizer_config.lr,
+            momentum=optimizer_config.momentum,
+            weight_decay=optimizer_config.weight_decay,
+        )
 
-    if optimizier is pipeline.schemas.constants.OptimizerType.RMSPROP:
-        return torch.optim.RMSprop(params, lr=lr, momentum=momentum, weight_decay=weight_decay, alpha=alpha)
+    if optimizer_config.optimizier is pipeline.schemas.constants.OptimizerType.RMSPROP:
+        return torch.optim.RMSprop(
+            params,
+            lr=optimizer_config.lr,
+            momentum=optimizer_config.momentum,
+            weight_decay=optimizer_config.weight_decay,
+            alpha=optimizer_config.alpha,
+        )
 
-    if optimizier is pipeline.schemas.constants.OptimizerType.ADAM:
-        return torch.optim.Adam(params, lr=lr, betas=betas, weight_decay=weight_decay)
+    if optimizer_config.optimizier is pipeline.schemas.constants.OptimizerType.ADAM:
+        return torch.optim.Adam(
+            params,
+            lr=optimizer_config.lr,
+            betas=optimizer_config.betas,
+            weight_decay=optimizer_config.weight_decay,
+        )
 
-    if optimizier is pipeline.schemas.constants.OptimizerType.ADAMW:
-        return torch.optim.AdamW(params, lr=lr, betas=betas, weight_decay=weight_decay)
+    if optimizer_config.optimizier is pipeline.schemas.constants.OptimizerType.ADAMW:
+        return torch.optim.AdamW(
+            params,
+            lr=optimizer_config.lr,
+            betas=optimizer_config.betas,
+            weight_decay=optimizer_config.weight_decay,
+        )
 
-    raise ValueError(f"Invalid optimizer type: {optimizier.value}")
+    raise ValueError(f"Invalid optimizer type: {optimizer_config.optimizier}")
 
 
 def initialize_scheduler(
-    scheduler: pipeline.schemas.constants.SchedulerType,
     optimizer: torch.optim.Optimizer,
+    scheduler_config: config.SchedulerConfig,
     num_epochs: int,
-    step_size: int = 30,
-    gamma: float = 0.1,
-    lr_min: float = 0.0,
 ) -> torch.optim.lr_scheduler.LRScheduler:
     """
     Get scheduler for the optimizer.
 
     Args:
     -----
-        scheduler: pipeline.schemas.constants.SchedulerType
-            Scheduler type.
-
         optimizer: torch.optim.Optimizer
             Optimizer to apply scheduler.
 
-        num_epochs: int
-            Number of epochs to train.
-
-        step_size: int, optional
-            Step size for the scheduler.
-
-        gamma: float, optional
-            Gamma for the scheduler.
-
-        lr_min: float, optional
-            Minimum learning rate for the scheduler.
+        scheduler_config: pipeline.schemas.config.SchedulerConfig
+            Scheduler configuration.
 
     Returns:
     --------
@@ -211,19 +169,20 @@ def initialize_scheduler(
             Scheduler for the optimizer.
     """
 
-    local_logger.info("Creating scheduler: %s for optimizer.", scheduler.value)
-    local_logger.debug(
-        "The number of epochs: %d, step_size: %d, gamma: %.4f, lr_min: %.4f.",
-        num_epochs,
-        step_size,
-        gamma,
-        lr_min,
-    )
+    local_logger.info("Creating scheduler with config %s", scheduler_config)
 
-    if scheduler is pipeline.schemas.constants.SchedulerType.STEP:
-        return torch.optim.lr_scheduler.StepLR(optimizer=optimizer, step_size=step_size, gamma=gamma)
+    if scheduler_config.scheduler is pipeline.schemas.constants.SchedulerType.STEP:
+        return torch.optim.lr_scheduler.StepLR(
+            optimizer=optimizer,
+            step_size=scheduler_config.step_size,
+            gamma=scheduler_config.gamma,
+        )
 
-    if scheduler is pipeline.schemas.constants.SchedulerType.COSINE:
-        return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=num_epochs, eta_min=lr_min)
+    if scheduler_config.scheduler is pipeline.schemas.constants.SchedulerType.COSINE:
+        return torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer=optimizer,
+            T_max=num_epochs,
+            eta_min=scheduler_config.lr_min,
+        )
 
-    raise ValueError(f"Invalid scheduler type: {scheduler.value}")
+    raise ValueError(f"Invalid scheduler type: {scheduler_config.scheduler}")

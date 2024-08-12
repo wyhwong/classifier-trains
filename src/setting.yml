@@ -1,10 +1,7 @@
-experiment_label:
-
-# General settings for facade
-setup:
-  enable_training: true
-  enable_evaluation: true
-  enable_export: true
+experiment_label: "experiment"
+enable_training: true
+enable_evaluation: true
+enable_export: true
 
 # Settings about model
 model:
@@ -14,8 +11,8 @@ model:
   weights: DEFAULT
   unfreeze_all_params: false
 
-# Settings about dataset
-dataset:
+# Settings about dataloader
+dataloader:
   # For poetry enviorment, input relative path/absolute path to the trainset
   # For docker enviorment, input ${DATA_DIR}/< path to the trainset within that folder>
   trainset_dir: ../dataset/train/
@@ -24,29 +21,29 @@ dataset:
   num_workers: 4
 
 preprocessing:
-  width: 48
-  height: 48
   mean: [0.485, 0.456, 0.406]
   std: [0.229, 0.224, 0.225]
 
-  resize_and_padding:
+  resize_config:
+    width: 48
+    height: 48
     # For available choices, see "InterpolationType" in src/schemas/constants.py
     interpolation: INTER_CUBIC
     maintain_aspect_ratio: true
     # For available choices, see "PaddingType" in src/schemas/constants.py
     padding: bottom_right
 
-  spatial:
+  spatial_config:
     # Probability in [0., 1.]
     hflip_prob: 0.5
     vflip_prob: 0.5
-    max_rotate: 10 # in degrees
-    centor_crop: false
-    random_crop: false
+    max_rotate_in_degree: 10 # in degrees
+    allow_centor_crop: false
+    allow_random_crop: false
 
-  color:
-    gray_scale: false
-    random_color_augmentation: false
+  color_config:
+    allow_gray_scale: false
+    allow_random_color: false
 
 training:
   num_epochs: 20

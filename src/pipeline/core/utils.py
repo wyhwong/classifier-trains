@@ -1,4 +1,3 @@
-import json
 import os
 
 import yaml
@@ -6,7 +5,7 @@ import yaml
 import pipeline.logger
 
 
-local_logger = logger.get_logger(__name__)
+local_logger = pipeline.logger.get_logger(__name__)
 
 
 def check_and_create_dir(dirpath: str) -> None:

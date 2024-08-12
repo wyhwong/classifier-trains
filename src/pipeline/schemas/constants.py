@@ -1,7 +1,7 @@
 import enum
 
 
-class OptimizerType(enum.Enum):
+class OptimizerType(enum.StrEnum):
     """The optimizer type."""
 
     SGD = "sgd"
@@ -10,21 +10,21 @@ class OptimizerType(enum.Enum):
     ADAMW = "adamw"
 
 
-class SchedulerType(enum.Enum):
+class SchedulerType(enum.StrEnum):
     """The scheduler type."""
 
     STEP = "step"
     COSINE = "cosine"
 
 
-class BestCriteria(enum.Enum):
+class BestCriteria(enum.StrEnum):
     """The best criteria."""
 
     LOSS = "loss"
     ACCURACY = "accuracy"
 
 
-class InterpolationType(enum.Enum):
+class InterpolationType(enum.StrEnum):
     """The interpolation type."""
 
     INTER_NEAREST = "INTER_NEAREST"
@@ -34,7 +34,7 @@ class InterpolationType(enum.Enum):
     INTER_LANCZOS4 = "INTER_LANCZOS4"
 
 
-class PaddingType(enum.Enum):
+class PaddingType(enum.StrEnum):
     """The padding type."""
 
     TOPLEFT = "top_left"
@@ -42,10 +42,9 @@ class PaddingType(enum.Enum):
     BOTTOMLEFT = "bottom_left"
     BOTTOMRIGHT = "bottom_right"
     CENTER = "center"
-    NONE = None
 
 
-class ModelBackbone(enum.Enum):
+class ModelBackbone(enum.StrEnum):
     """The model backbone."""
 
     RESNET18 = "resnet18"
@@ -70,7 +69,7 @@ class ModelBackbone(enum.Enum):
     INCEPTION_V3 = "inception_v3"
 
 
-class Phase(enum.Enum):
+class Phase(enum.StrEnum):
     """The phase."""
 
     TRAINING = "train"
