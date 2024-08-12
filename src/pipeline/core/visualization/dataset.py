@@ -59,4 +59,5 @@ def get_dataset_preview(
             axes[row][col].imshow(img)
             axes[row][col].axis("off")
     base.savefig_and_close(filename, output_dir, close)
+
     return (fig, axes)

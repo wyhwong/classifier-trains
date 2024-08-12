@@ -2,6 +2,7 @@ experiment_label: "experiment"
 enable_training: true
 enable_evaluation: true
 enable_export: true
+output_dir: ./results
 
 # Settings about model
 model:
