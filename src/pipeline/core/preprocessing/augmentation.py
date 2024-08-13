@@ -17,36 +17,19 @@ def get_spatial_transforms(
     allow_centor_crop: bool,
     allow_random_crop: bool,
 ) -> list[nn.Module]:
-    """
-    Get the spatial augmentation transforms.
+    """Get the spatial augmentation transforms.
 
     Args:
-    -----
-        width (int):
-            The width of the input image.
-
-        height (int):
-            The height of the input image.
-
-        hflip_prob (float):
-            The probability of horizontal flipping.
-
-        vflip_prob (float):
-            The probability of vertical flipping.
-
-        max_rotate_in_degree (float):
-            The maximum rotation angle.
-
-        allow_centor_crop (bool):
-            Whether to apply center cropping.
-
-        allow_random_crop (bool):
-            Whether to apply random cropping.
+        width (int): The width of the image.
+        height (int): The height of the image.
+        hflip_prob (float): The probability of horizontal flip.
+        vflip_prob (float): The probability of vertical flip.
+        max_rotate_in_degree (float): The maximum rotation in degree.
+        allow_centor_crop (bool): Whether to allow center crop.
+        allow_random_crop (bool): Whether to allow random crop.
 
     Returns:
-    -----
-        spatial_augmentation (list[nn.Module]):
-            The list of spatial augmentation transforms.
+        list[nn.Module]: The list of spatial augmentation transforms.
     """
 
     spatial_augmentation = []
@@ -74,21 +57,14 @@ def get_spatial_transforms(
 
 
 def get_color_transforms(allow_gray_scale: bool, allow_random_color: bool) -> list[nn.Module]:
-    """
-    Get the color augmentation transforms.
+    """Get the color augmentation transforms.
 
     Args:
-    -----
-        allow_gray_scale (bool):
-            Whether to apply grayscale transformation.
-
-        allow_random_color (bool):
-            Whether to apply random color augmentation.
+        allow_gray_scale (bool): Whether to allow grayscale.
+        allow_random_color (bool): Whether to allow random color.
 
     Returns:
-    -----
-        color_augmentation (list[nn.Module]):
-            The list of color augmentation transforms.
+        list[nn.Module]: The list of color augmentation transforms.
     """
 
     color_augmentation = []

@@ -5,7 +5,7 @@ import pipeline.schemas.config
 
 
 @click.command()
-@click.option("--config", "-c", required=True, help="Path to the configuration file.")
+@click.option("--config", "-c", required=True, type=str, help="Path to the configuration file.")
 def run(config: str) -> None:
     """Run Classifier Pipeline based on the configuration file."""
 

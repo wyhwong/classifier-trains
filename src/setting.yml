@@ -3,6 +3,8 @@ enable_training: true
 enable_evaluation: true
 enable_export: true
 output_dir: ./results
+device: cuda
+random_seed: 42
 
 # Settings about model
 model:

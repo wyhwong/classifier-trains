@@ -17,30 +17,17 @@ def get_resize_and_padding_transforms(
     padding: constants.PaddingType,
     maintain_aspect_ratio: bool,
 ) -> list[nn.Module]:
-    """
-    Get the resize and padding transforms.
+    """Function to get the resize and padding transforms.
 
     Args:
-    -----
-        width (int):
-            The width of the input image.
-
-        height (int):
-            The height of the input image.
-
-        interpolation (constants.InterpolationType):
-            The interpolation method to use for resizing.
-
-        padding (constants.PaddingType):
-            The type of padding to apply to the image.
-
-        maintain_aspect_ratio (bool):
-            Whether to maintain the aspect ratio of the image during resizing.
+        width (int): The width of the image.
+        height (int): The height of the image.
+        interpolation (constants.InterpolationType): The interpolation type.
+        padding (constants.PaddingType): The padding type.
+        maintain_aspect_ratio (bool): Whether to maintain the aspect ratio.
 
     Returns:
-    -----
-        resize_and_padding (list[nn.Module]):
-            The list of resize and padding transforms.
+        list[nn.Module]: The list of resize and padding transforms.
     """
 
     resize_and_padding = [
@@ -51,9 +38,7 @@ def get_resize_and_padding_transforms(
 
 
 class Resize:
-    """
-    Resize the image to the given width and height.
-    """
+    """Class to resize the image to the specified dimensions."""
 
     def __init__(
         self,
@@ -63,29 +48,14 @@ class Resize:
         interpolation: constants.InterpolationType,
         padding: constants.PaddingType,
     ) -> None:
-        """
-        Initialize the Resize layer.
+        """Initialize the Resize layer.
 
         Args:
-        -----
-            width (int):
-                The desired width of the input image.
-
-            height (int):
-                The desired height of the input image.
-
-            maintain_aspect_ratio (bool):
-                Whether to maintain the aspect ratio of the image during resizing.
-
-            interpolation (constants.InterpolationType):
-                The interpolation method to use for resizing.
-
-            padding (constants.PaddingType):
-                The type of padding to apply to the image.
-
-        Returns:
-        -----
-            None
+            width (int): The width of the image.
+            height (int): The height of the image.
+            maintain_aspect_ratio (bool): Whether to maintain the aspect ratio.
+            interpolation (constants.InterpolationType): The interpolation type.
+            padding (constants.PaddingType): The padding type.
         """
 
         self.__w = width
@@ -94,28 +64,15 @@ class Resize:
         self.__interpolation = getattr(cv2, interpolation.value.upper())
         self.__maintain_aspect_ratio = maintain_aspect_ratio
         self.__padding = padding
-        local_logger.debug(
-            "Resize layer initialized: %.2f, %.2f, %s, %s, %s.",
-            width,
-            height,
-            interpolation,
-            maintain_aspect_ratio,
-            padding,
-        )
 
     def __call__(self, image: np.ndarray) -> np.ndarray:
-        """
-        Resize and pad an image according to the specified parameters.
+        """Resize the image to the specified dimensions.
 
         Args:
-        -----
-            image (np.ndarray):
-                The input image to be processed.
+            image (np.ndarray): The input image.
 
         Returns:
-        -----
-            output_image (np.ndarray):
-                The resized and padded image.
+            np.ndarray: The resized image.
         """
 
         if not self.__maintain_aspect_ratio:
@@ -169,30 +126,16 @@ class Resize:
 
 
 class PilToCV2:
-    """
-    Convert the PIL image to cv2 image.
-    """
-
-    def __init__(self) -> None:
-        """
-        Initializes the PilToCV2 layer.
-        """
-
-        local_logger.debug("PilToCV2 layer initialized.")
+    """Convert the PIL image to cv2 image."""
 
     def __call__(self, image: PIL.Image) -> np.ndarray:
-        """
-        Convert a PIL image to a NumPy array.
+        """Convert the PIL image to cv2 image.
 
         Args:
-        -----
-            image (PIL.Image):
-                The input image.
+            image (PIL.Image): The input image.
 
         Returns:
-        -----
-            output_image (np.ndarray):
-                The converted image as a NumPy array.
+            np.ndarray: The cv2 image.
         """
 
         return np.array(image)

@@ -54,6 +54,7 @@ line-length = 120
 line_length = 120
 include_trailing_comma = true
 lines_after_imports = 2
+profile = "black"
 
 [tool.bandit]
 exclude_dirs = ["tests",]
