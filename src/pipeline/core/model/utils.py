@@ -13,17 +13,13 @@ local_logger = pipeline.logger.get_logger(__name__)
 
 
 def initialize_model(model_config: config.ModelConfig) -> nn.Module:
-    """
-    Initializes a model with the specified backbone, weights, and number of classes.
+    """Initialize the model with the given configuration.
 
     Args:
-    -----
-        model_config (pipeline.schemas.config.ModelConfig):
+        model_config (config.ModelConfig): The model configuration.
 
     Returns:
-    -----
-        model (nn.Module):
-            The initialized model.
+        nn.Module: The initialized model.
     """
 
     local_logger.info("Initializing model with the following configuration: %s.", model_config)
@@ -69,17 +65,10 @@ def initialize_model(model_config: config.ModelConfig) -> nn.Module:
 
 
 def unfreeze_all_params_in_model(model: nn.Module) -> None:
-    """
-    Unfreezes all parameters in the model by setting `requires_grad` to True for each parameter.
+    """Unfreeze all parameters in the model.
 
     Args:
-    -----
-        model (nn.Module):
-            The model whose parameters need to be unfrozen.
-
-    Returns:
-    -----
-        None
+        model (nn.Module): The model to unfreeze all parameters.
     """
 
     for param in model.parameters():
@@ -92,21 +81,14 @@ def initialize_optimizer(
     params: Iterator[Any],
     optimizer_config: config.OptimizerConfig,
 ) -> torch.optim.Optimizer:
-    """
-    Get optimizer for the model.
+    """Get optimizer for a specific model.
 
     Args:
-    -----
-        params: Iterator[Any] (torch.nn.Module.parameters)
-            Parameters of the model.
-
-        optimizer_config: pipeline.schemas.config.OptimizerConfig
-            Optimizer configuration.
+        params (Iterator): Model parameters.
+        optimizer_config (config.OptimizerConfig): Optimizer configuration.
 
     Returns:
-    --------
-        optimizer: torch.optim.Optimizer
-            Optimizer for the model.
+        torch.optim.Optimizer: Optimizer for the model.
     """
 
     local_logger.info("Creating optimizer with config %s", optimizer_config)
@@ -152,21 +134,15 @@ def initialize_scheduler(
     scheduler_config: config.SchedulerConfig,
     num_epochs: int,
 ) -> torch.optim.lr_scheduler.LRScheduler:
-    """
-    Get scheduler for the optimizer.
+    """Get scheduler for a specific optimizer.
 
     Args:
-    -----
-        optimizer: torch.optim.Optimizer
-            Optimizer to apply scheduler.
-
-        scheduler_config: pipeline.schemas.config.SchedulerConfig
-            Scheduler configuration.
+        optimizer (torch.optim.Optimizer): The optimizer.
+        scheduler_config (config.SchedulerConfig): The scheduler configuration.
+        num_epochs (int): The number of epochs.
 
     Returns:
-    --------
-        scheduler: torch.optim.lr_scheduler.LRScheduler
-            Scheduler for the optimizer.
+        torch.optim.lr_scheduler.LRScheduler: The scheduler.
     """
 
     local_logger.info("Creating scheduler with config %s", scheduler_config)

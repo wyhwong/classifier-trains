@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 import pipeline.env
 import pipeline.logger
-from pipeline.core.model.initialize import initialize_optimizer, initialize_scheduler
+from pipeline.core.model.utils import initialize_optimizer, initialize_scheduler
 from pipeline.schemas import config, constants
 
 
@@ -99,8 +99,8 @@ def train_model(
             epoch_loss = 0.0
             epoch_corrects = 0
             for inputs, labels in tqdm(dataloaders[phase]):
-                inputs = inputs.to(pipeline.envDEVICE)
-                labels = labels.to(pipeline.envDEVICE)
+                inputs = inputs.to(pipeline.env.DEVICE)
+                labels = labels.to(pipeline.env.DEVICE)
 
                 optimizer.zero_grad()
 
