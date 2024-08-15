@@ -12,6 +12,7 @@ class ModelConfig(BaseModel):
     num_classes: PositiveInt
     weights: str
     unfreeze_all_params: bool
+    weights_path: Optional[str] = None
 
 
 class DataloaderConfig(BaseModel):
@@ -87,13 +88,17 @@ class TrainingConfig(BaseModel):
     best_criteria: C.BestCriteria
     optimizer: OptimizerConfig
     scheduler: SchedulerConfig
+    save_last_weight: bool
+    save_best_weight: bool
+    export_last_weight: bool
+    export_best_weight: bool
 
 
 class ModelCheckpointConfig(BaseModel):
     """Model checkpoint configuration"""
 
-    name: str
-    path: str
+    model_name: str
+    weights_path: str
     backbone: C.ModelBackbone
 
 
@@ -103,27 +108,3 @@ class EvaluationConfig(BaseModel):
     evalset_dir: str
     mapping_path: str
     models: list[ModelCheckpointConfig]
-
-
-class ExportConfig(BaseModel):
-    """Export configuration"""
-
-    save_last_weight: bool
-    save_best_weight: bool
-    export_last_weight: bool
-    export_best_weight: bool
-
-
-class PipelineConfig(BaseModel):
-    """Pipeline configuration"""
-
-    experiment_label: str
-    enable_training: bool
-    enable_evaluation: bool
-    enable_export: bool
-    model: ModelConfig
-    dataloader: DataloaderConfig
-    preprocessing: PreprocessingConfig
-    training: TrainingConfig
-    evaluation: EvaluationConfig
-    export: ExportConfig

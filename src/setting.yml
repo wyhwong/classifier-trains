@@ -13,6 +13,7 @@ model:
   num_classes: 2
   weights: DEFAULT
   unfreeze_all_params: false
+  weights_path: null
 
 # Settings about dataloader
 dataloader:
@@ -52,6 +53,10 @@ training:
   num_epochs: 20
   # available choice: loss, accuracy
   best_criteria: loss
+  save_last_weight: true
+  save_best_weight: true
+  export_last_weight: true
+  export_best_weight: true
 
   scheduler:
     # For available choices, see "SchedulerType" in src/schemas/constants.py
@@ -82,11 +87,5 @@ evaluation:
   models:
     - name: default
       # Special handling: $OUTPUT_DIR will be replaced by the actual output directory
-      path: $OUTPUT_DIR/best_model.pt
+      weights_path: ./best_model.pt
       backbone: resnet18
-
-export:
-  save_last_weight: true
-  save_best_weight: true
-  export_last_weight: true
-  export_best_weight: true
