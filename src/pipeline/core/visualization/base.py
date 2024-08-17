@@ -12,36 +12,18 @@ local_logger = pipeline.logger.get_logger(__name__)
 
 
 def initialize_plot(nrows=1, ncols=1, figsize=(10, 6), labels=Labels(), padding=Padding(), fontsize=12):
-    """
-    Initialize a plot from matplotlib.
+    """Initialize a plot from matplotlib.
 
     Args:
-    -----
-        nrows (int):
-            The number of rows of the plot.
-
-        ncols (int):
-            The number of columns of the plot.
-
-        figsize (tuple):
-            The size of the plot.
-
-        labels (Labels):
-            The labels of the plot.
-
-        padding (Padding):
-            The padding of the plot.
-
-        fontsize (int):
-            The fontsize of the plot.
+        nrows (int, optional): Number of rows. Defaults to 1.
+        ncols (int, optional): Number of columns. Defaults to 1.
+        figsize (tuple, optional): Figure size. Defaults to (10, 6).
+        labels (Labels, optional): Labels for the plot. Defaults to Labels().
+        padding (Padding, optional): Padding for the plot. Defaults to Padding().
+        fontsize (int, optional): Font size. Defaults to 12.
 
     Returns:
-    -----
-        fig (matplotlib.figure.Figure):
-            The figure of the plot.
-
-        axes (numpy.ndarray):
-            The axes of the plot.
+        tuple: Figure and axes.
     """
 
     fig, axes = plt.subplots(nrows, ncols, figsize=figsize)
@@ -77,20 +59,14 @@ def initialize_plot(nrows=1, ncols=1, figsize=(10, 6), labels=Labels(), padding=
 
 
 def add_lines_to_plot(ax, lines: list[Line]) -> None:
-    """
-    Add lines to the plot.
+    """Add lines to the plot.
 
     Args:
-    -----
-        ax (matplotlib.axes.Axes):
-            The axes of the plot.
+        ax (Axes): The axes of the plot.
+        lines (list[Line]): The lines to add to the plot.
 
-        lines (list[Line]):
-            The lines to be added to the plot.
-
-    Returns:
-    -----
-        None
+    Raises:
+        TypeError: If the line is not an instance of Line
     """
 
     for line in lines:
@@ -113,19 +89,12 @@ def savefig_and_close(filename: Optional[str] = None, output_dir: Optional[str] 
     Save the figure and close it.
 
     Args:
-    -----
-        filename (str):
-            The filename of the figure.
+        filename (str, optional): The filename. Defaults to None.
+        output_dir (str, optional): The output directory. Defaults to None.
+        close (bool, optional): Whether to close the figure. Defaults to True.
 
-        output_dir (str):
-            The output directory of the figure.
-
-        close (bool):
-            Whether to close the figure.
-
-    Returns:
-    -----
-        None
+    Raises:
+        FileNotFoundError: If the output directory does not exist.
     """
 
     if output_dir:

@@ -23,6 +23,21 @@ class DataloaderConfig(BaseModel):
     batch_size: PositiveInt
     num_workers: PositiveInt
 
+    def get_dirpath(self, phase: C.Phase) -> str:
+        """Get the directory path for the given phase.
+
+        Args:
+            phase (C.Phase): The phase.
+
+        Returns:
+            str: The directory path.
+        """
+
+        if phase is C.Phase.TRAINING:
+            return self.trainset_dir
+
+        return self.valset_dir
+
 
 class ResizeConfig(BaseModel):
     """Resize configuration"""
@@ -88,10 +103,10 @@ class TrainingConfig(BaseModel):
     best_criteria: C.BestCriteria
     optimizer: OptimizerConfig
     scheduler: SchedulerConfig
-    save_last_weight: bool
-    save_best_weight: bool
     export_last_weight: bool
+    export_last_as_onnx: bool
     export_best_weight: bool
+    export_best_as_onnx: bool
 
 
 class ModelCheckpointConfig(BaseModel):

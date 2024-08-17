@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Callable, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +9,6 @@ import torch
 import torchvision
 from torch import nn
 
-import pipeline.core.model.inference
 import pipeline.core.visualization.base as base
 import pipeline.logger
 import pipeline.schemas.visualization as schemas
@@ -20,34 +19,20 @@ local_logger = pipeline.logger.get_logger(__name__)
 
 def loss_curve(
     df: pd.DataFrame,
-    save_csv=True,
-    filename="loss_history.jpg",
+    filename: Optional[str] = None,
     output_dir: Optional[str] = None,
-    close=True,
+    close: bool = False,
 ):
-    """
-    Plots the training/validation loss curve against the number of epochs.
+    """Plots the training/validation loss curve against the number of epochs.
 
     Args:
-    -----
-        df (pd.DataFrame):
-            The DataFrame containing the loss values.
-
-        save_csv (bool, optional):
-            Whether to save the DataFrame as a CSV file. Defaults to True.
-
-        filename (str, optional):
-            The name of the output file. Defaults to "loss_history.jpg".
-
-        output_dir (str, optional):
-            The directory to save the output file. Defaults to None.
-
-        close (bool, optional):
-            Whether to close the plot after saving. Defaults to True.
+        df (pd.DataFrame): The dataframe containing the loss data.
+        filename (str, optional): The name of the output image file. Defaults to None.
+        output_dir (str, optional): The directory to save the output files. Defaults to None.
+        close (bool, optional): Whether to close the plot after saving. Defaults to False.
 
     Returns:
-    -----
-        The figure and axes objects of the loss curve plot.
+        tuple: The figure and axes objects of the loss curve plot
     """
 
     labels = schemas.Labels(
@@ -57,42 +42,26 @@ def loss_curve(
     )
     fig, ax = base.initialize_plot(figsize=(10, 10), labels=labels)
     sns.lineplot(data=df, ax=ax)
-    if output_dir and save_csv:
-        df.to_csv(f"{output_dir}/{filename.replace('jpg', 'csv')}", index=False)
     base.savefig_and_close(filename, output_dir, close)
     return (fig, ax)
 
 
 def accuracy_curve(
     df: pd.DataFrame,
-    save_csv=True,
-    filename="accuracy_history.jpg",
+    filename: Optional[str] = None,
     output_dir: Optional[str] = None,
-    close=True,
+    close: bool = False,
 ):
-    """
-    Plots the training/validation accuracy curve against the number of epochs.
+    """Plots the training/validation accuracy curve against the number of epochs.
 
     Args:
-    -----
-        df (pd.DataFrame):
-            The dataframe containing the accuracy data.
-
-        save_csv (bool, optional):
-            Whether to save the accuracy data as a CSV file. Defaults to True.
-
-        filename (str, optional):
-            The name of the output image file. Defaults to "accuracy_history.jpg".
-
-        output_dir (str, optional):
-            The directory to save the output files. Defaults to None.
-
-        close (bool, optional):
-            Whether to close the plot after saving. Defaults to True.
+        df (pd.DataFrame): The dataframe containing the accuracy data.
+        filename (str, optional): The name of the output image file. Defaults to None.
+        output_dir (str, optional): The directory to save the output files. Defaults to None.
+        close (bool, optional): Whether to close the plot after saving. Defaults to False.
 
     Returns:
-    -----
-        The figure and axes objects of the loss curve plot.
+        tuple: The figure and axes objects of the accuracy curve
     """
 
     labels = schemas.Labels(
@@ -102,8 +71,6 @@ def accuracy_curve(
     )
     fig, ax = base.initialize_plot(figsize=(10, 10), labels=labels)
     sns.lineplot(data=df, ax=ax)
-    if output_dir and save_csv:
-        df.to_csv(f"{output_dir}/{filename.replace('jpg', 'csv')}", index=False)
     base.savefig_and_close(filename, output_dir, close)
     return (fig, ax)
 
@@ -111,32 +78,18 @@ def accuracy_curve(
 def confusion_matrix(
     y_true: list[str],
     y_pred: list[str],
-    filename="confusion_matrix.png",
+    filename: Optional[str] = None,
     output_dir: Optional[str] = None,
-    close=True,
+    close: bool = False,
 ):
-    """
-    Generate a confusion matrix plot based on the true and predicted labels.
+    """Plots the confusion matrix.
 
     Args:
-        y_true (list[str]):
-            List of true labels.
-
-        y_pred (list[str]):
-            List of predicted labels.
-
-        filename (str, optional):
-            Name of the output file. Defaults to "confusion_matrix.png".
-
-        output_dir (str, optional):
-            Directory to save the output file. Defaults to None.
-
-        close (bool, optional):
-            Whether to close the plot after saving. Defaults to True.
-
-    Returns:
-    -----
-        The figure and axes objects of the loss curve plot.
+        y_true (list[str]): The true labels.
+        y_pred (list[str]): The predicted labels.
+        filename (str, optional): The name of the output image file. Defaults to None.
+        output_dir (str, optional): The directory to save the output files. Defaults to None.
+        close (bool, optional): Whether to close the plot after saving. Defaults to False.
     """
 
     classes = np.unique(y_true)
@@ -166,32 +119,18 @@ def roc_curves(
     output_dir=None,
     close=True,
 ) -> None:
-    """
-    Generate ROC curve for multiple models.
+    """Plot the ROC curve for each class.
 
     Args:
-    -----
-        models (list[nn.Module]):
-            List of models to generate ROC curves.
+        models (list[nn.Module]): The list of models.
+        model_names (list[str]): The list of model names.
+        dataloader (torch.utils.data.DataLoader): The data loader.
+        mapping (dict[str, str]): The mapping of class indices to class names.
+        output_dir (str, optional): The output directory. Defaults to None.
+        close (bool, optional): Whether to close the plot after saving. Defaults to True.
 
-        model_names (list[str]):
-            List of model names.
-
-        dataloader (torchvision.datasets.ImageFolder):
-            Dataloader for the dataset.
-
-        mapping (dict[str, str]):
-            Mapping of class names to class indices.
-
-        output_dir (str, optional):
-            Output directory to save the ROC curve plots. Defaults to None.
-
-        close (bool, optional):
-            Flag to close the plot after saving. Defaults to True.
-
-    Returns:
-    -----
-        None
+    Raises:
+        FileNotFoundError: If the output directory does not exist.
     """
 
     confidence: dict[str, np.ndarray] = {}

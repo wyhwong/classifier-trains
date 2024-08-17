@@ -1,6 +1,7 @@
 import click
 import yaml
 
+from pipeline.core import ModelInterface
 import pipeline.schemas.config
 
 
@@ -14,8 +15,12 @@ def run(config: str) -> None:
 
     config = pipeline.schemas.config.PipelineConfig(**content)
 
+    model_interface = ModelInterface(
+        preprocessing_config=config.preprocessing,
+        model_config=config.model,
+    )
+
     # TODO: Implement the pipeline based on the configuration file.
-    print(config)
 
 
 if __name__ == "__main__":

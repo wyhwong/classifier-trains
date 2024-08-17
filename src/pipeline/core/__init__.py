@@ -1,2 +1,1 @@
-import pipeline.core.control
-import pipeline.core.utils
+from pipeline.core.interface import ModelInterface
