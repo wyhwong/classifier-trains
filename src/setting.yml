@@ -1,6 +1,6 @@
 experiment_label: "experiment"
 random_seed: 42
-device: cuda
+enable_training: true
 enable_evaluation: true
 
 # Settings about model
@@ -47,14 +47,16 @@ preprocessing:
     allow_random_color: false
 
 training:
+  name: "experiment"
+  device: cuda
   num_epochs: 20
+  max_num_hrs: null
+  validate_every_n_epoch: 1
+  save_every_n_epoch: 1
+  patience_in_epoch: 10
   # available choice: loss, accuracy
-  best_criteria: loss
-  save_last_weight: true
-  save_best_weight: true
-  export_last_weight: true
+  criterion: loss
   export_last_as_onnx: true
-  export_best_weight: true
   export_best_as_onnx: true
 
   scheduler:

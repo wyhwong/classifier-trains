@@ -1,10 +1,10 @@
 from typing import Optional
 
 import torch
-import torchvision.datasets as datasets
 
 import pipeline.core.utils
 import pipeline.logger
+from pipeline.core.dataloader import get_datamodule_for_training
 from pipeline.core.model import ModelFacade
 from pipeline.core.preprocessing import Preprocessor
 from pipeline.core.visualization import Visualizer
@@ -34,26 +34,6 @@ class ModelInterface:
         self.__model_facade = ModelFacade(model_config=model_config)
         self.__visualizer = Visualizer()
 
-    def __save_class_mapping(
-        dataset: datasets.ImageFolder,
-        output_dir: Optional[str] = None,
-    ) -> None:
-        """
-        Get class mapping from the dataset.
-
-        Args:
-            dataset (torchvision.datasets.ImageFolder): Dataset to get class mapping.
-            output_dir (str, optional): The output directory. Defaults to None.
-        """
-
-        mapping = dataset.class_to_idx
-        local_logger.info("Reading class mapping in the dataset: %s.", mapping)
-
-        if output_dir:
-            savepath = output_dir + "/class_mapping.yml"
-            pipeline.core.utils.save_as_yml(savepath, mapping)
-            local_logger.info("Saved class mapping to %s.", savepath)
-
     def train(
         self,
         training_config: TrainingConfig,
@@ -75,41 +55,15 @@ class ModelInterface:
             constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),
             constants.Phase.VALIDATION: self.__preprocessor.get_validation_transforms(),
         }
-        dataloaders: dict[constants.Phase, torch.utils.data.DataLoader] = {}
-
-        for phase in [constants.Phase.TRAINING, constants.Phase.VALIDATION]:
-            image_dataset = datasets.ImageFolder(
-                root=dataloader_config.get_dirpath(phase),
-                transform=transforms[phase],
-            )
-            self.__save_class_mapping(image_dataset, output_dir)
-            dataloaders[phase] = torch.utils.data.DataLoader(
-                image_dataset,
-                shuffle=True,
-                batch_size=dataloader_config.batch_size,
-                num_workers=dataloader_config.num_workers,
-            )
+        datamodule = get_datamodule_for_training(
+            dataloader_config=dataloader_config,
+            transforms=transforms,
+        )
 
         self.__model_facade.train(
-            dataloaders=dataloaders,
-            num_epochs=training_config.num_epochs,
-            best_criteria=training_config.best_criteria,
-            optimizer_config=training_config.optimizer,
-            scheduler_config=training_config.scheduler,
-        )
-
-        training_history = self.__model_facade.get_training_history()
-        self.__visualizer.plot_training_history(
-            training_history=training_history,
+            training_config=training_config,
+            datamodule=datamodule,
             output_dir=output_dir,
-        )
-
-        self.__model_facade.export(
-            output_dir=output_dir,
-            export_best_as_onnx=training_config.export_best_as_onnx,
-            export_best_weight=training_config.export_best_weight,
-            export_last_as_onnx=training_config.export_last_as_onnx,
-            export_last_weight=training_config.export_last_as_onnx,
         )
 
     def evaluate(
@@ -137,4 +91,4 @@ class ModelInterface:
             torch.Tensor: The inference result
         """
 
-        return self.__model_facade.inference(data=data)
+        return self.__model_facade.inference(x=data)

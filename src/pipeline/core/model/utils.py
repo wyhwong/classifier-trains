@@ -12,7 +12,20 @@ from pipeline.schemas import config
 local_logger = pipeline.logger.get_logger(__name__)
 
 
-def initialize_model(model_config: config.ModelConfig, device: str = "cuda") -> nn.Module:
+def __unfreeze_all_params_in_model(model: nn.Module) -> None:
+    """Unfreeze all parameters in the model.
+
+    Args:
+        model (nn.Module): The model to unfreeze all parameters.
+    """
+
+    for param in model.parameters():
+        param.requires_grad = True
+
+    local_logger.info("Unfreezed all parameters in the model.")
+
+
+def initialize_classifier(model_config: config.ModelConfig) -> nn.Module:
     """Initialize the model with the given configuration.
 
     Args:
@@ -46,35 +59,10 @@ def initialize_model(model_config: config.ModelConfig, device: str = "cuda") -> 
         model.AuxLogits.fc = torch.nn.Linear(model.AuxLogits.fc.in_features, model_config.num_classes)
         model.fc = torch.nn.Linear(model.fc.in_features, model_config.num_classes)
 
-    local_logger.info("Modified the output layer of the model.")
-
     if model_config.unfreeze_all_params:
-        unfreeze_all_params_in_model(model)
-
-    # To enable PyTorch 2 compiler for optimized performance
-    # (Only support CUDA capability >= 7.0)
-    if device == "cuda" and torch.cuda.get_device_properties("cuda").major >= 7:
-        local_logger.info("Enabled PyTorch 2 compiler for optimized performance.")
-        model = torch.compile(model)
-
-    # Move the model to the device
-    model.to(device)
-    local_logger.info("Moved the model to %s.", device)
+        __unfreeze_all_params_in_model(model)
 
     return model
-
-
-def unfreeze_all_params_in_model(model: nn.Module) -> None:
-    """Unfreeze all parameters in the model.
-
-    Args:
-        model (nn.Module): The model to unfreeze all parameters.
-    """
-
-    for param in model.parameters():
-        param.requires_grad = True
-
-    local_logger.info("Unfreezed all parameters in the model.")
 
 
 def initialize_optimizer(

@@ -9,6 +9,7 @@ class PipelineConfig(BaseModel):
     experiment_label: str
     random_seed: int
     device: str
+    enable_training: bool
     enable_evaluation: bool
     model: C.ModelConfig
     dataloader: C.DataloaderConfig

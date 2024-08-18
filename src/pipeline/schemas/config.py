@@ -99,13 +99,16 @@ class SchedulerConfig(BaseModel):
 class TrainingConfig(BaseModel):
     """Training configuration"""
 
+    name: str
     num_epochs: PositiveInt
-    best_criteria: C.Criterion
+    max_num_hrs: Optional[NonNegativeFloat]
+    validate_every_n_epoch: PositiveInt
+    save_every_n_epoch: PositiveInt
+    patience_in_epoch: PositiveInt
+    criterion: C.Criterion
     optimizer: OptimizerConfig
     scheduler: SchedulerConfig
-    export_last_weight: bool
     export_last_as_onnx: bool
-    export_best_weight: bool
     export_best_as_onnx: bool
 
 

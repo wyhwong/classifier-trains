@@ -75,17 +75,14 @@ class Preprocessor:
         """
 
         if is_augmented:
-            for layer in (
-                self.__spatial_augmentation
-                + self.__color_augmentation
-                + self.__resize_and_padding
-                + self.__normalization
-            ):
-                image = layer(image)
-            return image
+            layers = self.__spatial_augmentation + self.__color_augmentation
+        else:
+            layers = []
+        layers += self.__resize_and_padding + self.__normalization
 
-        for layer in self.__resize_and_padding + self.__normalization:
+        for layer in layers:
             image = layer(image)
+
         return image
 
     def denormalize(self, image: np.ndarray) -> np.ndarray:
