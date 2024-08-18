@@ -4,7 +4,7 @@ import torch
 
 import pipeline.core.utils
 import pipeline.logger
-from pipeline.core.dataloader import get_datamodule_for_training
+from pipeline.core.loading import ImageDataloader
 from pipeline.core.model import ModelFacade
 from pipeline.core.preprocessing import Preprocessor
 from pipeline.schemas import constants
@@ -52,8 +52,9 @@ class ModelInterface:
         transforms = {
             constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),
             constants.Phase.VALIDATION: self.__preprocessor.get_validation_transforms(),
+            constants.Phase.TESTING: self.__preprocessor.get_validation_transforms(),
         }
-        datamodule = get_datamodule_for_training(
+        datamodule = ImageDataloader(
             dataloader_config=dataloader_config,
             transforms=transforms,
         )

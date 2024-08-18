@@ -41,3 +41,7 @@ def run(config: str, output_dir: str) -> None:
             evaluation_config=pipeline_config.evaluation,
             output_dir=output_dir,
         )
+
+
+if __name__ == "__main__":
+    run()  # pylint: disable=no-value-for-parameter

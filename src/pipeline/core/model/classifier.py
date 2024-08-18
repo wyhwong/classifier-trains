@@ -163,7 +163,7 @@ class ClassifierModel(pl.LightningModule):
         loss = self.__common_step(
             batch=batch,
             batch_idx=batch_idx,
-            phase=constants.Phase.TEST,
+            phase=constants.Phase.TESTING,
         )
         return loss
 
