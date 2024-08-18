@@ -7,9 +7,9 @@ class PipelineConfig(BaseModel):
     """Pipeline configuration"""
 
     experiment_label: str
-    enable_training: bool
+    random_seed: int
+    device: str
     enable_evaluation: bool
-    enable_export: bool
     model: C.ModelConfig
     dataloader: C.DataloaderConfig
     preprocessing: C.PreprocessingConfig

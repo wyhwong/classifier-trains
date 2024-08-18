@@ -17,7 +17,7 @@ class SchedulerType(enum.StrEnum):
     COSINE = "cosine"
 
 
-class BestCriteria(enum.StrEnum):
+class Criterion(enum.StrEnum):
     """The best criteria."""
 
     LOSS = "loss"
@@ -27,11 +27,11 @@ class BestCriteria(enum.StrEnum):
 class InterpolationType(enum.StrEnum):
     """The interpolation type."""
 
-    INTER_NEAREST = "INTER_NEAREST"
-    INTER_LINEAR = "INTER_LINEAR"
-    INTER_AREA = "INTER_AREA"
-    INTER_CUBIC = "INTER_CUBIC"
-    INTER_LANCZOS4 = "INTER_LANCZOS4"
+    INTER_NEAREST = "inter_nearest"
+    INTER_LINEAR = "inter_linear"
+    INTER_AREA = "inter_area"
+    INTER_CUBIC = "inter_cubic"
+    INTER_LANCZOS4 = "inter_lanczos4"
 
 
 class PaddingType(enum.StrEnum):

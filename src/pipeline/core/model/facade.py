@@ -45,7 +45,7 @@ class ModelFacade:
                 constants.Phase.TRAINING: [],
                 constants.Phase.VALIDATION: [],
             }
-            for criterion in constants.BestCriteria
+            for criterion in constants.Criterion
         }
 
     def __load_weights(self, weights_path: str) -> None:
@@ -126,9 +126,10 @@ class ModelFacade:
         self,
         dataloaders: dict[constants.Phase, torch.utils.data.DataLoader],
         num_epochs: int,
-        best_criteria: constants.BestCriteria,
+        best_criteria: constants.Criterion,
         optimizer_config: config.OptimizerConfig,
         scheduler_config: config.SchedulerConfig,
+        device: str = "cuda",
     ) -> None:
         """Train the model.
 
@@ -141,6 +142,7 @@ class ModelFacade:
             export_last_as_onnx (bool): Export the last weight as ONNX
             export_best_weight (bool): Export the best weight
             export_best_as_onnx (bool): Export the best weight as ONNX
+            device (str, optional): The device to train the model. Defaults to "cuda".
         """
 
         training_start = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -156,7 +158,7 @@ class ModelFacade:
             num_epochs=num_epochs,
         )
         loss_fn = nn.CrossEntropyLoss()
-        best_record = np.inf if best_criteria is constants.BestCriteria.LOSS else -np.inf
+        best_record = np.inf if best_criteria is constants.Criterion.LOSS else -np.inf
 
         # Start training
         for epoch in range(1, num_epochs + 1):
@@ -175,8 +177,8 @@ class ModelFacade:
                 epoch_loss = 0.0
                 epoch_corrects = 0
                 for inputs, labels in tqdm(dataloaders[phase]):
-                    inputs = inputs.to(pipeline.env.DEVICE)
-                    labels = labels.to(pipeline.env.DEVICE)
+                    inputs = inputs.to(device)
+                    labels = labels.to(device)
 
                     optimizer.zero_grad()
 
@@ -202,20 +204,20 @@ class ModelFacade:
                 local_logger.info("%s Loss: %.4f Acc: %.4f.", phase, epoch_loss, epoch_acc)
 
                 if phase is constants.Phase.VALIDATION:
-                    if best_criteria is constants.BestCriteria.LOSS and epoch_loss < best_record:
+                    if best_criteria is constants.Criterion.LOSS and epoch_loss < best_record:
                         local_logger.info("New Record: %.4f < %.4f", epoch_loss, best_record)
                         best_record = epoch_loss
                         self.__best_weights = deepcopy(self.__model.state_dict())
                         local_logger.debug("Updated best models.")
 
-                    if best_criteria is constants.BestCriteria.ACCURACY and epoch_acc > best_record:
+                    if best_criteria is constants.Criterion.ACCURACY and epoch_acc > best_record:
                         local_logger.info("New Record: %.4f < %.4f", epoch_acc, best_record)
                         best_record = epoch_acc
                         self.__best_weights = deepcopy(self.__model.state_dict())
                         local_logger.debug("Updated best models.")
 
-                self.__training_history[constants.BestCriteria.LOSS][phase].append(float(epoch_loss))
-                self.__training_history[constants.BestCriteria.ACCURACY][phase].append(float(epoch_acc))
+                self.__training_history[constants.Criterion.LOSS][phase].append(float(epoch_loss))
+                self.__training_history[constants.Criterion.ACCURACY][phase].append(float(epoch_acc))
 
                 local_logger.debug(
                     "Updated %s accuracy: %.4f, loss: %.4f",

@@ -12,7 +12,7 @@ from pipeline.schemas import config
 local_logger = pipeline.logger.get_logger(__name__)
 
 
-def initialize_model(model_config: config.ModelConfig) -> nn.Module:
+def initialize_model(model_config: config.ModelConfig, device: str = "cuda") -> nn.Module:
     """Initialize the model with the given configuration.
 
     Args:
@@ -53,13 +53,13 @@ def initialize_model(model_config: config.ModelConfig) -> nn.Module:
 
     # To enable PyTorch 2 compiler for optimized performance
     # (Only support CUDA capability >= 7.0)
-    if pipeline.env.DEVICE == "cuda" and torch.cuda.get_device_properties("cuda").major >= 7:
+    if device == "cuda" and torch.cuda.get_device_properties("cuda").major >= 7:
         local_logger.info("Enabled PyTorch 2 compiler for optimized performance.")
         model = torch.compile(model)
 
     # Move the model to the device
-    model.to(pipeline.env.DEVICE)
-    local_logger.info("Moved the model to %s.", pipeline.env.DEVICE)
+    model.to(device)
+    local_logger.info("Moved the model to %s.", device)
 
     return model
 

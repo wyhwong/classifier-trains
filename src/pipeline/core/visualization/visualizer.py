@@ -2,7 +2,6 @@ from typing import Callable, Optional
 
 import pandas as pd
 import torch
-from torch import nn
 
 import pipeline.core.visualization.base as b
 import pipeline.core.visualization.performance as p
@@ -10,9 +9,11 @@ from pipeline.schemas import constants, visualization
 
 
 class Visualizer:
+    """Class to visualize the data."""
+
     @staticmethod
     def plot_training_history(
-        df: pd.DataFrame,
+        training_history: dict[constants.Criterion, dict[constants.Phase, list[float]]],
         filename: Optional[str] = None,
         output_dir: Optional[str] = None,
         close: bool = False,
@@ -30,8 +31,18 @@ class Visualizer:
         """
 
         return {
-            constants.BestCriteria.LOSS: p.loss_curve(df, filename, output_dir, close),
-            constants.BestCriteria.ACCURACY: p.accuracy_curve(df, filename, output_dir, close),
+            constants.Criterion.LOSS: p.loss_curve(
+                df=pd.DataFrame(training_history[constants.Criterion.LOSS]),
+                filename=filename,
+                output_dir=output_dir,
+                close=close,
+            ),
+            constants.Criterion.ACCURACY: p.accuracy_curve(
+                df=pd.DataFrame(training_history[constants.Criterion.ACCURACY]),
+                filename=filename,
+                output_dir=output_dir,
+                close=close,
+            ),
         }
 
     @staticmethod

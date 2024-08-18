@@ -1,10 +1,7 @@
 experiment_label: "experiment"
-enable_training: true
-enable_evaluation: true
-enable_export: true
-output_dir: ./results
-device: cuda
 random_seed: 42
+device: cuda
+enable_evaluation: true
 
 # Settings about model
 model:
@@ -32,17 +29,17 @@ preprocessing:
     width: 48
     height: 48
     # For available choices, see "InterpolationType" in src/schemas/constants.py
-    interpolation: INTER_CUBIC
-    maintain_aspect_ratio: true
+    interpolation: inter_cubic
     # For available choices, see "PaddingType" in src/schemas/constants.py
     padding: bottom_right
+    maintain_aspect_ratio: true
 
   spatial_config:
     # Probability in [0., 1.]
     hflip_prob: 0.5
     vflip_prob: 0.5
     max_rotate_in_degree: 10 # in degrees
-    allow_centor_crop: false
+    allow_center_crop: false
     allow_random_crop: false
 
   color_config:
@@ -56,7 +53,9 @@ training:
   save_last_weight: true
   save_best_weight: true
   export_last_weight: true
+  export_last_as_onnx: true
   export_best_weight: true
+  export_best_as_onnx: true
 
   scheduler:
     # For available choices, see "SchedulerType" in src/schemas/constants.py
@@ -78,14 +77,9 @@ training:
     betas: [0.9, 0.999]
 
 evaluation:
-  # For poetry enviorment, input relative path/absolute path to the trainset
-  # For docker enviorment, input ${DATA_DIR}/< path to the trainset within that folder>
   evalset_dir: ../dataset/val
-  # Special handling: $OUTPUT_DIR will be replaced by the actual output directory
-  mapping_path: $OUTPUT_DIR/class_mapping.yml
-
+  mapping_path: class_mapping.yml
   models:
     - name: default
-      # Special handling: $OUTPUT_DIR will be replaced by the actual output directory
       weights_path: ./best_model.pt
       backbone: resnet18

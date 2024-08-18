@@ -55,7 +55,7 @@ class SpatialTransformConfig(BaseModel):
     hflip_prob: NonNegativeFloat
     vflip_prob: NonNegativeFloat
     max_rotate_in_degree: NonNegativeFloat
-    allow_centor_crop: bool
+    allow_center_crop: bool
     allow_random_crop: bool
 
 
@@ -100,7 +100,7 @@ class TrainingConfig(BaseModel):
     """Training configuration"""
 
     num_epochs: PositiveInt
-    best_criteria: C.BestCriteria
+    best_criteria: C.Criterion
     optimizer: OptimizerConfig
     scheduler: SchedulerConfig
     export_last_weight: bool
@@ -112,7 +112,7 @@ class TrainingConfig(BaseModel):
 class ModelCheckpointConfig(BaseModel):
     """Model checkpoint configuration"""
 
-    model_name: str
+    name: str
     weights_path: str
     backbone: C.ModelBackbone
 

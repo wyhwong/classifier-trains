@@ -71,7 +71,10 @@ class ModelInterface:
         if output_dir:
             pipeline.core.utils.check_and_create_dir(output_dir)
 
-        transforms = self.__preprocessor.construct_transforms_compose()
+        transforms = {
+            constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),
+            constants.Phase.VALIDATION: self.__preprocessor.get_validation_transforms(),
+        }
         dataloaders: dict[constants.Phase, torch.utils.data.DataLoader] = {}
 
         for phase in [constants.Phase.TRAINING, constants.Phase.VALIDATION]:
@@ -96,6 +99,18 @@ class ModelInterface:
         )
 
         training_history = self.__model_facade.get_training_history()
+        self.__visualizer.plot_training_history(
+            training_history=training_history,
+            output_dir=output_dir,
+        )
+
+        self.__model_facade.export(
+            output_dir=output_dir,
+            export_best_as_onnx=training_config.export_best_as_onnx,
+            export_best_weight=training_config.export_best_weight,
+            export_last_as_onnx=training_config.export_last_as_onnx,
+            export_last_weight=training_config.export_last_as_onnx,
+        )
 
     def evaluate(
         self,
@@ -123,12 +138,3 @@ class ModelInterface:
         """
 
         return self.__model_facade.inference(data=data)
-
-    def export(self, output_dir: str) -> None:
-        """Export the model
-
-        Args:
-            output_dir (str): The output directory
-        """
-
-        pipeline.core.utils.check_and_create_dir(output_dir)

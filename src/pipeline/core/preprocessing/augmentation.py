@@ -14,7 +14,7 @@ def get_spatial_transforms(
     hflip_prob: float,
     vflip_prob: float,
     max_rotate_in_degree: float,
-    allow_centor_crop: bool,
+    allow_center_crop: bool,
     allow_random_crop: bool,
 ) -> list[nn.Module]:
     """Get the spatial augmentation transforms.
@@ -25,7 +25,7 @@ def get_spatial_transforms(
         hflip_prob (float): The probability of horizontal flip.
         vflip_prob (float): The probability of vertical flip.
         max_rotate_in_degree (float): The maximum rotation in degree.
-        allow_centor_crop (bool): Whether to allow center crop.
+        allow_center_crop (bool): Whether to allow center crop.
         allow_random_crop (bool): Whether to allow random crop.
 
     Returns:
@@ -45,7 +45,7 @@ def get_spatial_transforms(
         local_logger.debug("Spatial augmentation added: max_rotate=%.2f", max_rotate_in_degree)
         spatial_augmentation.append(torchvision.transforms.RandomRotation(max_rotate_in_degree))
 
-    if allow_centor_crop:
+    if allow_center_crop:
         local_logger.debug("Spatial augmentation added: center crop.")
         spatial_augmentation.append(torchvision.transforms.CenterCrop((height, width)))
 
