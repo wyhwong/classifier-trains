@@ -7,7 +7,6 @@ import pipeline.logger
 from pipeline.core.dataloader import get_datamodule_for_training
 from pipeline.core.model import ModelFacade
 from pipeline.core.preprocessing import Preprocessor
-from pipeline.core.visualization import Visualizer
 from pipeline.schemas import constants
 from pipeline.schemas.config import DataloaderConfig, EvaluationConfig, ModelConfig, PreprocessingConfig, TrainingConfig
 
@@ -32,20 +31,19 @@ class ModelInterface:
 
         self.__preprocessor = Preprocessor(preprocessing_config=preprocessing_config)
         self.__model_facade = ModelFacade(model_config=model_config)
-        self.__visualizer = Visualizer()
 
     def train(
         self,
         training_config: TrainingConfig,
         dataloader_config: DataloaderConfig,
-        output_dir: Optional[str] = None,
+        output_dir: str,
     ) -> None:
         """Train the classifier
 
         Args:
             training_config (TrainingConfig): The training configuration
             dataloader_config (DataloaderConfig): The dataloader configuration
-            output_dir (Optional[str], optional): The output directory. Defaults to None.
+            output_dir (str): The output directory
         """
 
         if output_dir:
@@ -80,6 +78,10 @@ class ModelInterface:
 
         if output_dir:
             pipeline.core.utils.check_and_create_dir(output_dir)
+
+        local_logger.info("Evaluation config: %s", evaluation_config)
+
+        raise NotImplementedError("Evaluation is not implemented yet")
 
     def inference(self, data: torch.Tensor) -> torch.Tensor:
         """Make inference with the model

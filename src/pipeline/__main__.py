@@ -9,31 +9,35 @@ from pipeline.schemas import pipeline
 @click.option("--config", "-c", required=True, type=str, help="Path to the configuration file.")
 @click.option("--output-dir", "-o", required=True, type=str, help="Path to the output directory.")
 def run(config: str, output_dir: str) -> None:
-    """Run Classifier Pipeline based on the configuration file."""
+    """Run Classifier Pipeline based on the configuration file.
+
+    Args:
+        config (str): Path to the configuration file.
+        output_dir (str): Path to the output directory.
+
+    Example:
+        >>> run("config.yaml", "output")
+    """
 
     with open(config, mode="r", encoding="utf-8") as file:
         content = yaml.load(file, Loader=yaml.SafeLoader)
 
-    config = pipeline.PipelineConfig(**content)
+    pipeline_config = pipeline.PipelineConfig(**content)
 
     model_interface = ModelInterface(
-        preprocessing_config=config.preprocessing,
-        model_config=config.model,
+        preprocessing_config=pipeline_config.preprocessing,
+        model_config=pipeline_config.model,
     )
 
-    if config.enable_training:
+    if pipeline_config.enable_training:
         model_interface.train(
-            training_config=config.training,
-            dataloader_config=config.dataloader,
+            training_config=pipeline_config.training,
+            dataloader_config=pipeline_config.dataloader,
             output_dir=output_dir,
         )
 
-    if config.enable_evaluation:
+    if pipeline_config.enable_evaluation:
         model_interface.evaluate(
-            dataloader_config=config.dataloader,
+            evaluation_config=pipeline_config.evaluation,
             output_dir=output_dir,
         )
-
-
-if __name__ == "__main__":
-    run()

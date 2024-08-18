@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, NonNegativeFloat, PositiveInt
 
@@ -103,7 +103,7 @@ class TrainingConfig(BaseModel):
     name: str
     num_epochs: PositiveInt
     random_seed: PositiveInt
-    precision: PositiveInt
+    precision: Literal[64, 32, 16]
     device: str
     max_num_hrs: Optional[NonNegativeFloat]
     validate_every_n_epoch: PositiveInt

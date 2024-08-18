@@ -1,7 +1,6 @@
 from typing import Optional
 
 import lightning as pl
-import numpy as np
 import torch
 from torch import nn
 
@@ -30,13 +29,8 @@ class ClassifierModel(pl.LightningModule):
         self.__classifier = pipeline.core.model.utils.initialize_classifier(model_config=self.__model_config)
 
         self.__loss_fn = nn.CrossEntropyLoss()
-        self.__optimizers: Optional[torch.optim.Optimizer] = None
-        self.__schedulers: Optional[torch.optim.lr_scheduler._LRScheduler] = None
-
-        self.__batch_acc: dict[str, list[float]] = {phase: [] for phase in constants.Phase}
-        self.__batch_loss: dict[str, list[float]] = {phase: [] for phase in constants.Phase}
-        self.__best_loss: dict[str, float] = {phase: np.inf for phase in constants.Phase}
-        self.__best_acc: dict[str, float] = {phase: -np.inf for phase in constants.Phase}
+        self.__optimizers: Optional[list[torch.optim.Optimizer]] = None
+        self.__schedulers: Optional[list[torch.optim.lr_scheduler.LRScheduler]] = None
 
     def training_setup(
         self,

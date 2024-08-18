@@ -85,33 +85,33 @@ def initialize_optimizer(
         return torch.optim.SGD(
             params,
             lr=optimizer_config.lr,
-            momentum=optimizer_config.momentum,
-            weight_decay=optimizer_config.weight_decay,
+            momentum=optimizer_config.momentum if optimizer_config.momentum else 0.0,
+            weight_decay=optimizer_config.weight_decay if optimizer_config.weight_decay else 0.0,
         )
 
     if optimizer_config.name is pipeline.schemas.constants.OptimizerType.RMSPROP:
         return torch.optim.RMSprop(
             params,
             lr=optimizer_config.lr,
-            momentum=optimizer_config.momentum,
-            weight_decay=optimizer_config.weight_decay,
-            alpha=optimizer_config.alpha,
+            momentum=optimizer_config.momentum if optimizer_config.momentum else 0.0,
+            weight_decay=optimizer_config.weight_decay if optimizer_config.weight_decay else 0.0,
+            alpha=optimizer_config.alpha if optimizer_config.alpha else 0.99,
         )
 
     if optimizer_config.name is pipeline.schemas.constants.OptimizerType.ADAM:
         return torch.optim.Adam(
             params,
             lr=optimizer_config.lr,
-            betas=optimizer_config.betas,
-            weight_decay=optimizer_config.weight_decay,
+            betas=optimizer_config.betas if optimizer_config.betas else (0.9, 0.999),
+            weight_decay=optimizer_config.weight_decay if optimizer_config.weight_decay else 0.0,
         )
 
     if optimizer_config.name is pipeline.schemas.constants.OptimizerType.ADAMW:
         return torch.optim.AdamW(
             params,
             lr=optimizer_config.lr,
-            betas=optimizer_config.betas,
-            weight_decay=optimizer_config.weight_decay,
+            betas=optimizer_config.betas if optimizer_config.betas else (0.9, 0.999),
+            weight_decay=optimizer_config.weight_decay if optimizer_config.weight_decay else 0.0,
         )
 
     raise ValueError(f"Invalid optimizer type: {optimizer_config.optimizier}")

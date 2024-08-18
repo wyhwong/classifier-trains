@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 import torchvision
 
 import pipeline.logger
@@ -63,7 +62,7 @@ class Preprocessor:
             maintain_aspect_ratio=self.__resize_config.maintain_aspect_ratio,
         )
 
-    def __call__(self, image: np.ndarray, is_augmented: bool) -> torch.Tensor:
+    def __call__(self, image: np.ndarray, is_augmented: bool) -> np.ndarray:
         """Preprocess the input image.
 
         Args:
@@ -71,7 +70,7 @@ class Preprocessor:
             is_augmented (bool): Whether the image is augmented or not.
 
         Returns:
-            torch.Tensor: The preprocessed image.
+            np.ndarray: The preprocessed image.
         """
 
         if is_augmented:

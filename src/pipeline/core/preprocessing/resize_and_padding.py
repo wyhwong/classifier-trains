@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-import PIL
+from PIL import Image
 from torch import nn
 
 import pipeline.logger
@@ -37,7 +37,7 @@ def get_resize_and_padding_transforms(
     return resize_and_padding
 
 
-class Resize:
+class Resize(nn.Module):
     """Class to resize the image to the specified dimensions."""
 
     def __init__(
@@ -57,6 +57,8 @@ class Resize:
             interpolation (constants.InterpolationType): The interpolation type.
             padding (constants.PaddingType): The padding type.
         """
+
+        super().__init__()
 
         self.__w = width
         self.__h = height
@@ -125,14 +127,14 @@ class Resize:
         return output_image
 
 
-class PilToCV2:
+class PilToCV2(nn.Module):
     """Convert the PIL image to cv2 image."""
 
-    def __call__(self, image: PIL.Image) -> np.ndarray:
+    def __call__(self, image: Image.Image) -> np.ndarray:
         """Convert the PIL image to cv2 image.
 
         Args:
-            image (PIL.Image): The input image.
+            image (Image.Image): The PIL image.
 
         Returns:
             np.ndarray: The cv2 image.
