@@ -67,6 +67,10 @@ install:
 	poetry install
 	poetry run pre-commit install -f
 
+run:
+	@echo "Running pipeline..."
+	poetry run python3 -m ${APP_DIR} -c ${CONFIG_PATH}  -o ${OUTPUT_DIR}
+
 # Upate Python dependencies in poetry environment
 update:
 	@echo "Updating Python dependencies..."

@@ -26,17 +26,27 @@ def get_datamodule_for_training(
     if not transforms:
         transforms = {phase: None for phase in Phase}
 
-    trainset = datasets.ImageFolder(
+    train_dataset = datasets.ImageFolder(
         root=dataloader_config.trainset_dir,
         transform=transforms[Phase.TRAINING],
     )
-    valset = datasets.ImageFolder(
+    val_dataset = datasets.ImageFolder(
         root=dataloader_config.valset_dir,
         transform=transforms[Phase.VALIDATION],
     )
+
+    if dataloader_config.testset_dir:
+        test_dataset = datasets.ImageFolder(
+            root=dataloader_config.testset_dir,
+            transform=transforms[Phase.VALIDATION],
+        )
+    else:
+        test_dataset = None
+
     return pl.LightningDataModule.from_datasets(
-        trainset,
-        valset,
+        train_dataset=train_dataset,
+        val_dataset=val_dataset,
+        test_dataset=test_dataset,
         batch_size=dataloader_config.batch_size,
         num_workers=dataloader_config.num_workers,
     )

@@ -20,6 +20,7 @@ class DataloaderConfig(BaseModel):
 
     trainset_dir: str
     valset_dir: str
+    testset_dir: Optional[str]
     batch_size: PositiveInt
     num_workers: PositiveInt
 
@@ -101,6 +102,9 @@ class TrainingConfig(BaseModel):
 
     name: str
     num_epochs: PositiveInt
+    random_seed: PositiveInt
+    precision: PositiveInt
+    device: str
     max_num_hrs: Optional[NonNegativeFloat]
     validate_every_n_epoch: PositiveInt
     save_every_n_epoch: PositiveInt

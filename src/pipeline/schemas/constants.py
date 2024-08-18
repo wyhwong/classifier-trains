@@ -74,6 +74,7 @@ class Phase(enum.StrEnum):
 
     TRAINING = "train"
     VALIDATION = "val"
+    TEST = "test"
 
     def __call__(self, suffix: str) -> str:
         """Return the phase with the suffix."""

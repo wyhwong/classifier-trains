@@ -21,11 +21,18 @@ def run(config: str, output_dir: str) -> None:
         model_config=config.model,
     )
 
-    model_interface.train(
-        training_config=config.training,
-        dataloader_config=config.dataloader,
-        output_dir=output_dir,
-    )
+    if config.enable_training:
+        model_interface.train(
+            training_config=config.training,
+            dataloader_config=config.dataloader,
+            output_dir=output_dir,
+        )
+
+    if config.enable_evaluation:
+        model_interface.evaluate(
+            dataloader_config=config.dataloader,
+            output_dir=output_dir,
+        )
 
 
 if __name__ == "__main__":

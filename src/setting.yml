@@ -1,7 +1,6 @@
 experiment_label: "experiment"
-random_seed: 42
 enable_training: true
-enable_evaluation: true
+enable_evaluation: false
 
 # Settings about model
 model:
@@ -16,9 +15,10 @@ model:
 dataloader:
   # For poetry enviorment, input relative path/absolute path to the trainset
   # For docker enviorment, input ${DATA_DIR}/< path to the trainset within that folder>
-  trainset_dir: ../dataset/train/
-  valset_dir: ../dataset/val/
-  batch_size: 8
+  trainset_dir: ./tests/test_dataset/
+  valset_dir: ./tests/test_dataset/
+  testset_dir: null
+  batch_size: 1
   num_workers: 4
 
 preprocessing:
@@ -49,6 +49,8 @@ preprocessing:
 training:
   name: "experiment"
   device: cuda
+  precision: 64
+  random_seed: 42
   num_epochs: 20
   max_num_hrs: null
   validate_every_n_epoch: 1
@@ -69,7 +71,7 @@ training:
   optimizer:
     # For available choices, see "OptimizerType" in src/schemas/constants.py
     name: adam
-    lr: 0.001
+    lr: 1e-7
     weight_decay: 0
     # Only used for sgd / rmsprop
     momentum: 0.9

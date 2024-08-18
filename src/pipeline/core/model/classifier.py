@@ -4,7 +4,6 @@ import lightning as pl
 import numpy as np
 import torch
 from torch import nn
-from torchmetrics import Accuracy
 
 import pipeline.core.model.utils
 import pipeline.logger
@@ -24,38 +23,20 @@ class ClassifierModel(pl.LightningModule):
             model_config (config.ModelConfig): The model configuration
         """
 
+        super().__init__()
+
         self.__model_config = model_config
 
-        self.__classifier = pipeline.core.model.utils.initialize_classifier(model_config=model_config)
+        self.__classifier = pipeline.core.model.utils.initialize_classifier(model_config=self.__model_config)
 
-        if self.__model_config.weights:
-            self.__load_weights(weights_path=self.__model_config.weights_path)
-
-        self.__loss_fn: Optional[nn.Module] = None
+        self.__loss_fn = nn.CrossEntropyLoss()
         self.__optimizers: Optional[torch.optim.Optimizer] = None
         self.__schedulers: Optional[torch.optim.lr_scheduler._LRScheduler] = None
 
-        self.__batch_acc: dict[str, nn.Module] = {
-            phase: Accuracy(
-                task="multiclass",
-                num_classes=self.__model_config.num_classes,
-            )
-            for phase in constants.Phase
-        }
+        self.__batch_acc: dict[str, list[float]] = {phase: [] for phase in constants.Phase}
         self.__batch_loss: dict[str, list[float]] = {phase: [] for phase in constants.Phase}
         self.__best_loss: dict[str, float] = {phase: np.inf for phase in constants.Phase}
         self.__best_acc: dict[str, float] = {phase: -np.inf for phase in constants.Phase}
-
-    def __load_weights(self, weights_path: str) -> None:
-        """Load the weights from the given path.
-
-        Args:
-            weights_path (str): The path to the weights file.
-        """
-
-        weights = torch.load(weights_path)
-        self.__classifier.load_state_dict(weights)
-        local_logger.info("Loaded weights from local file: %s.", weights_path)
 
     def training_setup(
         self,
@@ -79,10 +60,11 @@ class ClassifierModel(pl.LightningModule):
         ]
         self.__schedulers = [
             pipeline.core.model.utils.initialize_scheduler(
-                optimizer=self.__optimizer,
+                optimizer=optim,
                 scheduler_config=scheduler_config,
                 num_epochs=num_epochs,
             )
+            for optim in self.__optimizers
         ]
 
     def configure_optimizers(self):
@@ -103,15 +85,25 @@ class ClassifierModel(pl.LightningModule):
         batch: tuple[torch.Tensor, torch.Tensor],
         batch_idx: int,  # pylint: disable=unused-argument
         phase: constants.Phase,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> torch.Tensor:
+        """Common step for training, validation, and test
+
+        Args:
+            batch (tuple[torch.Tensor, torch.Tensor]): The input batch
+            batch_idx (int): The batch index
+            phase (constants.Phase): The phase
+
+        Returns:
+            torch.Tensor: The loss
+        """
 
         x, y = batch
         logits = self.__classifier(x)
         loss = self.__loss_fn(logits, y)
-        self.log(phase("loss"), loss, on_step=True, on_epoch=False)
+        self.log(name=phase(constants.Criterion.LOSS), value=loss, on_step=True)
 
-        acc = self.__batch_acc[phase](logits, y)
-        self.log(phase("accuracy"), acc, on_step=True, on_epoch=False)
+        acc = (logits.argmax(dim=1) == y).float().mean()
+        self.log(name=phase(constants.Criterion.ACCURACY), value=acc, on_step=True)
 
         return loss
 
@@ -133,7 +125,7 @@ class ClassifierModel(pl.LightningModule):
         loss = self.__common_step(
             batch=batch,
             batch_idx=batch_idx,
-            phase=constants.Phase.TRAIN,
+            phase=constants.Phase.TRAINING,
         )
         return loss
 
@@ -155,33 +147,31 @@ class ClassifierModel(pl.LightningModule):
         loss = self.__common_step(
             batch=batch,
             batch_idx=batch_idx,
-            phase=constants.Phase.VALID,
+            phase=constants.Phase.VALIDATION,
         )
         return loss
 
-    def __common_epoch_end(self, phase: constants.Phase) -> None:
+    def test_step(
+        self,
+        batch: tuple[torch.Tensor, torch.Tensor],
+        batch_idx: int,
+    ) -> torch.Tensor:
+        """Test step
 
-        epoch_loss = sum(self.__batch_loss[phase]) / len(self.__batch_loss[phase])
-        epoch_acc = sum(self.__batch_acc[phase]) / len(self.__batch_acc[phase])
+        Args:
+            batch (tuple[torch.Tensor, torch.Tensor]): The input batch
+            batch_idx (int): The batch index
 
-        self.__batch_loss[phase].clear()
-        self.__batch_r2[phase].clear()
+        Returns:
+            torch.Tensor: The loss
+        """
 
-        self.__best_acc[phase] = max(epoch_acc, self.__best_acc[phase])
-        self.__best_loss[phase] = min(epoch_loss, self.__best_loss[phase])
-
-        self.log(phase("epoch_loss"), epoch_loss, on_step=False, on_epoch=True)
-        self.log(phase("epoch_accuracy"), epoch_acc, on_step=False, on_epoch=True)
-
-    def training_epoch_end(self) -> None:
-        """Training epoch end"""
-
-        self.__common_epoch_end(phase=constants.Phase.TRAIN)
-
-    def validation_epoch_end(self) -> None:
-        """Validation epoch end"""
-
-        self.__common_epoch_end(phase=constants.Phase.VALID)
+        loss = self.__common_step(
+            batch=batch,
+            batch_idx=batch_idx,
+            phase=constants.Phase.TEST,
+        )
+        return loss
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass
