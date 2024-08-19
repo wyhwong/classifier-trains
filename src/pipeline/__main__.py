@@ -65,5 +65,21 @@ def compute_mean_and_std(dir_path: str) -> None:
     click.echo(f"Std: {mean_and_std['std']}")
 
 
+@cli.command("get-output-mapping")
+@click.option("--dir-path", "-d", required=True, type=str, help="Path to the dataset directory.")
+def get_output_mapping(dir_path: str) -> None:
+    """Get the output mapping for the dataset.
+
+    Args:
+        dir_path (str): Path to the dataset directory.
+
+    Example:
+        >>> get_output_mapping("dataset")
+    """
+
+    output_mapping = ModelInterface.get_output_mapping(dirpath=dir_path)
+    click.echo(output_mapping)
+
+
 if __name__ == "__main__":
     cli()

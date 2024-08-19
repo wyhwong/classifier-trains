@@ -111,3 +111,16 @@ class ModelInterface:
         """
 
         return Preprocessor.compute_mean_and_std(dirpath=dirpath)
+
+    @staticmethod
+    def get_output_mapping(dirpath: str) -> dict[str, int]:
+        """Get the output mapping for the dataset.
+
+        Args:
+            dirpath (str): The path to the dataset.
+
+        Returns:
+            dict[str, int]: The output mapping.
+        """
+
+        return ImageDataloader.get_output_mapping(dirpath=dirpath)

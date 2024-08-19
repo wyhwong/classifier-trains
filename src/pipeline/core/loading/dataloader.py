@@ -74,3 +74,17 @@ class ImageDataloader(pl.LightningDataModule):
             num_workers=self.__num_workers,
             shuffle=False,
         )
+
+    @staticmethod
+    def get_output_mapping(dirpath: str) -> dict[str, int]:
+        """Get the output mapping for the dataset.
+
+        Args:
+            dirpath (str): The path to the dataset.
+
+        Returns:
+            dict[str, int]: The output mapping.
+        """
+
+        dataset = datasets.ImageFolder(root=dirpath)
+        return dataset.class_to_idx

@@ -13,7 +13,7 @@ def default_dir_path() -> str:
     return f"{os.path.dirname(os.path.dirname(__file__))}/test_dataset"
 
 
-def test_compute_mean_and_std(dirpath: str):
+def test_compute_mean_and_std(dirpath: str) -> None:
     """Test the compute mean and std function"""
 
     mean_and_std = ModelInterface.compute_mean_and_std(dirpath=dirpath)

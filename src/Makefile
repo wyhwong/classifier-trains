@@ -75,6 +75,10 @@ compute-mean-and-std:
 	@echo "Computing mean and std..."
 	poetry run python3 -m ${APP_DIR} compute-mean-and-std -d ${DATA_DIR}
 
+get-output-mapping:
+	@echo "Getting output mapping..."
+	poetry run python3 -m ${APP_DIR} get-output-mapping -d ${DATA_DIR}
+
 # Upate Python dependencies in poetry environment
 update:
 	@echo "Updating Python dependencies..."
