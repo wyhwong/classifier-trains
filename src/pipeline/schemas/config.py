@@ -12,7 +12,7 @@ class ModelConfig(BaseModel):
     num_classes: PositiveInt
     weights: str
     unfreeze_all_params: bool
-    weights_path: Optional[str] = None
+    checkpoint_path: Optional[str] = None
 
 
 class DataloaderConfig(BaseModel):

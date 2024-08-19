@@ -5,7 +5,12 @@ from pipeline.core import ModelInterface
 from pipeline.schemas import pipeline
 
 
-@click.command()
+@click.group()
+def cli() -> None:
+    pass
+
+
+@cli.command("run")
 @click.option("--config", "-c", required=True, type=str, help="Path to the configuration file.")
 @click.option("--output-dir", "-o", required=True, type=str, help="Path to the output directory.")
 def run(config: str, output_dir: str) -> None:
@@ -43,5 +48,22 @@ def run(config: str, output_dir: str) -> None:
         )
 
 
+@cli.command("compute-mean-and-std")
+@click.option("--dir-path", "-d", required=True, type=str, help="Path to the trainset directory.")
+def compute_mean_and_std(dir_path: str) -> None:
+    """Compute the mean and standard deviation of the dataset.
+
+    Args:
+        dir_path (str): Path to the trainset directory.
+
+    Example:
+        >>> compute_mean_and_std("trainset")
+    """
+
+    mean_and_std = ModelInterface.compute_mean_and_std(dirpath=dir_path)
+    click.echo(f"Mean: {mean_and_std['mean']}")
+    click.echo(f"Std: {mean_and_std['std']}")
+
+
 if __name__ == "__main__":
-    run()  # pylint: disable=no-value-for-parameter
+    cli()

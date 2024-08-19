@@ -6,7 +6,7 @@ include ${ENV_FILE}
 
 # For Docker mount
 export DATA_DIR?=dataset/
-export CONFIG_PATH?=setting.yml
+export CONFIG_PATH?=pipeline_setting.yml
 export OUTPUT_DIR?=results/
 
 # For Docker image
@@ -53,7 +53,7 @@ train:
 		--gpus all \
 		-v ${OUTPUT_DIR}:/home/${USERNAME}/results/ \
 		-v ${DATA_DIR}:/home/${USERNAME}/dataset/ \
-		-v ${CONFIG_PATH}:/home/${USERNAME}/setting.yml \
+		-v ${CONFIG_PATH}:/home/${USERNAME}/pipeline_setting.yml \
 		--env-file ${ENV_FILE} \
 		${USERNAME}/${APP_DIR}:${VERSION}
 
@@ -69,7 +69,11 @@ install:
 
 run:
 	@echo "Running pipeline..."
-	poetry run python3 -m ${APP_DIR} -c ${CONFIG_PATH}  -o ${OUTPUT_DIR}
+	poetry run python3 -m ${APP_DIR} run -c ${CONFIG_PATH}  -o ${OUTPUT_DIR}
+
+compute-mean-and-std:
+	@echo "Computing mean and std..."
+	poetry run python3 -m ${APP_DIR} compute-mean-and-std -d ${DATA_DIR}
 
 # Upate Python dependencies in poetry environment
 update:

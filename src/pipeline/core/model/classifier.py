@@ -2,6 +2,7 @@ from typing import Optional
 
 import lightning as pl
 import torch
+import torchvision
 from torch import nn
 
 import pipeline.core.model.utils
@@ -111,6 +112,17 @@ class ClassifierModel(pl.LightningModule):
         """
 
         x, y = batch
+
+        if batch_idx == 0:
+            grid = torchvision.utils.make_grid(x)
+            # Here we ignore the type, expected message:
+            # "Attribute 'experiment' is not defined for 'Optional[LightningLoggerBase]'"
+            self.logger.experiment.add_image(  # type: ignore
+                f"sample_images_{phase}",
+                grid,
+                self.current_epoch,
+            )
+
         logits = self.__classifier(x)
         loss = self.__loss_fn(logits, y)
         self.log(name=phase(constants.Criterion.LOSS), value=loss, on_step=True)

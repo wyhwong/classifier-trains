@@ -98,3 +98,16 @@ class ModelInterface:
         """
 
         return self.__model_facade.inference(x=data)
+
+    @staticmethod
+    def compute_mean_and_std(dirpath: str) -> dict[str, list[float]]:
+        """Compute the mean and standard deviation of the dataset.
+
+        Args:
+            dirpath (str): The directory path.
+
+        Returns:
+            dict[str, list[float]]: The mean and standard deviation.
+        """
+
+        return Preprocessor.compute_mean_and_std(dirpath=dirpath)

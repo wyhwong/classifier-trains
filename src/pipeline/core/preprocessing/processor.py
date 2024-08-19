@@ -130,3 +130,42 @@ class Preprocessor:
             self.__resize_config.height,
             self.__resize_config.width,
         )
+
+    @staticmethod
+    def compute_mean_and_std(dirpath: str) -> dict[str, list[float]]:
+        """Compute the mean and standard deviation of the dataset.
+        Suppose the mean and standard deviation are computed for each channel.
+        So the output is expected to be a dictionary with the following format:
+        {
+            "mean": [mean_channel_1, mean_channel_2, mean_channel_3],
+            "std": [std_channel_1, std_channel_2, std_channel_3],
+        }
+
+        Args:
+            dirpath (str): The directory path.
+
+        Returns:
+            dict[str, list[float]]: The mean and standard deviation.
+        """
+
+        dataloader = torch.utils.data.DataLoader(
+            torchvision.datasets.ImageFolder(
+                root=dirpath,
+                transform=torchvision.transforms.Compose([torchvision.transforms.ToTensor()]),
+            ),
+            batch_size=1,
+            shuffle=False,
+        )
+        mean, std = torch.zeros(3), torch.zeros(3)
+
+        for images, _ in dataloader:
+            mean += images.mean(dim=[0, 2, 3])
+            std += images.std(dim=[0, 2, 3])
+
+        mean /= len(dataloader)
+        std /= len(dataloader)
+
+        return {
+            "mean": mean.tolist(),
+            "std": std.tolist(),
+        }

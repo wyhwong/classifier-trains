@@ -6,9 +6,9 @@ import torch
 from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.loggers import TensorBoardLogger
 
-import pipeline.core.model.classifier
 import pipeline.core.model.utils
 import pipeline.logger
+from pipeline.core.model.classifier import ClassifierModel
 from pipeline.schemas import config, constants
 
 
@@ -33,10 +33,20 @@ class ModelFacade:
         local_logger.info("Initializing ModelFacade with config %s", model_config)
 
         self.__example_input_array = example_input_array
-        self.__model = pipeline.core.model.classifier.ClassifierModel(
-            model_config=model_config,
-            example_input_array=example_input_array,
-        )
+
+        if not model_config.checkpoint_path:
+            self.__model = ClassifierModel(
+                model_config=model_config,
+                example_input_array=example_input_array,
+            )
+        else:
+            # NOTE: Here we need to disable the pylint check for no-value-for-parameter
+            # Expected message: E1120: No value for argument 'cls' in unbound method call
+            self.__model = ClassifierModel.load_from_checkpoint(  # pylint: disable=E1120
+                checkpoint_path=model_config.checkpoint_path,
+                model_config=model_config,
+                example_input_array=example_input_array,
+            )
         self.__trainer: Optional[pl.Trainer] = None
 
     def train(

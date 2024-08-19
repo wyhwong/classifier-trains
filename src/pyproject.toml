@@ -17,6 +17,7 @@ lightning = "^2.4.0"
 tensorboard = "^2.17.0"
 click = "^8.1.7"
 torch-tb-profiler = "^0.4.3"
+torchmetrics = "^1.4.1"
 
 [tool.poetry.group.torch.dependencies]
 torch = {version = "^2.4.0+cu124", source = "pytorch-cuda"}

@@ -59,7 +59,7 @@ class ImageDataloader(pl.LightningDataModule):
             shuffle=False,
         )
 
-    def test_dataloader(self) -> DataLoader:
+    def test_dataloader(self) -> Optional[DataLoader]:
         """Get the test dataloader."""
 
         if not self.__test_dir:

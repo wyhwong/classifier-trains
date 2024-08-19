@@ -9,7 +9,7 @@ model:
   num_classes: 2
   weights: DEFAULT
   unfreeze_all_params: false
-  weights_path: null
+  checkpoint_path: null
 
 # Settings about dataloader
 dataloader:
@@ -18,12 +18,12 @@ dataloader:
   trainset_dir: ./tests/test_dataset/
   valset_dir: ./tests/test_dataset/
   testset_dir: null
-  batch_size: 1
-  num_workers: 4
+  batch_size: 4
+  num_workers: 2
 
 preprocessing:
-  mean: [0.485, 0.456, 0.406]
-  std: [0.229, 0.224, 0.225]
+  mean: [0.47488933801651, 0.4632834792137146, 0.4371258318424225]
+  std: [0.21972933411598206, 0.22210058569908142, 0.22161932289600372]
 
   resize_config:
     width: 48
