@@ -30,7 +30,10 @@ class ModelInterface:
         """
 
         self.__preprocessor = Preprocessor(preprocessing_config=preprocessing_config)
-        self.__model_facade = ModelFacade(model_config=model_config)
+        self.__model_facade = ModelFacade(
+            model_config=model_config,
+            example_input_array=self.__preprocessor.get_example_array(),
+        )
 
     def train(
         self,

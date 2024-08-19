@@ -4,6 +4,7 @@ from typing import Optional
 import lightning as pl
 import torch
 from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.loggers import TensorBoardLogger
 
 import pipeline.core.model.classifier
 import pipeline.core.model.utils
@@ -17,16 +18,25 @@ local_logger = pipeline.logger.get_logger(__name__)
 class ModelFacade:
     """Class to handle the model related functions."""
 
-    def __init__(self, model_config: config.ModelConfig) -> None:
+    def __init__(
+        self,
+        model_config: config.ModelConfig,
+        example_input_array: torch.Tensor,
+    ) -> None:
         """Initialize the ModelFacade object.
 
         Args:
             model_config (config.ModelConfig): The model configuration
+            example_input_array (torch.Tensor): The example input array
         """
 
         local_logger.info("Initializing ModelFacade with config %s", model_config)
 
-        self.__model = pipeline.core.model.classifier.ClassifierModel(model_config=model_config)
+        self.__example_input_array = example_input_array
+        self.__model = pipeline.core.model.classifier.ClassifierModel(
+            model_config=model_config,
+            example_input_array=example_input_array,
+        )
         self.__trainer: Optional[pl.Trainer] = None
 
     def train(
@@ -50,19 +60,28 @@ class ModelFacade:
             optimizer_config=training_config.optimizer,
             scheduler_config=training_config.scheduler,
         )
+        dtype = getattr(torch, f"float{training_config.precision}")
+        self.__model.update_example_input_array(self.__example_input_array.to(dtype))
         version = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-        root_path = f"{output_dir}/{training_config.name}/{version}"
         mode = "min" if training_config.criterion is constants.Criterion.LOSS else "max"
         max_time = datetime.timedelta(hours=training_config.max_num_hrs) if training_config.max_num_hrs else None
+        root_dir = f"{output_dir}/{training_config.name}/{version}"
+        logger = TensorBoardLogger(
+            save_dir=output_dir,
+            version=version,
+            name=training_config.name,
+            log_graph=True,
+        )
 
         self.__trainer = pl.pytorch.Trainer(
+            logger=logger,
             precision=training_config.precision,
             accelerator=training_config.device,
             max_epochs=training_config.num_epochs,
             max_time=max_time,
             check_val_every_n_epoch=training_config.validate_every_n_epoch,
             log_every_n_steps=1,
-            default_root_dir=root_path,
+            default_root_dir=root_dir,
             callbacks=[
                 LearningRateMonitor(
                     logging_interval="step",
@@ -77,7 +96,7 @@ class ModelFacade:
                 ),
                 ModelCheckpoint(
                     monitor=constants.Phase.VALIDATION(training_config.criterion),
-                    dirpath=root_path,
+                    dirpath=root_dir,
                     filename=training_config.name + "-best-{epoch:02d}",
                     save_top_k=1,
                     save_last=True,
@@ -85,7 +104,7 @@ class ModelFacade:
                     mode=mode,
                 ),
                 ModelCheckpoint(
-                    dirpath=root_path,
+                    dirpath=root_dir,
                     filename=training_config.name + "-{epoch:02d}",
                     every_n_epochs=training_config.save_every_n_epoch,
                     save_top_k=-1,

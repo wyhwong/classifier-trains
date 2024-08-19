@@ -15,22 +15,41 @@ local_logger = pipeline.logger.get_logger(__name__)
 class ClassifierModel(pl.LightningModule):
     """Classifier model class"""
 
-    def __init__(self, model_config: config.ModelConfig) -> None:
+    def __init__(
+        self,
+        model_config: config.ModelConfig,
+        example_input_array: Optional[torch.Tensor] = None,
+    ) -> None:
         """Initialize the ClassifierModel object
 
         Args:
             model_config (config.ModelConfig): The model configuration
+            example_in_array (torch.Tensor): The example input array
         """
 
         super().__init__()
 
+        self.example_input_array = example_input_array
         self.__model_config = model_config
 
-        self.__classifier = pipeline.core.model.utils.initialize_classifier(model_config=self.__model_config)
+        self.__classifier = pipeline.core.model.utils.initialize_classifier(
+            model_config=self.__model_config,
+        )
 
         self.__loss_fn = nn.CrossEntropyLoss()
         self.__optimizers: Optional[list[torch.optim.Optimizer]] = None
         self.__schedulers: Optional[list[torch.optim.lr_scheduler.LRScheduler]] = None
+
+        self.save_hyperparameters()
+
+    def update_example_input_array(self, example_input_array: torch.Tensor) -> None:
+        """Update the example input array
+
+        Args:
+            example_input_array (torch.Tensor): The example input array
+        """
+
+        self.example_input_array = example_input_array
 
     def training_setup(
         self,

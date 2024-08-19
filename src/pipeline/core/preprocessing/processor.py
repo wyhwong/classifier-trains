@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 import torchvision
 
 import pipeline.logger
@@ -115,3 +116,17 @@ class Preprocessor:
         """
 
         return torchvision.transforms.Compose(self.__resize_and_padding + self.__normalization)
+
+    def get_example_array(self) -> torch.Tensor:
+        """Get an example array.
+
+        Returns:
+            torch.Tensor: The example array.
+        """
+
+        return torch.rand(
+            1,
+            3,
+            self.__resize_config.height,
+            self.__resize_config.width,
+        )
