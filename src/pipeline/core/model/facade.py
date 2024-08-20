@@ -1,5 +1,4 @@
 import datetime
-from typing import Optional
 
 import lightning as pl
 import torch
@@ -47,7 +46,6 @@ class ModelFacade:
                 model_config=model_config,
                 example_input_array=example_input_array,
             )
-        self.__trainer: Optional[pl.Trainer] = None
 
     def train(
         self,
@@ -75,15 +73,13 @@ class ModelFacade:
         version = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         mode = "min" if training_config.criterion is constants.Criterion.LOSS else "max"
         max_time = datetime.timedelta(hours=training_config.max_num_hrs) if training_config.max_num_hrs else None
-        root_dir = f"{output_dir}/{training_config.name}/{version}"
-        logger = TensorBoardLogger(
-            save_dir=output_dir,
-            version=version,
-            name=training_config.name,
-            log_graph=True,
-        )
+        name = f"train-{training_config.name}"
+        root_dir = f"{output_dir}/{name}/{version}"
 
-        self.__trainer = pl.pytorch.Trainer(
+        local_logger.info("Training results will be logged at %s", root_dir)
+
+        logger = TensorBoardLogger(save_dir=output_dir, version=version, name=name, log_graph=True)
+        trainer = pl.pytorch.Trainer(
             logger=logger,
             precision=training_config.precision,
             accelerator=training_config.device,
@@ -122,11 +118,54 @@ class ModelFacade:
                 ),
             ],
         )
-
-        self.__trainer.fit(
+        trainer.fit(
             model=self.__model,
             datamodule=datamodule,
         )
+
+    def evaluate(
+        self,
+        evaluation_config: config.EvaluationConfig,
+        dataloader: torch.utils.data.DataLoader,
+        output_dir: str,
+    ) -> None:
+        """Evaluate trained models.
+
+        Args:
+            evaluation_config (config.EvaluationConfig): The evaluation configuration
+            dataloader (torch.utils.data.DataLoader): The dataloader
+            output_dir (str): The output directory
+        """
+
+        version = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        name = f"eval-{evaluation_config.name}"
+        root_dir = f"{output_dir}/{name}/{version}"
+
+        local_logger.info("Evaluation results will be logged at %s", root_dir)
+
+        logger = TensorBoardLogger(save_dir=output_dir, version=version, name=name, log_graph=True)
+        trainer = pl.pytorch.Trainer(
+            logger=logger,
+            precision=evaluation_config.precision,
+            accelerator=evaluation_config.device,
+            default_root_dir=root_dir,
+        )
+        dtype = getattr(torch, f"float{evaluation_config.precision}")
+
+        for model_config in evaluation_config.models:
+            if model_config.checkpoint_path:
+                model = ClassifierModel.load_from_checkpoint(  # pylint: disable=E1120
+                    checkpoint_path=model_config.checkpoint_path,
+                    model_config=model_config,
+                )
+            else:
+                model = ClassifierModel(model_config=model_config)
+
+            model.update_example_input_array(self.__example_input_array.to(dtype))
+            trainer.test(
+                model=model,
+                dataloaders=dataloader,
+            )
 
     def inference(self, x: torch.Tensor) -> torch.Tensor:
         """Perform inference

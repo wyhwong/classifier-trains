@@ -44,6 +44,7 @@ def run(config: str, output_dir: str) -> None:
     if pipeline_config.enable_evaluation:
         model_interface.evaluate(
             evaluation_config=pipeline_config.evaluation,
+            dataloader_config=pipeline_config.dataloader,
             output_dir=output_dir,
         )
 

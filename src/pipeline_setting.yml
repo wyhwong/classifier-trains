@@ -1,6 +1,5 @@
-experiment_label: "experiment"
 enable_training: true
-enable_evaluation: false
+enable_evaluation: true
 
 # Settings about model
 model:
@@ -8,7 +7,6 @@ model:
   backbone: resnet18
   num_classes: 2
   weights: DEFAULT
-  unfreeze_all_params: false
   checkpoint_path: null
 
 # Settings about dataloader
@@ -47,7 +45,7 @@ preprocessing:
     allow_random_color: false
 
 training:
-  name: "experiment"
+  name: experiment
   device: cuda
   precision: 64
   random_seed: 42
@@ -81,9 +79,12 @@ training:
     betas: [0.9, 0.999]
 
 evaluation:
-  evalset_dir: ../dataset/val
-  mapping_path: class_mapping.yml
+  name: experiment
+  device: cuda
+  precision: 64
+  evalset_dir: ./tests/test_dataset/
   models:
-    - name: default
-      weights_path: ./best_model.pt
-      backbone: resnet18
+    - backbone: resnet18
+      num_classes: 2
+      weights: DEFAULT
+      checkpoint_path: null

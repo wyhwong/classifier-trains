@@ -1,5 +1,3 @@
-from typing import Optional
-
 import torch
 
 import pipeline.core.utils
@@ -34,6 +32,11 @@ class ModelInterface:
             model_config=model_config,
             example_input_array=self.__preprocessor.get_example_array(),
         )
+        self.__transforms = {
+            constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),
+            constants.Phase.VALIDATION: self.__preprocessor.get_validation_transforms(),
+            constants.Phase.TESTING: self.__preprocessor.get_validation_transforms(),
+        }
 
     def train(
         self,
@@ -52,14 +55,9 @@ class ModelInterface:
         if output_dir:
             pipeline.core.utils.check_and_create_dir(output_dir)
 
-        transforms = {
-            constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),
-            constants.Phase.VALIDATION: self.__preprocessor.get_validation_transforms(),
-            constants.Phase.TESTING: self.__preprocessor.get_validation_transforms(),
-        }
         datamodule = ImageDataloader(
             dataloader_config=dataloader_config,
-            transforms=transforms,
+            transforms=self.__transforms,
         )
 
         self.__model_facade.train(
@@ -71,13 +69,15 @@ class ModelInterface:
     def evaluate(
         self,
         evaluation_config: EvaluationConfig,
-        output_dir: Optional[str] = None,
-    ):
+        dataloader_config: DataloaderConfig,
+        output_dir: str,
+    ) -> None:
         """Evaluate the model
 
         Args:
             evaluation_config (EvaluationConfig): The evaluation configuration
-            output_dir (Optional[str], optional): The output directory. Defaults to None.
+            dataloader_config (DataloaderConfig): The dataloader configuration
+            output_dir (str): The output directory. Defaults to None.
         """
 
         if output_dir:
@@ -85,7 +85,19 @@ class ModelInterface:
 
         local_logger.info("Evaluation config: %s", evaluation_config)
 
-        raise NotImplementedError("Evaluation is not implemented yet")
+        datamodule = ImageDataloader(
+            dataloader_config=dataloader_config,
+            transforms=self.__transforms,
+        )
+        dataloader = datamodule.get_dataloader(
+            dirpath=evaluation_config.evalset_dir,
+            is_augmented=False,
+        )
+        self.__model_facade.evaluate(
+            evaluation_config=evaluation_config,
+            dataloader=dataloader,
+            output_dir=output_dir,
+        )
 
     def inference(self, data: torch.Tensor) -> torch.Tensor:
         """Make inference with the model

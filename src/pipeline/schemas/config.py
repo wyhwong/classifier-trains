@@ -11,7 +11,6 @@ class ModelConfig(BaseModel):
     backbone: C.ModelBackbone
     num_classes: PositiveInt
     weights: str
-    unfreeze_all_params: bool
     checkpoint_path: Optional[str] = None
 
 
@@ -116,17 +115,11 @@ class TrainingConfig(BaseModel):
     export_best_as_onnx: bool
 
 
-class ModelCheckpointConfig(BaseModel):
-    """Model checkpoint configuration"""
-
-    name: str
-    weights_path: str
-    backbone: C.ModelBackbone
-
-
 class EvaluationConfig(BaseModel):
     """Evaluation configuration"""
 
+    name: str
+    device: str
+    precision: Literal[64, 32, 16]
     evalset_dir: str
-    mapping_path: str
-    models: list[ModelCheckpointConfig]
+    models: list[ModelConfig]

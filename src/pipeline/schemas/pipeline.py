@@ -6,7 +6,6 @@ import pipeline.schemas.config as C
 class PipelineConfig(BaseModel):
     """Pipeline configuration"""
 
-    experiment_label: str
     enable_training: bool
     enable_evaluation: bool
     model: C.ModelConfig

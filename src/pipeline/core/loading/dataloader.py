@@ -75,6 +75,29 @@ class ImageDataloader(pl.LightningDataModule):
             shuffle=False,
         )
 
+    def get_dataloader(self, dirpath: str, is_augmented=False) -> DataLoader:
+        """Get the dataloader for the dataset.
+
+        Args:
+            dirpath (str): The path to the dataset.
+            is_augmented (bool): If the dataset is augmented.
+
+        Returns:
+            DataLoader: The dataloader.
+        """
+
+        transforms = self.__transforms[Phase.TRAINING] if is_augmented else self.__transforms[Phase.VALIDATION]
+        dataloader = DataLoader(
+            dataset=datasets.ImageFolder(
+                root=dirpath,
+                transform=transforms,
+            ),
+            batch_size=self.__batch_size,
+            num_workers=self.__num_workers,
+            shuffle=False,
+        )
+        return dataloader
+
     @staticmethod
     def get_output_mapping(dirpath: str) -> dict[str, int]:
         """Get the output mapping for the dataset.
