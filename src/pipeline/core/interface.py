@@ -31,6 +31,7 @@ class ModelInterface:
         self.__model_facade = ModelFacade(
             model_config=model_config,
             example_input_array=self.__preprocessor.get_example_array(),
+            denorm_fn=self.__preprocessor.denormalize,
         )
         self.__transforms = {
             constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),

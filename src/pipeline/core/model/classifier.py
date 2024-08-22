@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Callable, Optional
 
 import lightning as pl
 import torch
@@ -20,18 +20,21 @@ class ClassifierModel(pl.LightningModule):
         self,
         model_config: config.ModelConfig,
         example_input_array: Optional[torch.Tensor] = None,
+        denorm_fn: Optional[Callable] = None,
     ) -> None:
         """Initialize the ClassifierModel object
 
         Args:
             model_config (config.ModelConfig): The model configuration
             example_in_array (torch.Tensor): The example input array
+            denorm_fn (Optional[Callable], optional): The denormalization function. Defaults to None.
         """
 
         super().__init__()
 
         self.example_input_array = example_input_array
         self.__model_config = model_config
+        self.__denorm_fn = denorm_fn
 
         self.__classifier = pipeline.core.model.utils.initialize_classifier(
             model_config=self.__model_config,
@@ -114,7 +117,8 @@ class ClassifierModel(pl.LightningModule):
         x, y = batch
 
         if batch_idx == 0:
-            grid = torchvision.utils.make_grid(x)
+            x_denorm = self.__denorm_fn(x) if self.__denorm_fn else x
+            grid = torchvision.utils.make_grid(x_denorm)
             # Here we ignore the type, expected message:
             # "Attribute 'experiment' is not defined for 'Optional[LightningLoggerBase]'"
             self.logger.experiment.add_image(  # type: ignore

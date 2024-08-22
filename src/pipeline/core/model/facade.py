@@ -1,4 +1,5 @@
 import datetime
+from typing import Callable, Optional
 
 import lightning as pl
 import torch
@@ -21,12 +22,14 @@ class ModelFacade:
         self,
         model_config: config.ModelConfig,
         example_input_array: torch.Tensor,
+        denorm_fn: Optional[Callable] = None,
     ) -> None:
         """Initialize the ModelFacade object.
 
         Args:
             model_config (config.ModelConfig): The model configuration
             example_input_array (torch.Tensor): The example input array
+            denorm_fn (Optional[Callable], optional): The denormalization function. Defaults to None.
         """
 
         local_logger.info("Initializing ModelFacade with config %s", model_config)
@@ -37,6 +40,7 @@ class ModelFacade:
             self.__model = ClassifierModel(
                 model_config=model_config,
                 example_input_array=example_input_array,
+                denorm_fn=denorm_fn,
             )
         else:
             # NOTE: Here we need to disable the pylint check for no-value-for-parameter
@@ -45,6 +49,7 @@ class ModelFacade:
                 checkpoint_path=model_config.checkpoint_path,
                 model_config=model_config,
                 example_input_array=example_input_array,
+                denorm_fn=denorm_fn,
             )
 
     def train(
