@@ -1,0 +1,139 @@
+import torch
+
+import pipeline.core.utils
+import pipeline.logger
+from pipeline.core.loading import ImageDataloader
+from pipeline.core.model import ModelFacade
+from pipeline.core.preprocessing import Preprocessor
+from pipeline.schemas import constants
+from pipeline.schemas.config import DataloaderConfig, EvaluationConfig, ModelConfig, PreprocessingConfig, TrainingConfig
+
+
+local_logger = pipeline.logger.get_logger(__name__)
+
+
+class ModelInterface:
+    """Class to handle the classifier training"""
+
+    def __init__(
+        self,
+        preprocessing_config: PreprocessingConfig,
+        model_config: ModelConfig,
+    ) -> None:
+        """Initialize the classifier facade
+
+        Args:
+            preprocessing_config (PreprocessingConfig): The preprocessing configuration
+            model_config (ModelConfig): The model configuration
+        """
+
+        self.__preprocessor = Preprocessor(preprocessing_config=preprocessing_config)
+        self.__model_facade = ModelFacade(
+            model_config=model_config,
+            example_input_array=self.__preprocessor.get_example_array(),
+            denorm_fn=self.__preprocessor.denormalize,
+        )
+        self.__transforms = {
+            constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),
+            constants.Phase.VALIDATION: self.__preprocessor.get_validation_transforms(),
+            constants.Phase.TESTING: self.__preprocessor.get_validation_transforms(),
+        }
+
+    def train(
+        self,
+        training_config: TrainingConfig,
+        dataloader_config: DataloaderConfig,
+        output_dir: str,
+    ) -> None:
+        """Train the classifier
+
+        Args:
+            training_config (TrainingConfig): The training configuration
+            dataloader_config (DataloaderConfig): The dataloader configuration
+            output_dir (str): The output directory
+        """
+
+        if output_dir:
+            pipeline.core.utils.check_and_create_dir(output_dir)
+
+        datamodule = ImageDataloader(
+            dataloader_config=dataloader_config,
+            transforms=self.__transforms,
+        )
+
+        self.__model_facade.train(
+            training_config=training_config,
+            datamodule=datamodule,
+            output_dir=output_dir,
+        )
+
+    def evaluate(
+        self,
+        evaluation_config: EvaluationConfig,
+        dataloader_config: DataloaderConfig,
+        output_dir: str,
+    ) -> None:
+        """Evaluate the model
+
+        Args:
+            evaluation_config (EvaluationConfig): The evaluation configuration
+            dataloader_config (DataloaderConfig): The dataloader configuration
+            output_dir (str): The output directory. Defaults to None.
+        """
+
+        if output_dir:
+            pipeline.core.utils.check_and_create_dir(output_dir)
+
+        local_logger.info("Evaluation config: %s", evaluation_config)
+
+        datamodule = ImageDataloader(
+            dataloader_config=dataloader_config,
+            transforms=self.__transforms,
+        )
+        dataloader = datamodule.get_dataloader(
+            dirpath=evaluation_config.evalset_dir,
+            is_augmented=False,
+        )
+        self.__model_facade.evaluate(
+            evaluation_config=evaluation_config,
+            dataloader=dataloader,
+            output_dir=output_dir,
+        )
+
+    def inference(self, data: torch.Tensor) -> torch.Tensor:
+        """Make inference with the model
+
+        Args:
+            data: The data to make inference
+
+        Returns:
+            torch.Tensor: The inference result
+        """
+
+        return self.__model_facade.inference(x=data)
+
+    @staticmethod
+    def compute_mean_and_std(dirpath: str) -> dict[str, list[float]]:
+        """Compute the mean and standard deviation of the dataset.
+
+        Args:
+            dirpath (str): The directory path.
+
+        Returns:
+            dict[str, list[float]]: The mean and standard deviation.
+        """
+
+        return Preprocessor.compute_mean_and_std(dirpath=dirpath)
+
+    @staticmethod
+    def get_output_mapping(dirpath: str) -> dict[str, int]:
+        """Get the output mapping for the dataset.
+
+        Args:
+            dirpath (str): The path to the dataset.
+
+        Returns:
+            dict[str, int]: The output mapping.
+        """
+
+        return ImageDataloader.get_output_mapping(dirpath=dirpath)

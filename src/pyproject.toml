@@ -1,0 +1,76 @@
+[tool.poetry]
+name = "pipeline"
+version = "0.1.0"
+description = ""
+authors = ["wyhwong <wyhwong@link.cuhk.edu.hk>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pyyaml = "^6.0.1"
+numpy = "^1.26.3"
+opencv-python = "^4.9.0.80"
+onnx = "^1.15.0"
+pydantic = "^2.8.2"
+lightning = "^2.4.0"
+tensorboard = "^2.17.0"
+click = "^8.1.7"
+torch-tb-profiler = "^0.4.3"
+torchmetrics = "^1.4.1"
+scikit-learn = "^1.5.1"
+matplotlib = "^3.9.2"
+
+[tool.poetry.group.torch.dependencies]
+torch = {version = "^2.4.0+cu124", source = "pytorch-cuda"}
+torchvision = {version = "^0.19.0+cu124", source = "pytorch-cuda"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+pytest-cov = "^4.1.0"
+black = "^24.3.0"
+pylint = "^3.0.3"
+mypy = "^1.8.0"
+bandit = "^1.7.6"
+radon = "^6.0.1"
+isort = "^5.13.2"
+pre-commit = "^3.6.0"
+ipykernel = "^6.29.5"
+
+[[tool.poetry.source]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu124"
+priority = "supplemental"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+line_length = 120
+include_trailing_comma = true
+lines_after_imports = 2
+profile = "black"
+
+[tool.bandit]
+exclude_dirs = ["tests",]
+
+[tool.mypy]
+exclude = ["tests",]
+
+[[tool.mypy.overrides]]
+module = "*.*"
+ignore_missing_imports = true
+
+# Tutorial:
+# https://radon.readthedocs.io/en/latest/commandline.html#radon-configuration-files
+[tool.radon]
+exclude = "test_*.py"
+cc_min = "A"
+cc_max = "C"
+average = true
+total_average = true
+show_complexity = true

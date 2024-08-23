@@ -1,5 +1,5 @@
 # TAO-like PyTorch Object Classifier Training Pipeline
-This repository aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in [setting.yml](./pipeline/setting.yml) to minimize the need of modifying scripts.
+This repository aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in [pipeline_setting.yml](./src/pipeline_setting.yml) to minimize the need of modifying scripts.
 
 Get config ready, get dataset ready, no coding (hopefully :D), start PyTorch training.
 
@@ -14,7 +14,10 @@ Get config ready, get dataset ready, no coding (hopefully :D), start PyTorch tra
 - [x] Poetry dependency management
 
 ## Usage
-Please see [README.md](./pipeline/README.md) inside `pipeline` folder.
+Please see [README.md](./src/README.md) inside `src` folder.
+
+## UML Diagram
+Please see [UML Diagram](./docs/README.md) for the class diagram.
 
 ## Features To Be Developed
 1. Implement detector training
