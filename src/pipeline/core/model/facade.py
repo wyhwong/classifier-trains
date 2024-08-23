@@ -35,6 +35,7 @@ class ModelFacade:
         local_logger.info("Initializing ModelFacade with config %s", model_config)
 
         self.__example_input_array = example_input_array
+        self.__version = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
         if not model_config.checkpoint_path:
             self.__model = ClassifierModel(
@@ -75,15 +76,14 @@ class ModelFacade:
         )
         dtype = getattr(torch, f"float{training_config.precision}")
         self.__model.update_example_input_array(self.__example_input_array.to(dtype))
-        version = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         mode = "min" if training_config.criterion is constants.Criterion.LOSS else "max"
         max_time = datetime.timedelta(hours=training_config.max_num_hrs) if training_config.max_num_hrs else None
         name = f"train-{training_config.name}"
-        root_dir = f"{output_dir}/{name}/{version}"
+        root_dir = f"{output_dir}/{name}/{self.__version}"
 
         local_logger.info("Training results will be logged at %s", root_dir)
 
-        logger = TensorBoardLogger(save_dir=output_dir, version=version, name=name, log_graph=True)
+        logger = TensorBoardLogger(save_dir=output_dir, version=self.__version, name=name, log_graph=True)
         trainer = pl.pytorch.Trainer(
             logger=logger,
             precision=training_config.precision,
@@ -142,13 +142,12 @@ class ModelFacade:
             output_dir (str): The output directory
         """
 
-        version = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         name = f"eval-{evaluation_config.name}"
-        root_dir = f"{output_dir}/{name}/{version}"
+        root_dir = f"{output_dir}/{name}/{self.__version}"
 
         local_logger.info("Evaluation results will be logged at %s", root_dir)
 
-        logger = TensorBoardLogger(save_dir=output_dir, version=version, name=name, log_graph=True)
+        logger = TensorBoardLogger(save_dir=output_dir, version=self.__version, name=name, log_graph=True)
         trainer = pl.pytorch.Trainer(
             logger=logger,
             precision=evaluation_config.precision,

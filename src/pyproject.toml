@@ -33,6 +33,7 @@ bandit = "^1.7.6"
 radon = "^6.0.1"
 isort = "^5.13.2"
 pre-commit = "^3.6.0"
+ipykernel = "^6.29.5"
 
 [[tool.poetry.source]]
 name = "pytorch-cuda"
