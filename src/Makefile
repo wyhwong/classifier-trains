@@ -10,17 +10,18 @@ export VERSION?=0.1.0
 export USERNAME?=$(shell whoami)
 export USER_ID?=$(shell id -u)
 export GROUP_ID?=$(shell id -g)
-export APP=pipeline
-export UML_DIR?=uml-diagram
-export DOCKERFILE?=deployment/Dockerfile
 
-# For Code analysis
-export TEST_DIR?=tests
+# Fixed variables
+export APP=pipeline
+export UML_DIR=uml-diagram
+export DOCKERFILE=deployment/Dockerfile
+export TEST_DIR=tests
+
+# For test
 export TEST_REPORT_DIR?=test_report
 
 # Build Docker image
 build:
-	mkdir -p ${OUTPUT_DIR}
 	@echo "Building Docker image (MAIN)..."
 	docker build \
 		--build-arg VERSION=${VERSION} \
@@ -105,13 +106,23 @@ help:
 	@echo "Usage: make [target]"
 	@echo "Targets:"
 	@echo "  build: Build Docker image"
+	@echo "    - VERSION: Version of Docker image"
+	@echo "    - USERNAME: Username of Docker image"
+	@echo "    - USER_ID: User ID of Docker image"
+	@echo "    - GROUP_ID: Group ID of Docker image"
 	@echo "  install: Install Python dependencies in poetry environment"
 	@echo "  run: Run pipeline"
+	@echo "    - CONFIG_PATH: Path to pipeline setting file"
+	@echo "    - OUTPUT_DIR: Path to output directory"
 	@echo "  compute-mean-and-std: Compute mean and std"
+	@echo "    - DATA_DIR: Path to dataset directory"
 	@echo "  get-output-mapping: Get output mapping"
+	@echo "    - DATA_DIR: Path to dataset directory"
 	@echo "  update: Update Python dependencies in poetry environment"
 	@echo "  format: Format pipeline using black, isort"
 	@echo "  static-code-analysis: Run static code analysis"
+	@echo "    - TEST_REPORT_DIR: Path to test report directory"
 	@echo "  test-report: Generate test report"
+	@echo "    - TEST_REPORT_DIR: Path to test report directory"
 	@echo "  uml: Generate UML diagram"
 	@echo "  help: Show this help message and exit"

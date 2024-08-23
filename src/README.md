@@ -1,56 +1,28 @@
 # TAO-like PyTorch Object Classifier Training Pipeline
 
-## Run in Docker Environment
+## Makefile Commands
 
 ```bash
-# Build Docker image
-make build
-
-# Modify setting.yml according to your needs
-# Then start training
-DATA_DIR=<path to image dataset> CONFIG_PATH=<path to yml config> OUTPUT_DIR=<path to output folder> make train
-
-# Example (also default values)
-DATA_DIR=./dataset CONFIG_PATH=./train.yml OUTPUT_DIR=./results make train
+# Check all available commands
+make help
 ```
 
-## Run with Poetry Environment
+## After installation
+
+For example of pipeline configuration, please see [pipeline_setting.yml](./pipeline_setting.yml).
 
 ```bash
-# Install dependencies in Poetry
-make local
+# Run training or evaluation
+python3 -m pipeline run --config <path to yml config> --output_dir <output_dir>
 
-# Modify setting.yml according to your needs
-# Put dataset in ./dataset
+# Compute mean and std of dataset
+python3 -m pipeline compute-mean-and-std --dir-path <path to dataset>
 
-# Then start training
-cd src
-poetry run python3 main.py
+# Get output mapping of dataset
+python3 -m pipeline get-output-mapping --dir-path <path to dataset>
 ```
 
-## GNU Make Commands for Development
-
-```bash
-# Install dependencies in Poetry
-make local
-
-# Run static code analysis
-# Components included:
-#   - black (formatter)
-#   - bandit (security linter)
-#   - pylint (linter)
-#   - mypy (type checker)
-#   - isort (import sorter)
-make analyze
-
-# Update dependencies in Poetry
-make update
-
-# After developement
-make format
-```
-
-## Folder Structure for Dataset
+## Expected Folder Structure for Dataset
 ```
 Dataset Directory
 ├── train
@@ -78,12 +50,13 @@ Dataset Directory
 
 ## After Training
 
-By default, the pipeline will output the following:
+The logs and checkpoints will be saved in the output directory, and logs are in tensorboard format. In tensorboard, you will be able to see the ROC curve, sample images in training, parameters like learning rate and momentum, and metrics like accuracy and loss.
 
-1. Weights of best and last model
-2. yml file of class mapping
-3. Preview of trainset and valset during training
-4. Line plots of accuracy history and loss history
-5. csv files of accuracy history and loss history
-6. ROC curves of model in each class
-7. Full training log
+```bash
+# Run tensorboard
+tensorboard --logdir <output_dir>
+```
+
+![ROC curve in tensorboard](../docs/tensorboard_1.png)
+
+![Sample images and parameters](../docs/tensorboard_2.png)
