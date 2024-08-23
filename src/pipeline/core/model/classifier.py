@@ -54,11 +54,11 @@ class ClassifierModel(pl.LightningModule):
     def __auto_convert_example_dtype(self) -> None:
         """Auto convert the example input array to the correct data type"""
 
-        classifier_dtype = self.__classifier.parameters().__next__().dtype
-        if self.example_input_array is not None and self.example_input_array.dtype != classifier_dtype:
+        classifier_dtype = next(self.__classifier.parameters()).dtype
+        if isinstance(self.example_input_array, torch.Tensor) and self.example_input_array.dtype != classifier_dtype:
             self.example_input_array = self.example_input_array.to(dtype=classifier_dtype)
 
-    def to_onnx(self, output_path: str) -> None:
+    def to_onnx(self, output_path: str) -> None:  # type: ignore
         """Export the model to ONNX format
 
         Args:
