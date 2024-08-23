@@ -10,4 +10,4 @@ LOG_FILEPATH = os.getenv("LOG_FILEPATH", "./runtime.log")
 #       style of the project and should not be changed.
 LOG_FMT = "%(asctime)s [%(name)s | %(levelname)s]: %(message)s"
 LOG_DATEFMT = "%Y-%m-%dT%H:%M:%SZ"
-TZ = zoneinfo.ZoneInfo(os.getenv("TZ", "UTC"))
+TZ = zoneinfo.ZoneInfo(os.getenv("TZ") or "UTC")

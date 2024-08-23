@@ -6,8 +6,8 @@ import torch
 from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.loggers import TensorBoardLogger
 
-import pipeline.core.model.utils
 import pipeline.logger
+from pipeline.core import utils
 from pipeline.core.model.classifier import ClassifierModel
 from pipeline.schemas import config, constants
 
@@ -34,6 +34,7 @@ class ModelFacade:
 
         local_logger.info("Initializing ModelFacade with config %s", model_config)
 
+        self.__model_config = model_config
         self.__example_input_array = example_input_array
         self.__version = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
@@ -75,7 +76,8 @@ class ModelFacade:
             scheduler_config=training_config.scheduler,
         )
         dtype = getattr(torch, f"float{training_config.precision}")
-        self.__model.update_example_input_array(self.__example_input_array.to(dtype))
+        self.__example_input_array = self.__example_input_array.to(dtype)
+        self.__model.update_example_input_array(self.__example_input_array)
         mode = "min" if training_config.criterion is constants.Criterion.LOSS else "max"
         max_time = datetime.timedelta(hours=training_config.max_num_hrs) if training_config.max_num_hrs else None
         name = f"train-{training_config.name}"
@@ -108,7 +110,7 @@ class ModelFacade:
                 ModelCheckpoint(
                     monitor=constants.Phase.VALIDATION(training_config.criterion),
                     dirpath=root_dir,
-                    filename=training_config.name + "-best-{epoch:02d}",
+                    filename="best",
                     save_top_k=1,
                     save_last=True,
                     verbose=True,
@@ -123,9 +125,34 @@ class ModelFacade:
                 ),
             ],
         )
+
         trainer.fit(
             model=self.__model,
             datamodule=datamodule,
+        )
+        utils.save_as_yml(f"{root_dir}/training.yml", training_config.model_dump())
+
+        if training_config.export_best_as_onnx:
+            self.__export_checkpoint_as_onnx("best.ckpt", root_dir)
+
+        if training_config.export_last_as_onnx:
+            self.__export_checkpoint_as_onnx("last.ckpt", root_dir)
+
+    def __export_checkpoint_as_onnx(self, checkpoint_name: str, root_dir: str) -> None:
+        """Export the checkpoint as ONNX.
+
+        Args:
+            checkpoint_name (str): The checkpoint name
+            root_dir (str): The root directory
+        """
+
+        model = ClassifierModel.load_from_checkpoint(  # pylint: disable=E1120
+            checkpoint_path=f"{root_dir}/{checkpoint_name}",
+            model_config=self.__model_config,
+            example_input_array=self.__example_input_array,
+        )
+        model.to_onnx(
+            f"{root_dir}/{checkpoint_name.replace('.ckpt', '.onnx')}",
         )
 
     def evaluate(
@@ -170,6 +197,8 @@ class ModelFacade:
                 model=model,
                 dataloaders=dataloader,
             )
+
+        utils.save_as_yml(f"{root_dir}/evaluation.yml", evaluation_config.model_dump())
 
     def inference(self, x: torch.Tensor) -> torch.Tensor:
         """Perform inference
