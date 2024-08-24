@@ -22,20 +22,17 @@ class ClassifierModel(pl.LightningModule):
     def __init__(
         self,
         model_config: config.ModelConfig,
-        example_input_array: Optional[torch.Tensor] = None,
         denorm_fn: Optional[Callable] = None,
     ) -> None:
         """Initialize the ClassifierModel object
 
         Args:
             model_config (config.ModelConfig): The model configuration
-            example_in_array (torch.Tensor): The example input array
             denorm_fn (Optional[Callable], optional): The denormalization function. Defaults to None.
         """
 
         super().__init__()
 
-        self.example_input_array = example_input_array
         self.__model_config = model_config
         self.__denorm_fn = denorm_fn
         self.__classifier = pipeline.core.model.utils.initialize_classifier(
@@ -49,39 +46,12 @@ class ClassifierModel(pl.LightningModule):
         self.__y_test_true: torch.Tensor = torch.tensor([])
         self.__y_test_pred: torch.Tensor = torch.tensor([])
 
-        self.__auto_convert_example_dtype()
-
-    def __auto_convert_example_dtype(self) -> None:
-        """Auto convert the example input array to the correct data type"""
-
-        classifier_dtype = next(self.__classifier.parameters()).dtype
-        if isinstance(self.example_input_array, torch.Tensor) and self.example_input_array.dtype != classifier_dtype:
-            self.example_input_array = self.example_input_array.to(dtype=classifier_dtype)
-
-    def to_onnx(self, output_path: str) -> None:  # type: ignore
-        """Export the model to ONNX format
-
-        Args:
-            output_path (str): The output path
-        """
-
-        self.__auto_convert_example_dtype()
-        super().to_onnx(output_path)
-
-    def update_example_input_array(self, example_input_array: torch.Tensor) -> None:
-        """Update the example input array
-
-        Args:
-            example_input_array (torch.Tensor): The example input array
-        """
-
-        self.example_input_array = example_input_array
-
     def training_setup(
         self,
         num_epochs: int,
         optimizer_config: config.OptimizerConfig,
         scheduler_config: config.SchedulerConfig,
+        input_sample: Optional[torch.Tensor] = None,
     ) -> None:
         """Setup the training configuration
 
@@ -89,6 +59,7 @@ class ClassifierModel(pl.LightningModule):
             num_epochs (int): The number of epochs
             optimizer_config (config.OptimizerConfig): The optimizer configuration
             scheduler_config (config.SchedulerConfig): The scheduler configuration
+            input_sample (Optional[torch.Tensor], optional): The input sample for onnx export,
         """
 
         self.__optimizers = [
@@ -105,6 +76,9 @@ class ClassifierModel(pl.LightningModule):
             )
             for optim in self.__optimizers
         ]
+
+        if input_sample is not None:
+            self.example_input_array = input_sample
 
     def configure_optimizers(self):
         """Configure the optimizers and schedulers."""
@@ -149,7 +123,7 @@ class ClassifierModel(pl.LightningModule):
                 self.current_epoch,
             )
 
-        logits = self.__classifier(x)
+        logits = self.forward(x)
         loss = self.__loss_fn(logits, y)
         self.log(name=phase(constants.Criterion.LOSS), value=loss, on_step=True)
 
@@ -218,7 +192,7 @@ class ClassifierModel(pl.LightningModule):
         """
 
         x, y = batch
-        logits = self.__classifier(x)
+        logits = self.forward(x)
         loss = self.__loss_fn(logits, y)
         self.log(name=constants.Phase.TESTING(constants.Criterion.LOSS), value=loss, on_step=True)
         acc = (logits.argmax(dim=1) == y).float().mean()
@@ -318,4 +292,4 @@ class ClassifierModel(pl.LightningModule):
             torch.Tensor: The output tensor
         """
 
-        return self.__classifier(x)
+        return self.__classifier(x.to(self.dtype))

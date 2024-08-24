@@ -30,7 +30,6 @@ class ModelInterface:
         self.__preprocessor = Preprocessor(preprocessing_config=preprocessing_config)
         self.__model_facade = ModelFacade(
             model_config=model_config,
-            example_input_array=self.__preprocessor.get_example_array(),
             denorm_fn=self.__preprocessor.denormalize,
         )
         self.__transforms = {
@@ -65,6 +64,7 @@ class ModelInterface:
             training_config=training_config,
             datamodule=datamodule,
             output_dir=output_dir,
+            input_sample=self.__preprocessor.get_example_array(),
         )
 
     def evaluate(

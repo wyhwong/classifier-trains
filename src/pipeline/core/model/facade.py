@@ -18,30 +18,22 @@ local_logger = pipeline.logger.get_logger(__name__)
 class ModelFacade:
     """Class to handle the model related functions."""
 
-    def __init__(
-        self,
-        model_config: config.ModelConfig,
-        example_input_array: torch.Tensor,
-        denorm_fn: Optional[Callable] = None,
-    ) -> None:
+    def __init__(self, model_config: config.ModelConfig, denorm_fn: Optional[Callable] = None) -> None:
         """Initialize the ModelFacade object.
 
         Args:
             model_config (config.ModelConfig): The model configuration
-            example_input_array (torch.Tensor): The example input array
             denorm_fn (Optional[Callable], optional): The denormalization function. Defaults to None.
         """
 
         local_logger.info("Initializing ModelFacade with config %s", model_config)
 
         self.__model_config = model_config
-        self.__example_input_array = example_input_array
         self.__version = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
         if not model_config.checkpoint_path:
             self.__model = ClassifierModel(
                 model_config=model_config,
-                example_input_array=example_input_array,
                 denorm_fn=denorm_fn,
             )
         else:
@@ -50,7 +42,6 @@ class ModelFacade:
             self.__model = ClassifierModel.load_from_checkpoint(  # pylint: disable=E1120
                 checkpoint_path=model_config.checkpoint_path,
                 model_config=model_config,
-                example_input_array=example_input_array,
                 denorm_fn=denorm_fn,
             )
 
@@ -59,6 +50,7 @@ class ModelFacade:
         training_config: config.TrainingConfig,
         datamodule: pl.LightningDataModule,
         output_dir: str,
+        input_sample: Optional[torch.Tensor] = None,
     ) -> None:
         """Train the model.
 
@@ -66,6 +58,8 @@ class ModelFacade:
             training_config (config.TrainingConfig): The training configuration
             datamodule (pl.LightningDataModule): The datamodule
             output_dir (str): The output directory
+            input_sample (Optional[torch.Tensor], optional): The input sample for onnx export,
+                Defaults to None.
         """
 
         pl.pytorch.seed_everything(training_config.random_seed)
@@ -74,10 +68,8 @@ class ModelFacade:
             num_epochs=training_config.num_epochs,
             optimizer_config=training_config.optimizer,
             scheduler_config=training_config.scheduler,
+            input_sample=input_sample,
         )
-        dtype = getattr(torch, f"float{training_config.precision}")
-        self.__example_input_array = self.__example_input_array.to(dtype)
-        self.__model.update_example_input_array(self.__example_input_array)
         mode = "min" if training_config.criterion is constants.Criterion.LOSS else "max"
         max_time = datetime.timedelta(hours=training_config.max_num_hrs) if training_config.max_num_hrs else None
         name = f"train-{training_config.name}"
@@ -133,26 +125,33 @@ class ModelFacade:
         utils.save_as_yml(f"{root_dir}/training.yml", training_config.model_dump())
 
         if training_config.export_best_as_onnx:
-            self.__export_checkpoint_as_onnx("best.ckpt", root_dir)
+            self.__export_checkpoint_as_onnx("best.ckpt", root_dir, input_sample)
 
         if training_config.export_last_as_onnx:
-            self.__export_checkpoint_as_onnx("last.ckpt", root_dir)
+            self.__export_checkpoint_as_onnx("last.ckpt", root_dir, input_sample)
 
-    def __export_checkpoint_as_onnx(self, checkpoint_name: str, root_dir: str) -> None:
+    def __export_checkpoint_as_onnx(
+        self,
+        checkpoint_name: str,
+        root_dir: str,
+        input_sample: Optional[torch.Tensor] = None,
+    ) -> None:
         """Export the checkpoint as ONNX.
 
         Args:
             checkpoint_name (str): The checkpoint name
             root_dir (str): The root directory
+            input_sample (Optional[torch.Tensor], optional): The input sample for onnx export,
+                Defaults to None.
         """
 
         model = ClassifierModel.load_from_checkpoint(  # pylint: disable=E1120
             checkpoint_path=f"{root_dir}/{checkpoint_name}",
             model_config=self.__model_config,
-            example_input_array=self.__example_input_array,
         )
         model.to_onnx(
             f"{root_dir}/{checkpoint_name.replace('.ckpt', '.onnx')}",
+            input_sample=input_sample,
         )
 
     def evaluate(
@@ -174,15 +173,13 @@ class ModelFacade:
 
         local_logger.info("Evaluation results will be logged at %s", root_dir)
 
-        logger = TensorBoardLogger(save_dir=output_dir, version=self.__version, name=name, log_graph=True)
+        logger = TensorBoardLogger(save_dir=output_dir, version=self.__version, name=name)
         trainer = pl.pytorch.Trainer(
             logger=logger,
             precision=evaluation_config.precision,
             accelerator=evaluation_config.device,
             default_root_dir=root_dir,
         )
-        dtype = getattr(torch, f"float{evaluation_config.precision}")
-
         for model_config in evaluation_config.models:
             if model_config.checkpoint_path:
                 model = ClassifierModel.load_from_checkpoint(  # pylint: disable=E1120
@@ -192,11 +189,7 @@ class ModelFacade:
             else:
                 model = ClassifierModel(model_config=model_config)
 
-            model.update_example_input_array(self.__example_input_array.to(dtype))
-            trainer.test(
-                model=model,
-                dataloaders=dataloader,
-            )
+            trainer.test(model=model, dataloaders=dataloader)
 
         utils.save_as_yml(f"{root_dir}/evaluation.yml", evaluation_config.model_dump())
 
