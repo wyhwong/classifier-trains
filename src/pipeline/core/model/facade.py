@@ -168,6 +168,8 @@ class ModelFacade:
             output_dir (str): The output directory
         """
 
+        pl.pytorch.seed_everything(evaluation_config.random_seed)
+
         name = f"eval-{evaluation_config.name}"
         root_dir = f"{output_dir}/{name}/{self.__version}"
 

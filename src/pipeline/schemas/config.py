@@ -1,6 +1,6 @@
 from typing import Literal, Optional
 
-from pydantic import BaseModel, NonNegativeFloat, PositiveInt
+from pydantic import BaseModel, NonNegativeFloat, PositiveInt, field_validator
 
 import pipeline.schemas.constants as C
 
@@ -57,6 +57,33 @@ class SpatialTransformConfig(BaseModel):
     max_rotate_in_degree: NonNegativeFloat
     allow_center_crop: bool
     allow_random_crop: bool
+
+    @field_validator("hflip_prob")
+    @classmethod
+    def hfilp_prob_is_valid(cls, v: float) -> float:
+        """Validate the hflip probability."""
+
+        if v < 0 or v > 1:
+            raise ValueError("hflip_prob must be between 0 and 1")
+        return v
+
+    @field_validator("vflip_prob")
+    @classmethod
+    def vfilp_prob_is_valid(cls, v: float) -> float:
+        """Validate the vflip probability."""
+
+        if v < 0 or v > 1:
+            raise ValueError("vflip_prob must be between 0 and 1")
+        return v
+
+    @field_validator("max_rotate_in_degree")
+    @classmethod
+    def max_rotate_in_degree_is_valid(cls, v: float) -> float:
+        """Validate the maximum rotation in degree."""
+
+        if v < 0 or v > 180:
+            raise ValueError("max_rotate_in_degree must be between 0 and 180")
+        return v
 
 
 class ColorTransformConfig(BaseModel):
@@ -120,6 +147,7 @@ class EvaluationConfig(BaseModel):
 
     name: str
     device: str
+    random_seed: PositiveInt
     precision: Literal[64, 32, 16]
     evalset_dir: str
     models: list[ModelConfig]

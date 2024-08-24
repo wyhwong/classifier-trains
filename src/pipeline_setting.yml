@@ -90,6 +90,7 @@ evaluation:
   name: experiment
   device: cuda
   precision: 64
+  random_seed: 42
   evalset_dir: ./tests/test_dataset/
   models:
     - backbone: resnet18
