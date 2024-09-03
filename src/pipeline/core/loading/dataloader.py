@@ -7,6 +7,10 @@ from torch.utils.data import DataLoader
 
 from pipeline.schemas.config import DataloaderConfig
 from pipeline.schemas.constants import Phase
+from pipeline.utils import logger
+
+
+local_logger = logger.get_logger(__name__)
 
 
 class ImageDataloader(pl.LightningDataModule):
@@ -25,6 +29,8 @@ class ImageDataloader(pl.LightningDataModule):
         """
 
         super().__init__()
+
+        local_logger.info("Initializing ImageDataloader with config: %s", dataloader_config)
 
         self.__trainset_dir = dataloader_config.trainset_dir
         self.__valset_dir = dataloader_config.valset_dir
@@ -110,4 +116,7 @@ class ImageDataloader(pl.LightningDataModule):
         """
 
         dataset = datasets.ImageFolder(root=dirpath)
-        return dataset.class_to_idx
+        mapping = dataset.class_to_idx
+
+        local_logger.info("Output mapping: %s", mapping)
+        return mapping

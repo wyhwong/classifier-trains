@@ -61,6 +61,8 @@ class ModelFacade:
                 Defaults to None.
         """
 
+        local_logger.info("Training with config %s", training_config)
+
         pl.pytorch.seed_everything(training_config.random_seed)
 
         self.__model.training_setup(
@@ -144,6 +146,8 @@ class ModelFacade:
                 Defaults to None.
         """
 
+        local_logger.info("Exporting checkpoint %s as ONNX", checkpoint_name)
+
         model = ClassifierModel.load_from_checkpoint(  # pylint: disable=E1120
             checkpoint_path=f"{root_dir}/{checkpoint_name}",
             model_config=self.__model_config,
@@ -166,6 +170,8 @@ class ModelFacade:
             dataloader (torch.utils.data.DataLoader): The dataloader
             output_dir (str): The output directory
         """
+
+        local_logger.info("Evaluating with config %s", evaluation_config)
 
         pl.pytorch.seed_everything(evaluation_config.random_seed)
 

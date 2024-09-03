@@ -33,6 +33,8 @@ class ClassifierModel(pl.LightningModule):
 
         super().__init__()
 
+        local_logger.info("Initializing ClassifierModel with config: %s", model_config)
+
         self.__model_config = model_config
         self.__denorm_fn = denorm_fn
         self.__classifier = pipeline.core.model.utils.initialize_classifier(
@@ -61,6 +63,13 @@ class ClassifierModel(pl.LightningModule):
             scheduler_config (config.SchedulerConfig): The scheduler configuration
             input_sample (Optional[torch.Tensor], optional): The input sample for onnx export,
         """
+
+        local_logger.info(
+            "Setting up training with num_epochs: %d, optimizer_config: %s, scheduler_config: %s",
+            num_epochs,
+            optimizer_config,
+            scheduler_config,
+        )
 
         self.__optimizers = [
             pipeline.core.model.utils.initialize_optimizer(
@@ -273,6 +282,9 @@ class ClassifierModel(pl.LightningModule):
                 horizontalalignment="center",
                 color="white" if cm[i, j] > thresh else "black",
             )
+
+        # Textual log
+        local_logger.info("Confusion Matrix:\n%s", cm)
 
         # Log to TensorBoard
         self.logger.experiment.add_figure(  # type: ignore

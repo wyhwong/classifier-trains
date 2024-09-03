@@ -21,6 +21,8 @@ class Preprocessor:
             preprocessing_config (config.PreprocessingConfig): The preprocessing configuration.
         """
 
+        local_logger.info("Initializing Preprocessor with config: %s", preprocessing_config)
+
         self.__mean = np.array(preprocessing_config.mean)
         self.__std = np.array(preprocessing_config.std)
 
