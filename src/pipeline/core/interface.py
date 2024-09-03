@@ -1,15 +1,14 @@
 import torch
 
-import pipeline.core.utils
-import pipeline.logger
 from pipeline.core.loading import ImageDataloader
 from pipeline.core.model import ModelFacade
 from pipeline.core.preprocessing import Preprocessor
 from pipeline.schemas import constants
 from pipeline.schemas.config import DataloaderConfig, EvaluationConfig, ModelConfig, PreprocessingConfig, TrainingConfig
+from pipeline.utils import file, logger
 
 
-local_logger = pipeline.logger.get_logger(__name__)
+local_logger = logger.get_logger(__name__)
 
 
 class ModelInterface:
@@ -53,7 +52,7 @@ class ModelInterface:
         """
 
         if output_dir:
-            pipeline.core.utils.check_and_create_dir(output_dir)
+            file.check_and_create_dir(output_dir)
 
         datamodule = ImageDataloader(
             dataloader_config=dataloader_config,
@@ -82,7 +81,7 @@ class ModelInterface:
         """
 
         if output_dir:
-            pipeline.core.utils.check_and_create_dir(output_dir)
+            file.check_and_create_dir(output_dir)
 
         local_logger.info("Evaluation config: %s", evaluation_config)
 

@@ -4,12 +4,11 @@ import torch
 import torchvision
 from torch import nn
 
-import pipeline.env
-import pipeline.logger
-from pipeline.schemas import config
+from pipeline.schemas import config, constants
+from pipeline.utils import logger
 
 
-local_logger = pipeline.logger.get_logger(__name__)
+local_logger = logger.get_logger(__name__)
 
 
 def initialize_classifier(model_config: config.ModelConfig) -> nn.Module:
@@ -65,7 +64,7 @@ def initialize_optimizer(
 
     local_logger.info("Creating optimizer with config %s", optimizer_config)
 
-    if optimizer_config.name is pipeline.schemas.constants.OptimizerType.SGD:
+    if optimizer_config.name is constants.OptimizerType.SGD:
         return torch.optim.SGD(
             params,
             lr=optimizer_config.lr,
@@ -73,7 +72,7 @@ def initialize_optimizer(
             weight_decay=optimizer_config.weight_decay if optimizer_config.weight_decay else 0.0,
         )
 
-    if optimizer_config.name is pipeline.schemas.constants.OptimizerType.RMSPROP:
+    if optimizer_config.name is constants.OptimizerType.RMSPROP:
         return torch.optim.RMSprop(
             params,
             lr=optimizer_config.lr,
@@ -82,7 +81,7 @@ def initialize_optimizer(
             alpha=optimizer_config.alpha if optimizer_config.alpha else 0.99,
         )
 
-    if optimizer_config.name is pipeline.schemas.constants.OptimizerType.ADAM:
+    if optimizer_config.name is constants.OptimizerType.ADAM:
         return torch.optim.Adam(
             params,
             lr=optimizer_config.lr,
@@ -90,7 +89,7 @@ def initialize_optimizer(
             weight_decay=optimizer_config.weight_decay if optimizer_config.weight_decay else 0.0,
         )
 
-    if optimizer_config.name is pipeline.schemas.constants.OptimizerType.ADAMW:
+    if optimizer_config.name is constants.OptimizerType.ADAMW:
         return torch.optim.AdamW(
             params,
             lr=optimizer_config.lr,
@@ -119,14 +118,14 @@ def initialize_scheduler(
 
     local_logger.info("Creating scheduler with config %s", scheduler_config)
 
-    if scheduler_config.name is pipeline.schemas.constants.SchedulerType.STEP:
+    if scheduler_config.name is constants.SchedulerType.STEP:
         return torch.optim.lr_scheduler.StepLR(
             optimizer=optimizer,
             step_size=scheduler_config.step_size,
             gamma=scheduler_config.gamma,
         )
 
-    if scheduler_config.name is pipeline.schemas.constants.SchedulerType.COSINE:
+    if scheduler_config.name is constants.SchedulerType.COSINE:
         return torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer=optimizer,
             T_max=num_epochs,

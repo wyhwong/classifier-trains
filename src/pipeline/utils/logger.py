@@ -4,25 +4,25 @@ import os
 import sys
 from typing import Optional
 
-import pipeline.env
+from pipeline.utils import env
 
 
 def get_logger(
     logger_name: str,
-    streaming_log_level: int = pipeline.env.STREAMING_LOG_LEVEL,
-    file_log_level: int = pipeline.env.FILE_LOG_LEVEL,
-    log_filepath: Optional[str] = pipeline.env.LOG_FILEPATH,
+    streaming_log_level: int = env.STREAMING_LOG_LEVEL,
+    file_log_level: int = env.FILE_LOG_LEVEL,
+    log_filepath: Optional[str] = env.LOG_FILEPATH,
 ) -> logging.Logger:
     """Function to create a logger object with the specified name and log levels.
 
     Args:
         logger_name (str): Name of the logger object.
         streaming_log_level (int, optional): Log level for console logging.
-            Defaults to pipeline.env.STREAMING_LOG_LEVEL.
+            Defaults to env.STREAMING_LOG_LEVEL.
         file_log_level (int, optional): Log level for file logging.
-            Defaults to pipeline.env.FILE_LOG_LEVEL.
+            Defaults to env.FILE_LOG_LEVEL.
         log_filepath (Optional[str], optional): Path to the log file.
-            Defaults to pipeline.env.LOG_FILEPATH.
+            Defaults to env.LOG_FILEPATH.
 
     Returns:
         logging.Logger: Logger object with the specified name and log levels.
@@ -48,7 +48,7 @@ def get_logger(
         return logger
 
     logger.setLevel(file_log_level)
-    formatter = logging.Formatter(fmt=pipeline.env.LOG_FMT, datefmt=pipeline.env.LOG_DATEFMT)
+    formatter = logging.Formatter(fmt=env.LOG_FMT, datefmt=env.LOG_DATEFMT)
 
     # Add stream handler to log to console
     stream_handler = logging.StreamHandler(sys.stdout)

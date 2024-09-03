@@ -3,10 +3,10 @@ from typing import Any
 
 import yaml
 
-import pipeline.logger
+from pipeline.utils import logger
 
 
-local_logger = pipeline.logger.get_logger(__name__)
+local_logger = logger.get_logger(__name__)
 
 
 def check_and_create_dir(dirpath: str) -> None:

@@ -2,13 +2,13 @@ import numpy as np
 import torch
 import torchvision
 
-import pipeline.logger
 from pipeline.core.preprocessing.augmentation import get_color_transforms, get_spatial_transforms
 from pipeline.core.preprocessing.resize_and_padding import get_resize_and_padding_transforms
 from pipeline.schemas import config
+from pipeline.utils import logger
 
 
-local_logger = pipeline.logger.get_logger(__name__)
+local_logger = logger.get_logger(__name__)
 
 
 class Preprocessor:

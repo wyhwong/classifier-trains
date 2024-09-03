@@ -3,11 +3,11 @@ import numpy as np
 from PIL import Image
 from torch import nn
 
-import pipeline.logger
 from pipeline.schemas import constants
+from pipeline.utils import logger
 
 
-local_logger = pipeline.logger.get_logger(__name__)
+local_logger = logger.get_logger(__name__)
 
 
 def get_resize_and_padding_transforms(

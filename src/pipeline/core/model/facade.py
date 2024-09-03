@@ -6,13 +6,12 @@ import torch
 from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.loggers import TensorBoardLogger
 
-import pipeline.logger
-from pipeline.core import utils
 from pipeline.core.model.classifier import ClassifierModel
 from pipeline.schemas import config, constants
+from pipeline.utils import file, logger
 
 
-local_logger = pipeline.logger.get_logger(__name__)
+local_logger = logger.get_logger(__name__)
 
 
 class ModelFacade:
@@ -122,7 +121,7 @@ class ModelFacade:
             model=self.__model,
             datamodule=datamodule,
         )
-        utils.save_as_yml(f"{root_dir}/training.yml", training_config.model_dump())
+        file.save_as_yml(f"{root_dir}/training.yml", training_config.model_dump())
 
         if training_config.export_best_as_onnx:
             self.__export_checkpoint_as_onnx("best.ckpt", root_dir, input_sample)
@@ -193,7 +192,7 @@ class ModelFacade:
 
             trainer.test(model=model, dataloaders=dataloader)
 
-        utils.save_as_yml(f"{root_dir}/evaluation.yml", evaluation_config.model_dump())
+        file.save_as_yml(f"{root_dir}/evaluation.yml", evaluation_config.model_dump())
 
     def inference(self, x: torch.Tensor) -> torch.Tensor:
         """Perform inference

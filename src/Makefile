@@ -14,7 +14,7 @@ export GROUP_ID?=$(shell id -g)
 # Fixed variables
 export APP=pipeline
 export UML_DIR=uml-diagram
-export DOCKERFILE=deployment/Dockerfile
+export DOCKERFILE=docker/Dockerfile
 export TEST_DIR=tests
 
 # For test

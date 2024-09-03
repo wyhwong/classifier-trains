@@ -1,11 +1,10 @@
 import torchvision
 from torch import nn
 
-import pipeline.logger
-import pipeline.schemas.constants
+from pipeline.utils import logger
 
 
-local_logger = pipeline.logger.get_logger(__name__)
+local_logger = logger.get_logger(__name__)
 
 
 def get_spatial_transforms(

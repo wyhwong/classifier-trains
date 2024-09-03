@@ -2,7 +2,7 @@ import click
 import yaml
 
 from pipeline.core import ModelInterface
-from pipeline.schemas import pipeline
+import pipeline.schemas.pipeline
 
 
 @click.group()
@@ -27,7 +27,7 @@ def run(config: str, output_dir: str) -> None:
     with open(config, mode="r", encoding="utf-8") as file:
         content = yaml.load(file, Loader=yaml.SafeLoader)
 
-    pipeline_config = pipeline.PipelineConfig(**content)
+    pipeline_config = pipeline.schemas.pipeline.PipelineConfig(**content)
 
     model_interface = ModelInterface(
         preprocessing_config=pipeline_config.preprocessing,

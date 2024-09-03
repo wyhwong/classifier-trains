@@ -9,11 +9,11 @@ from sklearn.metrics import confusion_matrix, roc_curve
 from torch import nn
 
 import pipeline.core.model.utils
-import pipeline.logger
 from pipeline.schemas import config, constants
+from pipeline.utils import logger
 
 
-local_logger = pipeline.logger.get_logger(__name__)
+local_logger = logger.get_logger(__name__)
 
 
 class ClassifierModel(pl.LightningModule):
