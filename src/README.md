@@ -1,4 +1,4 @@
-# TAO-like PyTorch Object Classifier Training Pipeline
+# Classifier-trains
 
 ## Makefile Commands
 
