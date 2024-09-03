@@ -114,7 +114,7 @@ class ClassifierModel(pl.LightningModule):
 
         if batch_idx == 0:
             x_denorm = self.__denorm_fn(x) if self.__denorm_fn else x
-            grid = torchvision.utils.make_grid(x_denorm.to(dtype=torch.uint8))
+            grid = torchvision.utils.make_grid(x_denorm)
             # Here we ignore the type, expected message:
             # "Attribute 'experiment' is not defined for 'Optional[LightningLoggerBase]'"
             self.logger.experiment.add_image(  # type: ignore

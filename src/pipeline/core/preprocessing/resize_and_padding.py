@@ -1,6 +1,6 @@
-import cv2
-import numpy as np
-from PIL import Image
+import torch
+import torchvision
+import torchvision.transforms.functional
 from torch import nn
 
 from pipeline.schemas import constants
@@ -31,13 +31,12 @@ def get_resize_and_padding_transforms(
     """
 
     resize_and_padding = [
-        PilToCV2(),
-        Resize(width, height, maintain_aspect_ratio, interpolation, padding),
+        ResizeAndPadding(width, height, maintain_aspect_ratio, interpolation, padding),
     ]
     return resize_and_padding
 
 
-class Resize(nn.Module):
+class ResizeAndPadding(nn.Module):
     """Class to resize the image to the specified dimensions."""
 
     def __init__(
@@ -62,82 +61,53 @@ class Resize(nn.Module):
 
         self.__w = width
         self.__h = height
-        self.__dim = (width, height)
-        self.__interpolation = getattr(cv2, interpolation.value.upper())
+
+        self.__interpolation = getattr(torchvision.transforms.InterpolationMode, interpolation.value.upper())
         self.__maintain_aspect_ratio = maintain_aspect_ratio
         self.__padding = padding
 
-    def __call__(self, image: np.ndarray) -> np.ndarray:
+    def __call__(self, image: torch.Tensor) -> torch.Tensor:
         """Resize the image to the specified dimensions.
 
         Args:
-            image (np.ndarray): The input image.
+            image (torch.Tensor): The input image.
 
         Returns:
-            np.ndarray: The resized image.
+            torch.Tensor: The resized image.
         """
 
         if not self.__maintain_aspect_ratio:
-            return cv2.resize(image, self.__dim, interpolation=self.__interpolation)
+            return torchvision.transforms.functional.resize(image, (self.__h, self.__w), self.__interpolation)
 
-        image_height, image_width, _ = image.shape
-        # Resize the image to fit the input size while maintaining the aspect ratio.
-        if image_height / self.__h < image_width / self.__w:
-            image_height = int(image_height * (self.__w / image_width))
-            image_width = self.__w
+        # Resize the image while maintaining the aspect ratio
+        h, w = image.shape[-2:]
+
+        if h / self.__h < w / self.__w:
+            h, w = int(h * (self.__w / w)), self.__w
         else:
-            image_width = int(image_width * (self.__h / image_height))
-            image_height = self.__h
+            w, h = int(w * (self.__h / h)), self.__h
 
-        image = cv2.resize(image, (image_width, image_height), interpolation=self.__interpolation)
-        output_image = np.zeros((self.__h, self.__w, 3), dtype=float)
+        image = torchvision.transforms.functional.resize(image, (h, w), self.__interpolation)
+        output_image = torch.zeros((3, self.__h, self.__w), dtype=image.dtype)
 
-        if self.__padding is constants.PaddingType.BOTTOMRIGHT:
-            output_image[
-                :image_height,
-                :image_width,
-            ] = image
+        if self.__padding is constants.PaddingType.TOPLEFT:
+            output_image[:, :h, :w] = image
+        elif self.__padding is constants.PaddingType.TOPRIGHT:
+            output_image[:, :h, -w:] = image
 
         elif self.__padding is constants.PaddingType.BOTTOMLEFT:
-            output_image[
-                :image_height,
-                self.__w - image_width :,
-            ] = image
+            output_image[:, -h:, :w] = image
 
-        elif self.__padding is constants.PaddingType.TOPLEFT:
-            output_image[
-                self.__h - image_height :,
-                :image_width,
-            ] = image
-
-        elif self.__padding is constants.PaddingType.TOPRIGHT:
-            output_image[
-                self.__h - image_height :,
-                self.__w - image_width :,
-            ] = image
+        elif self.__padding is constants.PaddingType.BOTTOMRIGHT:
+            output_image[:, -h:, -w:] = image
 
         elif self.__padding is constants.PaddingType.CENTER:
-            left = int((self.__w - image_width) / 2)
-            top = int((self.__h - image_height) / 2)
             output_image[
-                top : top + image_height,
-                left : left + image_width,
+                :, (self.__h - h) // 2 : (self.__h - h) // 2 + h, (self.__w - w) // 2 : (self.__w - w) // 2 + w
             ] = image
 
+        else:
+            local_logger.error(f"Invalid padding type: {self.__padding}")
+            raise ValueError(f"Invalid padding type: {self.__padding}")
+
         return output_image
-
-
-class PilToCV2(nn.Module):
-    """Convert the PIL image to cv2 image."""
-
-    def __call__(self, image: Image.Image) -> np.ndarray:
-        """Convert the PIL image to cv2 image.
-
-        Args:
-            image (Image.Image): The PIL image.
-
-        Returns:
-            np.ndarray: The cv2 image.
-        """
-
-        return np.array(image)

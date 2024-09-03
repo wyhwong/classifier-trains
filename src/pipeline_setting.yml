@@ -31,7 +31,7 @@ preprocessing:
     width: 48
     height: 48
     # available choices in pipeline.schemas.constants.InterpolationType
-    interpolation: inter_cubic
+    interpolation: bicubic
     # available choices in pipeline.schemas.constants.PaddingType
     padding: bottom_right
     maintain_aspect_ratio: true

@@ -1,8 +1,8 @@
 import click
 import yaml
 
-from pipeline.core import ModelInterface
 import pipeline.schemas.pipeline
+from pipeline.core import ModelInterface
 
 
 @click.group()

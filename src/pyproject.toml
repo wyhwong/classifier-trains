@@ -18,7 +18,6 @@ click = "^8.1.7"
 torch-tb-profiler = "^0.4.3"
 scikit-learn = "^1.5.1"
 matplotlib = "^3.9.2"
-opencv-python-headless = "^4.10.0.84"
 
 [tool.poetry.group.torch.dependencies]
 torch = {version = "^2.4.0+cu124", source = "pytorch-cuda"}

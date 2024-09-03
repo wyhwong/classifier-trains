@@ -25,13 +25,16 @@ class Criterion(enum.StrEnum):
 
 
 class InterpolationType(enum.StrEnum):
-    """The interpolation type."""
+    """The interpolation type.
+    These are based on the support of torchvision
+    Details please check:
+    https://pytorch.org/vision/stable/generated/torchvision.transforms.functional.resize.html
+    """
 
-    INTER_NEAREST = "inter_nearest"
-    INTER_LINEAR = "inter_linear"
-    INTER_AREA = "inter_area"
-    INTER_CUBIC = "inter_cubic"
-    INTER_LANCZOS4 = "inter_lanczos4"
+    NEAREST = "nearest"
+    NEAREST_EXACT = "nearest_exact"
+    BILINEAR = "bilinear"
+    BICUBIC = "bicubic"
 
 
 class PaddingType(enum.StrEnum):

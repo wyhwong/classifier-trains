@@ -78,7 +78,7 @@ class Preprocessor:
             layers = self.__spatial_augmentation + self.__color_augmentation
         else:
             layers = []
-        layers += self.__resize_and_padding + self.__normalization
+        layers += self.__normalization + self.__resize_and_padding
 
         for layer in layers:
             image = layer(image)
@@ -105,7 +105,7 @@ class Preprocessor:
         """
 
         return torchvision.transforms.Compose(
-            self.__spatial_augmentation + self.__color_augmentation + self.__resize_and_padding + self.__normalization
+            self.__spatial_augmentation + self.__color_augmentation + self.__normalization + self.__resize_and_padding
         )
 
     def get_validation_transforms(self) -> torchvision.transforms.Compose:
@@ -115,7 +115,7 @@ class Preprocessor:
             torchvision.transforms.Compose: The validation transforms.
         """
 
-        return torchvision.transforms.Compose(self.__resize_and_padding + self.__normalization)
+        return torchvision.transforms.Compose(self.__normalization + self.__resize_and_padding)
 
     def get_example_array(self) -> torch.Tensor:
         """Get an example array.
@@ -124,12 +124,7 @@ class Preprocessor:
             torch.Tensor: The example array.
         """
 
-        return torch.rand(
-            1,
-            3,
-            self.__resize_config.height,
-            self.__resize_config.width,
-        )
+        return torch.rand(1, 3, self.__resize_config.height, self.__resize_config.width)
 
     @staticmethod
     def compute_mean_and_std(dirpath: str) -> dict[str, list[float]]:
