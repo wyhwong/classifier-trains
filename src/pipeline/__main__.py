@@ -5,26 +5,15 @@ import pipeline.schemas.pipeline
 from pipeline.core import ModelInterface
 
 
-@click.group()
-def cli() -> None:
-    pass
-
-
-@cli.command("run")
-@click.option("--config", "-c", required=True, type=str, help="Path to the configuration file.")
-@click.option("--output-dir", "-o", required=True, type=str, help="Path to the output directory.")
-def run(config: str, output_dir: str) -> None:
-    """Run Classifier Pipeline based on the configuration file.
+def __run_pipeline(config_path: str, output_dir: str) -> None:
+    """Run the pipeline based on the configuration file.
 
     Args:
-        config (str): Path to the configuration file.
+        config_path (str): Path to the configuration file.
         output_dir (str): Path to the output directory.
-
-    Example:
-        >>> run("config.yaml", "output")
     """
 
-    with open(config, mode="r", encoding="utf-8") as file:
+    with open(config_path, mode="r", encoding="utf-8") as file:
         content = yaml.load(file, Loader=yaml.SafeLoader)
 
     pipeline_config = pipeline.schemas.pipeline.PipelineConfig(**content)
@@ -49,6 +38,28 @@ def run(config: str, output_dir: str) -> None:
         )
 
 
+@click.group()
+def cli() -> None:
+    pass
+
+
+@cli.command("run")
+@click.option("--config-path", "-c", required=True, type=str, help="Path to the configuration file.")
+@click.option("--output-dir", "-o", required=True, type=str, help="Path to the output directory.")
+def run(config_path: str, output_dir: str) -> None:
+    """Run Classifier Pipeline based on the configuration file.
+
+    Args:
+        config (str): Path to the configuration file.
+        output_dir (str): Path to the output directory.
+
+    Example:
+        >>> python -m pipeline run -c config.yaml -o output
+    """
+
+    __run_pipeline(config_path=config_path, output_dir=output_dir)
+
+
 @cli.command("compute-mean-and-std")
 @click.option("--dir-path", "-d", required=True, type=str, help="Path to the trainset directory.")
 def compute_mean_and_std(dir_path: str) -> None:
@@ -58,7 +69,7 @@ def compute_mean_and_std(dir_path: str) -> None:
         dir_path (str): Path to the trainset directory.
 
     Example:
-        >>> compute_mean_and_std("trainset")
+        >>> python -m pipeline compute-mean-and-std -d dataset
     """
 
     mean_and_std = ModelInterface.compute_mean_and_std(dirpath=dir_path)
@@ -75,11 +86,42 @@ def get_output_mapping(dir_path: str) -> None:
         dir_path (str): Path to the dataset directory.
 
     Example:
-        >>> get_output_mapping("dataset")
+        >>> python -m pipeline get-output-mapping -d dataset
     """
 
     output_mapping = ModelInterface.get_output_mapping(dirpath=dir_path)
     click.echo(output_mapping)
+
+
+@cli.command("profile")
+@click.option("--config-path", "-c", required=True, type=str, help="Path to the configuration file.")
+@click.option("--output-dir", "-o", required=True, type=str, help="Path to the output directory.")
+@click.option("--interval", "-i", default=0.001, type=float, help="Interval for the profiler.")
+@click.option("--show-all", "-s", is_flag=True, help="Show all the functions in the profiler.")
+@click.option("--timeline", "-t", is_flag=True, help="Show the timeline in the profiler.")
+def profile(config_path: str, output_dir: str, interval: float, show_all: bool, timeline: bool) -> None:
+    """Profile Classifier Pipeline based on the configuration file.
+
+    Args:
+        config_path (str): Path to the configuration file.
+        output_dir (str): Path to the output directory.
+
+    Example:
+        >>> python -m pipeline profile -c config.yaml -o output
+    """
+
+    # Here we do not import the Profiler class at the top level
+    # This is to allow the inexistence of dev dependencies
+    from pyinstrument import Profiler  # pylint: disable=import-outside-toplevel
+
+    profiler = Profiler(interval=interval)
+    profiler.start()
+
+    __run_pipeline(config_path=config_path, output_dir=output_dir)
+
+    profiler.stop()
+    profiler.write_html(f"{output_dir}/profile.html", show_all=show_all, timeline=timeline)
+    click.echo(profiler.output_text(unicode=True, color=True))
 
 
 if __name__ == "__main__":

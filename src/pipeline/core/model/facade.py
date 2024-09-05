@@ -78,9 +78,9 @@ class ModelFacade:
 
         local_logger.info("Training results will be logged at %s", root_dir)
 
-        logger = TensorBoardLogger(save_dir=output_dir, version=self.__version, name=name, log_graph=True)
+        trainer_logger = TensorBoardLogger(save_dir=output_dir, version=self.__version, name=name, log_graph=True)
         trainer = pl.pytorch.Trainer(
-            logger=logger,
+            logger=trainer_logger,
             precision=training_config.precision,
             accelerator=training_config.device,
             max_epochs=training_config.num_epochs,
@@ -180,9 +180,9 @@ class ModelFacade:
 
         local_logger.info("Evaluation results will be logged at %s", root_dir)
 
-        logger = TensorBoardLogger(save_dir=output_dir, version=self.__version, name=name)
+        trainer_logger = TensorBoardLogger(save_dir=output_dir, version=self.__version, name=name)
         trainer = pl.pytorch.Trainer(
-            logger=logger,
+            logger=trainer_logger,
             precision=evaluation_config.precision,
             accelerator=evaluation_config.device,
             default_root_dir=root_dir,

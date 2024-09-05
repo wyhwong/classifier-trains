@@ -15,6 +15,9 @@ For example of pipeline configuration, please see [pipeline_setting.yml](./pipel
 # Run training or evaluation
 python3 -m pipeline run --config <path to yml config> --output_dir <output_dir>
 
+# Run training or evaluation with profiling, which will generate a profile report
+python3 -m pipeline profile --config <path to yml config> --output_dir <output_dir>
+
 # Compute mean and std of dataset
 python3 -m pipeline compute-mean-and-std --dir-path <path to dataset>
 
@@ -57,6 +60,12 @@ The logs and checkpoints will be saved in the output directory, and logs are in 
 tensorboard --logdir <output_dir>
 ```
 
-![ROC curve in tensorboard](../docs/tensorboard_1.png)
+![ROC curve in tensorboard](../docs/preview-tensorboard-1.png)
 
-![Sample images and parameters](../docs/tensorboard_2.png)
+![Sample images and parameters](../docs/preview-tensorboard-2.png)
+
+## Profile Report
+
+If you run the training with profiling, a profile report will be generated in the output directory. You can see the time spent on each function. It gives you a better understanding of the performance of the training process, and a sense of where to optimize.
+
+![Profile report](../docs/preview-profile-report.png)

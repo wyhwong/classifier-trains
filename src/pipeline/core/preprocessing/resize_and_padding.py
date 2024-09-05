@@ -30,7 +30,7 @@ def get_resize_and_padding_transforms(
         list[nn.Module]: The list of resize and padding transforms.
     """
 
-    resize_and_padding = [
+    resize_and_padding: list[nn.Module] = [
         ResizeAndPadding(width, height, maintain_aspect_ratio, interpolation, padding),
     ]
     return resize_and_padding
@@ -107,7 +107,7 @@ class ResizeAndPadding(nn.Module):
             ] = image
 
         else:
-            local_logger.error(f"Invalid padding type: {self.__padding}")
+            local_logger.error("Invalid padding type: %s", self.__padding)
             raise ValueError(f"Invalid padding type: {self.__padding}")
 
         return output_image

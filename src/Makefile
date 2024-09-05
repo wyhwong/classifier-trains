@@ -3,7 +3,7 @@ export DOCKER_BUILDKIT=1
 # For Docker mount
 export DATA_DIR?=./tests/test_dataset
 export CONFIG_PATH?=pipeline_setting.yml
-export OUTPUT_DIR?=results/
+export OUTPUT_DIR?=results
 
 # For Docker image
 export VERSION?=0.1.0
@@ -51,6 +51,10 @@ install:
 run:
 	@echo "Running pipeline..."
 	poetry run python3 -m ${APP} run -c ${CONFIG_PATH}  -o ${OUTPUT_DIR}
+
+profile:
+	@echo "Running pipeline in profile mode..."
+	poetry run python3 -m ${APP} profile -c ${CONFIG_PATH}  -o ${OUTPUT_DIR}
 
 compute-mean-and-std:
 	@echo "Computing mean and std..."
@@ -112,6 +116,9 @@ help:
 	@echo "    - GROUP_ID: Group ID of Docker image"
 	@echo "  install: Install Python dependencies in poetry environment"
 	@echo "  run: Run pipeline"
+	@echo "    - CONFIG_PATH: Path to pipeline setting file"
+	@echo "    - OUTPUT_DIR: Path to output directory"
+	@echo "  profile: Run pipeline in profile mode"
 	@echo "    - CONFIG_PATH: Path to pipeline setting file"
 	@echo "    - OUTPUT_DIR: Path to output directory"
 	@echo "  compute-mean-and-std: Compute mean and std"
