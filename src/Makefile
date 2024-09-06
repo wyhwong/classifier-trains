@@ -45,7 +45,7 @@ build:
 # Install Python dependencies in poetry environment
 install:
 	@echo "Installing Python dependencies..."
-	poetry install
+	poetry install --without ci
 	poetry run pre-commit install -f
 
 run:

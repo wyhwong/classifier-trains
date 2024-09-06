@@ -38,7 +38,7 @@ COPY --chown=${USERNAME} --from=base /requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --upgrade pip && \
     pip3 install --no-cache-dir -r /tmp/requirements.txt
 
-COPY --chown=${USERNAME} ./pipeline/ /usr/local/lib/pipeline/
+COPY --chown=${USERNAME} ./classifier_trains/ /usr/local/lib/classifier_trains/
 ENV PYTHONPATH=/usr/local/lib
 
 # # [Optional] Setup test environment
