@@ -28,7 +28,7 @@ jobs:
       - name: Setup virtual environment
         working-directory: ./src
         run: |
-          poetry install --without cuda
+          poetry install
       - name: Static code Analysis
         working-directory: ./src
         run: |
