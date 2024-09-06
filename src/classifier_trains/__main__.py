@@ -111,7 +111,10 @@ def profile(config_path: str, output_dir: str, interval: float, show_all: bool, 
 
     # Here we do not import the Profiler class at the top level
     # This is to allow the inexistence of dev dependencies
-    from pyinstrument import Profiler  # pylint: disable=import-outside-toplevel
+    try:
+        from pyinstrument import Profiler  # pylint: disable=import-outside-toplevel
+    except ImportError as exc:
+        raise ImportError("Please install the dev-group package `pyinstrument` to use the profiler.") from exc
 
     profiler = Profiler(interval=interval)
     profiler.start()

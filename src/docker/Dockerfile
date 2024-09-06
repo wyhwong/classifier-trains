@@ -7,8 +7,8 @@ COPY ./pyproject.toml ./poetry.lock /
 RUN poetry export -o requirements.txt \
     -f requirements.txt \
     --without-hashes \
-    --without torch \
-    --without dev && \
+    --without dev \
+    --with core,viz && \
     poetry export -o requirements-dev.txt \
     -f requirements.txt \
     --without-hashes \

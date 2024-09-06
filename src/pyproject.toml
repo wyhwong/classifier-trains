@@ -9,24 +9,21 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 pyyaml = "^6.0.1"
-numpy = "^2.1.1"
-onnx = "^1.15.0"
 pydantic = "^2.8.2"
-lightning = "^2.4.0"
-tensorboard = "^2.17.0"
 click = "^8.1.7"
-torch-tb-profiler = "^0.4.3"
-scikit-learn = "^1.5.1"
-matplotlib = "^3.9.2"
 
-[tool.poetry.group.cuda.dependencies]
+[tool.poetry.group.core.dependencies]
+lightning = "^2.4.0"
 torch = {version = "^2.4.0+cu124", source = "pytorch-cuda"}
 torchvision = {version = "^0.19.0+cu124", source = "pytorch-cuda"}
+numpy = "^2.1.1"
+onnx = "^1.15.0"
 
-[tool.poetry.group.ci.dependencies]
-# NOTE: This is for github action only (cpu-only machine)
-torch = "^2.4.0"
-torchvision = "^0.19.0"
+[tool.poetry.group.viz.dependencies]
+scikit-learn = "^1.5.1"
+matplotlib = "^3.9.2"
+tensorboard = "^2.17.0"
+torch-tb-profiler = "^0.4.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
