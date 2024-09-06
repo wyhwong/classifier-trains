@@ -6,9 +6,9 @@ import torch
 from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.loggers import TensorBoardLogger
 
-from pipeline.core.model.classifier import ClassifierModel
-from pipeline.schemas import config, constants
-from pipeline.utils import file, logger
+from classifier_trains.core.model.classifier import ClassifierModel
+from classifier_trains.schemas import config, constants
+from classifier_trains.utils import file, logger
 
 
 local_logger = logger.get_logger(__name__)

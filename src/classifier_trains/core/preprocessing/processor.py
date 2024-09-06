@@ -2,10 +2,10 @@ import numpy as np
 import torch
 import torchvision
 
-from pipeline.core.preprocessing.augmentation import get_color_transforms, get_spatial_transforms
-from pipeline.core.preprocessing.resize_and_padding import get_resize_and_padding_transforms
-from pipeline.schemas import config
-from pipeline.utils import logger
+from classifier_trains.core.preprocessing.augmentation import get_color_transforms, get_spatial_transforms
+from classifier_trains.core.preprocessing.resize_and_padding import get_resize_and_padding_transforms
+from classifier_trains.schemas import config
+from classifier_trains.utils import logger
 
 
 local_logger = logger.get_logger(__name__)

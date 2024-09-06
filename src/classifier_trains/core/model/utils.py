@@ -4,8 +4,8 @@ import torch
 import torchvision
 from torch import nn
 
-from pipeline.schemas import config, constants
-from pipeline.utils import logger
+from classifier_trains.schemas import config, constants
+from classifier_trains.utils import logger
 
 
 local_logger = logger.get_logger(__name__)

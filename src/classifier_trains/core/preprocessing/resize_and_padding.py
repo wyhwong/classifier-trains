@@ -3,8 +3,8 @@ import torchvision
 import torchvision.transforms.functional
 from torch import nn
 
-from pipeline.schemas import constants
-from pipeline.utils import logger
+from classifier_trains.schemas import constants
+from classifier_trains.utils import logger
 
 
 local_logger = logger.get_logger(__name__)

@@ -4,7 +4,7 @@ import os
 import sys
 from typing import Optional
 
-from pipeline.utils import env
+from classifier_trains.utils import env
 
 
 def get_logger(

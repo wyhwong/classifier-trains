@@ -13,16 +13,16 @@ For example of pipeline configuration, please see [pipeline_setting.yml](./pipel
 
 ```bash
 # Run training or evaluation
-python3 -m pipeline run --config <path to yml config> --output_dir <output_dir>
+python3 -m classifier_trains run --config <path to yml config> --output_dir <output_dir>
 
 # Run training or evaluation with profiling, which will generate a profile report
-python3 -m pipeline profile --config <path to yml config> --output_dir <output_dir>
+python3 -m classifier_trains profile --config <path to yml config> --output_dir <output_dir>
 
 # Compute mean and std of dataset
-python3 -m pipeline compute-mean-and-std --dir-path <path to dataset>
+python3 -m classifier_trains compute-mean-and-std --dir-path <path to dataset>
 
 # Get output mapping of dataset
-python3 -m pipeline get-output-mapping --dir-path <path to dataset>
+python3 -m classifier_trains get-output-mapping --dir-path <path to dataset>
 ```
 
 ## Expected Folder Structure for Dataset

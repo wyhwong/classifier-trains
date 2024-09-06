@@ -1,22 +1,17 @@
 import click
 import yaml
 
-import pipeline.schemas.pipeline
-from pipeline.core import ModelInterface
+import classifier_trains.schemas.pipeline
+from classifier_trains.core import ModelInterface
 
 
-def __run_pipeline(config_path: str, output_dir: str) -> None:
+def __run_pipeline(pipeline_config: classifier_trains.schemas.pipeline.PipelineConfig, output_dir: str) -> None:
     """Run the pipeline based on the configuration file.
 
     Args:
-        config_path (str): Path to the configuration file.
+        pipeline_config (classifier_trains.schemas.pipeline.PipelineConfig): Configuration for the pipeline.
         output_dir (str): Path to the output directory.
     """
-
-    with open(config_path, mode="r", encoding="utf-8") as file:
-        content = yaml.load(file, Loader=yaml.SafeLoader)
-
-    pipeline_config = pipeline.schemas.pipeline.PipelineConfig(**content)
 
     model_interface = ModelInterface(
         preprocessing_config=pipeline_config.preprocessing,
@@ -57,7 +52,11 @@ def run(config_path: str, output_dir: str) -> None:
         >>> python -m pipeline run -c config.yaml -o output
     """
 
-    __run_pipeline(config_path=config_path, output_dir=output_dir)
+    with open(config_path, mode="r", encoding="utf-8") as file:
+        content = yaml.load(file, Loader=yaml.SafeLoader)
+
+    pipeline_config = classifier_trains.schemas.pipeline.PipelineConfig(**content)
+    __run_pipeline(pipeline_config=pipeline_config, output_dir=output_dir)
 
 
 @cli.command("compute-mean-and-std")
@@ -117,7 +116,11 @@ def profile(config_path: str, output_dir: str, interval: float, show_all: bool, 
     profiler = Profiler(interval=interval)
     profiler.start()
 
-    __run_pipeline(config_path=config_path, output_dir=output_dir)
+    with open(config_path, mode="r", encoding="utf-8") as file:
+        content = yaml.load(file, Loader=yaml.SafeLoader)
+
+    pipeline_config = classifier_trains.schemas.pipeline.PipelineConfig(**content)
+    __run_pipeline(pipeline_config=pipeline_config, output_dir=output_dir)
 
     profiler.stop()
     profiler.write_html(f"{output_dir}/profile.html", show_all=show_all, timeline=timeline)

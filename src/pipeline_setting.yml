@@ -4,7 +4,7 @@ enable_evaluation: true
 
 # Model settings
 model:
-  # available choices in pipeline.schemas.constants.ModelBackbone
+  # available choices in classifier_trains.schemas.constants.ModelBackbone
   backbone: resnet18
   num_classes: 2
   weights: DEFAULT
@@ -30,9 +30,9 @@ preprocessing:
   resize_config:
     width: 48
     height: 48
-    # available choices in pipeline.schemas.constants.InterpolationType
+    # available choices in classifier_trains.schemas.constants.InterpolationType
     interpolation: bicubic
-    # available choices in pipeline.schemas.constants.PaddingType
+    # available choices in classifier_trains.schemas.constants.PaddingType
     padding: bottom_right
     maintain_aspect_ratio: true
 
@@ -65,7 +65,7 @@ training:
   export_best_as_onnx: true
 
   scheduler:
-    # available choices in pipeline.schemas.constants.SchedulerType
+    # available choices in classifier_trains.schemas.constants.SchedulerType
     name: step
     lr_min: 0
     # Only for step
@@ -74,7 +74,7 @@ training:
     gamma: 0.1
 
   optimizer:
-    # available choices in pipeline.schemas.constants.OptimizerType
+    # available choices in classifier_trains.schemas.constants.OptimizerType
     name: adam
     lr: 1e-7
     weight_decay: 0

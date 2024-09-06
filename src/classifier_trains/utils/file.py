@@ -3,7 +3,7 @@ from typing import Any
 
 import yaml
 
-from pipeline.utils import logger
+from classifier_trains.utils import logger
 
 
 local_logger = logger.get_logger(__name__)

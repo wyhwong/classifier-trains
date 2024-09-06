@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, NonNegativeFloat, PositiveInt, field_validator
 
-import pipeline.schemas.constants as C
+import classifier_trains.schemas.constants as C
 
 
 class ModelConfig(BaseModel):

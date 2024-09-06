@@ -1,6 +1,6 @@
 from pydantic import BaseModel, model_validator
 
-import pipeline.schemas.config as C
+import classifier_trains.schemas.config as C
 
 
 class PipelineConfig(BaseModel):

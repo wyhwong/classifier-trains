@@ -5,9 +5,9 @@ import torchvision
 import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 
-from pipeline.schemas.config import DataloaderConfig
-from pipeline.schemas.constants import Phase
-from pipeline.utils import logger
+from classifier_trains.schemas.config import DataloaderConfig
+from classifier_trains.schemas.constants import Phase
+from classifier_trains.utils import logger
 
 
 local_logger = logger.get_logger(__name__)

@@ -1,11 +1,17 @@
 import torch
 
-from pipeline.core.loading import ImageDataloader
-from pipeline.core.model import ModelFacade
-from pipeline.core.preprocessing import Preprocessor
-from pipeline.schemas import constants
-from pipeline.schemas.config import DataloaderConfig, EvaluationConfig, ModelConfig, PreprocessingConfig, TrainingConfig
-from pipeline.utils import file, logger
+from classifier_trains.core.loading import ImageDataloader
+from classifier_trains.core.model import ModelFacade
+from classifier_trains.core.preprocessing import Preprocessor
+from classifier_trains.schemas import constants
+from classifier_trains.schemas.config import (
+    DataloaderConfig,
+    EvaluationConfig,
+    ModelConfig,
+    PreprocessingConfig,
+    TrainingConfig,
+)
+from classifier_trains.utils import file, logger
 
 
 local_logger = logger.get_logger(__name__)

@@ -12,7 +12,7 @@ export USER_ID?=$(shell id -u)
 export GROUP_ID?=$(shell id -g)
 
 # Fixed variables
-export APP=pipeline
+export APP=classifier_trains
 export UML_DIR=uml-diagram
 export DOCKERFILE=docker/Dockerfile
 export TEST_DIR=tests

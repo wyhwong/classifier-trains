@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from pipeline.core import ModelInterface
+from classifier_trains.core import ModelInterface
 
 
 @pytest.fixture(name="dirpath")

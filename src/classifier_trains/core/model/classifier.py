@@ -8,9 +8,9 @@ import torchvision
 from sklearn.metrics import confusion_matrix, roc_curve
 from torch import nn
 
-import pipeline.core.model.utils
-from pipeline.schemas import config, constants
-from pipeline.utils import logger
+import classifier_trains.core.model.utils
+from classifier_trains.schemas import config, constants
+from classifier_trains.utils import logger
 
 
 local_logger = logger.get_logger(__name__)
@@ -37,7 +37,7 @@ class ClassifierModel(pl.LightningModule):
 
         self.__model_config = model_config
         self.__denorm_fn = denorm_fn
-        self.__classifier = pipeline.core.model.utils.initialize_classifier(
+        self.__classifier = classifier_trains.core.model.utils.initialize_classifier(
             model_config=self.__model_config,
         )
 
@@ -72,13 +72,13 @@ class ClassifierModel(pl.LightningModule):
         )
 
         self.__optimizers = [
-            pipeline.core.model.utils.initialize_optimizer(
+            classifier_trains.core.model.utils.initialize_optimizer(
                 params=self.__classifier.parameters(),
                 optimizer_config=optimizer_config,
             )
         ]
         self.__schedulers = [
-            pipeline.core.model.utils.initialize_scheduler(
+            classifier_trains.core.model.utils.initialize_scheduler(
                 optimizer=optim,
                 scheduler_config=scheduler_config,
                 num_epochs=num_epochs,
