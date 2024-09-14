@@ -2,10 +2,15 @@
 
 For project details, please see [README.md](https://github.com/wyhwong/classifier-trains)
 
-## Makefile Commands
+## Install as a package
+```bash
+pip3 install classifier-trains
+```
+
+## Makefile Commands (Only when cloned from GitHub)
 
 ```bash
-# Check all available commands (Only when cloned from GitHub)
+# Check all available commands
 make help
 ```
 

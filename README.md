@@ -3,7 +3,12 @@ This repository aims to provide a primitive tool to finetune state-of-the-art mo
 
 Goal: Get config ready, get dataset ready, no coding (hopefully :D), start PyTorch training.
 
-## Prerequisites
+## Install as a package
+```bash
+pip3 install classifier-trains
+```
+
+## Prerequisites (if clone this repository):
 - Docker: [https://www.docker.com/](https://www.docker.com/)
 - Poetry: [https://python-poetry.org](https://python-poetry.org)
 - GNU make: [https://www.gnu.org/software/make/manual/make.html](https://www.gnu.org/software/make/manual/make.html)
