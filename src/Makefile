@@ -45,7 +45,13 @@ build:
 # Install Python dependencies in poetry environment
 install:
 	@echo "Installing Python dependencies..."
-	poetry install --without ci
+	poetry install
+	poetry run pre-commit install -f
+
+# Install Python dependencies in poetry environment
+dev-install:
+	@echo "Installing Python dependencies (dev mode)..."
+	poetry install --with dev
 	poetry run pre-commit install -f
 
 run:
@@ -115,6 +121,7 @@ help:
 	@echo "    - USER_ID: User ID of Docker image"
 	@echo "    - GROUP_ID: Group ID of Docker image"
 	@echo "  install: Install Python dependencies in poetry environment"
+	@echo "  dev-install: Install Python dependencies in poetry environment (dev mode)"
 	@echo "  run: Run pipeline"
 	@echo "    - CONFIG_PATH: Path to pipeline setting file"
 	@echo "    - OUTPUT_DIR: Path to output directory"
