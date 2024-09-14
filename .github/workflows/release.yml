@@ -1,15 +1,14 @@
-name: CI
+name: pypi-release
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  ci:
+  release:
+    environment: release
     strategy:
-      fail-fast: false
       matrix:
         python-version: ["3.11"]
         poetry-version: ["1.7.1"]
@@ -29,7 +28,7 @@ jobs:
         working-directory: ./src
         run: |
           poetry install --with dev
-      - name: Static code Analysis
+      - name: Build and publish
         working-directory: ./src
         run: |
-          make static-code-analysis
+          poetry publish --build --username __token__ --password ${{ secrets.PYPI_TOKEN }}
