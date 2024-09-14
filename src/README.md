@@ -1,15 +1,17 @@
 # Classifier-trains
 
+For project details, please see [README.md](https://github.com/wyhwong/classifier-trains)
+
 ## Makefile Commands
 
 ```bash
-# Check all available commands
+# Check all available commands (Only when cloned from GitHub)
 make help
 ```
 
 ## After installation
 
-For example of pipeline configuration, please see [pipeline_setting.yml](./pipeline_setting.yml).
+For example of pipeline configuration, please see [pipeline_setting.yml](https://github.com/wyhwong/classifier-trains/blob/main/src/pipeline_setting.yml).
 
 ```bash
 # Run training or evaluation
@@ -50,22 +52,3 @@ Dataset Directory
         ├── <image1>
         └── ...
 ```
-
-## After Training
-
-The logs and checkpoints will be saved in the output directory, and logs are in tensorboard format. In tensorboard, you will be able to see the ROC curve, sample images in training, parameters like learning rate and momentum, and metrics like accuracy and loss.
-
-```bash
-# Run tensorboard
-tensorboard --logdir <output_dir>
-```
-
-![ROC curve in tensorboard](../docs/preview-tensorboard-1.png)
-
-![Sample images and parameters](../docs/preview-tensorboard-2.png)
-
-## Profile Report
-
-If you run the training with profiling, a profile report will be generated in the output directory. You can see the time spent on each function. It gives you a better understanding of the performance of the training process, and a sense of where to optimize.
-
-![Profile report](../docs/preview-profile-report.png)
