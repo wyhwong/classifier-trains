@@ -19,9 +19,9 @@ class DataloaderConfig(BaseModel):
 
     trainset_dir: str
     valset_dir: str
-    testset_dir: Optional[str]
     batch_size: PositiveInt
     num_workers: PositiveInt
+    testset_dir: Optional[str] = None
 
     def get_dirpath(self, phase: C.Phase) -> str:
         """Get the directory path for the given phase.
@@ -109,9 +109,9 @@ class OptimizerConfig(BaseModel):
     name: C.OptimizerType
     lr: NonNegativeFloat
     weight_decay: NonNegativeFloat
-    momentum: Optional[NonNegativeFloat]
-    alpha: Optional[NonNegativeFloat]
-    betas: Optional[tuple[NonNegativeFloat, NonNegativeFloat]]
+    momentum: Optional[NonNegativeFloat] = None
+    alpha: Optional[NonNegativeFloat] = None
+    betas: Optional[tuple[NonNegativeFloat, NonNegativeFloat]] = None
 
 
 class SchedulerConfig(BaseModel):
@@ -131,7 +131,6 @@ class TrainingConfig(BaseModel):
     random_seed: PositiveInt
     precision: Literal[64, 32, 16]
     device: str
-    max_num_hrs: Optional[NonNegativeFloat]
     validate_every_n_epoch: PositiveInt
     save_every_n_epoch: PositiveInt
     patience_in_epoch: PositiveInt
@@ -140,6 +139,7 @@ class TrainingConfig(BaseModel):
     scheduler: SchedulerConfig
     export_last_as_onnx: bool
     export_best_as_onnx: bool
+    max_num_hrs: Optional[NonNegativeFloat] = None
 
 
 class EvaluationConfig(BaseModel):
