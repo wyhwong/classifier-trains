@@ -1,5 +1,5 @@
 # Classifier-trains
-This repository aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in [pipeline_setting.yml](./src/pipeline_setting.yml) to minimize the need of modifying scripts.
+This repository aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in yaml file to minimize the need of modifying scripts.
 
 Goal: Get config ready, get dataset ready, no coding (hopefully :D), start PyTorch training.
 
