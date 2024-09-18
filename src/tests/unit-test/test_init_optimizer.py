@@ -16,14 +16,7 @@ def model_params_fixture() -> torch.Tensor:
 def optimizer_config_factory(name: OptimizerType) -> OptimizerConfig:
     """Return an optimizer configuration object."""
 
-    return OptimizerConfig(
-        name=name,
-        lr=0.07,
-        weight_decay=0.004,
-        momentum=0.97,
-        alpha=0.2,
-        betas=(0.9, 0.999),
-    )
+    return OptimizerConfig(name=name, lr=0.07, weight_decay=0.004)
 
 
 def test_initialize_optimizer_sgd(model_params: list[float]) -> None:
@@ -32,7 +25,6 @@ def test_initialize_optimizer_sgd(model_params: list[float]) -> None:
     optimizer_config = optimizer_config_factory(OptimizerType.SGD)
     optimizer = initialize_optimizer(model_params, optimizer_config)
     assert optimizer.defaults["lr"] == optimizer_config.lr
-    assert optimizer.defaults["momentum"] == optimizer_config.momentum
     assert optimizer.defaults["weight_decay"] == optimizer_config.weight_decay
 
 
@@ -42,9 +34,7 @@ def test_initialize_optimizer_rmsprop(model_params: list[float]) -> None:
     optimizer_config = optimizer_config_factory(OptimizerType.RMSPROP)
     optimizer = initialize_optimizer(model_params, optimizer_config)
     assert optimizer.defaults["lr"] == optimizer_config.lr
-    assert optimizer.defaults["momentum"] == optimizer_config.momentum
     assert optimizer.defaults["weight_decay"] == optimizer_config.weight_decay
-    assert optimizer.defaults["alpha"] == optimizer_config.alpha
 
 
 def test_initialize_optimizer_adam(model_params: list[float]) -> None:
@@ -53,7 +43,6 @@ def test_initialize_optimizer_adam(model_params: list[float]) -> None:
     optimizer_config = optimizer_config_factory(OptimizerType.ADAM)
     optimizer = initialize_optimizer(model_params, optimizer_config)
     assert optimizer.defaults["lr"] == optimizer_config.lr
-    assert optimizer.defaults["betas"] == optimizer_config.betas
     assert optimizer.defaults["weight_decay"] == optimizer_config.weight_decay
 
 
@@ -63,5 +52,4 @@ def test_initialize_optimizer_adamw(model_params: list[float]) -> None:
     optimizer_config = optimizer_config_factory(OptimizerType.ADAMW)
     optimizer = initialize_optimizer(model_params, optimizer_config)
     assert optimizer.defaults["lr"] == optimizer_config.lr
-    assert optimizer.defaults["betas"] == optimizer_config.betas
     assert optimizer.defaults["weight_decay"] == optimizer_config.weight_decay

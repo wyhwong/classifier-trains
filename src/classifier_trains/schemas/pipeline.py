@@ -1,4 +1,6 @@
-from pydantic import BaseModel, model_validator
+from typing import Optional
+
+from pydantic import BaseModel, model_validator, field_validator, ValidationInfo
 
 import classifier_trains.schemas.config as C
 
@@ -11,8 +13,40 @@ class PipelineConfig(BaseModel):
     model: C.ModelConfig
     dataloader: C.DataloaderConfig
     preprocessing: C.PreprocessingConfig
-    training: C.TrainingConfig
-    evaluation: C.EvaluationConfig
+    training: Optional[C.TrainingConfig] = None
+    evaluation: Optional[C.EvaluationConfig] = None
+
+    @field_validator("training")
+    @classmethod
+    def training_is_required_if_enabled(
+        cls, v: Optional[C.TrainingConfig], info: ValidationInfo
+    ) -> Optional[C.TrainingConfig]:
+        """Ensure training is required if enabled"""
+
+        print(info)
+
+        if info.data["enable_training"] and not v:
+            raise ValueError("training is required if enabled")
+
+        if not info.data["enable_training"]:
+            return None
+
+        return v
+
+    @field_validator("evaluation")
+    @classmethod
+    def evaluation_is_required_if_enabled(
+        cls, v: Optional[C.EvaluationConfig], info: ValidationInfo
+    ) -> Optional[C.EvaluationConfig]:
+        """Ensure evaluation is required if enabled"""
+
+        if info.data["enable_evaluation"] and not v:
+            raise ValueError("evaluation is required if enabled")
+
+        if not info.data["enable_evaluation"]:
+            return None
+
+        return v
 
     @model_validator(mode="after")
     def consistent_random_seed_in_training_and_evaluation(self) -> "PipelineConfig":
