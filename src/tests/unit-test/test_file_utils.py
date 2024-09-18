@@ -6,7 +6,7 @@ from classifier_trains.utils.file import check_and_create_dir, load_yml, save_as
 
 
 @pytest.fixture(name="dirpath")
-def default_dir_path() -> str:
+def dirpath_fixture() -> str:
     """Return the default directory path"""
 
     return f"{os.path.dirname(os.path.dirname(__file__))}/test_data"

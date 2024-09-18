@@ -6,17 +6,17 @@ import pytest
 from classifier_trains.core import ModelInterface
 
 
-@pytest.fixture(name="dirpath")
-def default_dir_path() -> str:
+@pytest.fixture(name="dataset_path")
+def dataset_path_fixture() -> str:
     """Return the default directory path"""
 
     return f"{os.path.dirname(os.path.dirname(__file__))}/test_dataset"
 
 
-def test_compute_mean_and_std(dirpath: str) -> None:
+def test_compute_mean_and_std(dataset_path: str) -> None:
     """Test the compute mean and std function"""
 
-    mean_and_std = ModelInterface.compute_mean_and_std(dirpath=dirpath)
+    mean_and_std = ModelInterface.compute_mean_and_std(dirpath=dataset_path)
 
     assert np.isclose(mean_and_std["mean"][0], 0.47488933801651, atol=1e-9)
     assert np.isclose(mean_and_std["mean"][1], 0.4632834792137146, atol=1e-9)

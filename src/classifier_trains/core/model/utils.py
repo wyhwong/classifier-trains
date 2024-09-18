@@ -122,7 +122,7 @@ def initialize_scheduler(
     if scheduler_config.name is constants.SchedulerType.STEP:
         return torch.optim.lr_scheduler.StepLR(
             optimizer=optimizer,
-            step_size=scheduler_config.step_size,
+            step_size=scheduler_config.step_size,  # type: ignore
             gamma=scheduler_config.gamma,
         )
 

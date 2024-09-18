@@ -1,5 +1,3 @@
-import torch
-
 from classifier_trains.core.loading import ImageDataloader
 from classifier_trains.core.model import ModelFacade
 from classifier_trains.core.preprocessing import Preprocessor
@@ -20,23 +18,15 @@ local_logger = logger.get_logger(__name__)
 class ModelInterface:
     """Class to handle the classifier training"""
 
-    def __init__(
-        self,
-        preprocessing_config: PreprocessingConfig,
-        model_config: ModelConfig,
-    ) -> None:
+    def __init__(self, preprocessing_config: PreprocessingConfig) -> None:
         """Initialize the classifier facade
 
         Args:
             preprocessing_config (PreprocessingConfig): The preprocessing configuration
-            model_config (ModelConfig): The model configuration
         """
 
         self.__preprocessor = Preprocessor(preprocessing_config=preprocessing_config)
-        self.__model_facade = ModelFacade(
-            model_config=model_config,
-            denorm_fn=self.__preprocessor.denormalize,
-        )
+        self.__model_facade = ModelFacade(denorm_fn=self.__preprocessor.denormalize)
         self.__transforms = {
             constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),
             constants.Phase.VALIDATION: self.__preprocessor.get_validation_transforms(),
@@ -46,6 +36,7 @@ class ModelInterface:
     def train(
         self,
         training_config: TrainingConfig,
+        model_config: ModelConfig,
         dataloader_config: DataloaderConfig,
         output_dir: str,
     ) -> None:
@@ -64,8 +55,14 @@ class ModelInterface:
             dataloader_config=dataloader_config,
             transforms=self.__transforms,
         )
+        datamodule.setup_for_training(
+            trainset_dir=training_config.trainset_dir,
+            valset_dir=training_config.valset_dir,
+            test_dir=training_config.testset_dir,
+        )
 
         self.__model_facade.train(
+            model_config=model_config,
             training_config=training_config,
             datamodule=datamodule,
             output_dir=output_dir,
@@ -99,23 +96,11 @@ class ModelInterface:
             dirpath=evaluation_config.evalset_dir,
             is_augmented=False,
         )
-        self.__model_facade.evaluate(
+        ModelFacade.evaluate(
             evaluation_config=evaluation_config,
             dataloader=dataloader,
             output_dir=output_dir,
         )
-
-    def inference(self, data: torch.Tensor) -> torch.Tensor:
-        """Make inference with the model
-
-        Args:
-            data: The data to make inference
-
-        Returns:
-            torch.Tensor: The inference result
-        """
-
-        return self.__model_facade.inference(x=data)
 
     @staticmethod
     def compute_mean_and_std(dirpath: str) -> dict[str, list[float]]:

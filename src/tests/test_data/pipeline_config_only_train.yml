@@ -1,0 +1,40 @@
+enable_training: true
+enable_evaluation: false
+
+dataloader:
+  batch_size: 4
+
+preprocessing:
+  mean: [0.47488933801651, 0.4632834792137146, 0.4371258318424225]
+  std: [0.21972933411598206, 0.22210058569908142, 0.22161932289600372]
+  resize_config:
+    width: 48
+    height: 48
+  spatial_config:
+    hflip_prob: 0.5
+    vflip_prob: 0.5
+    max_rotate_in_degree: 10
+    allow_center_crop: true
+    allow_random_crop: true
+
+model:
+  backbone: squeezenet1_0
+  num_classes: 2
+  weights: DEFAULT
+  checkpoint_path: null
+
+training:
+  name: experiment
+  num_epochs: 1
+  device: cpu
+  trainset_dir: ./tests/test_dataset/
+  valset_dir: ./tests/test_dataset/
+  scheduler:
+    name: step
+    step_size: 30
+    gamma: 0.1
+  optimizer:
+    name: adam
+    lr: 1e-7
+    weight_decay: 0
+    betas: [0.9, 0.999]

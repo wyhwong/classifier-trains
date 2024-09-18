@@ -16,7 +16,7 @@ make help
 
 ## After installation
 
-For example of pipeline configuration, please see [pipeline_setting.yml](https://github.com/wyhwong/classifier-trains/blob/main/src/pipeline_setting.yml).
+For example of pipeline configuration, please see [pipeline_config.yml](https://github.com/wyhwong/classifier-trains/blob/main/src/tests/test_data/pipeline_config.yml).
 
 ```bash
 # Run training or evaluation

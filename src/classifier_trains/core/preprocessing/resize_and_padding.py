@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 import torchvision
 import torchvision.transforms.functional
@@ -14,8 +16,8 @@ def get_resize_and_padding_transforms(
     width: int,
     height: int,
     interpolation: constants.InterpolationType,
-    padding: constants.PaddingType,
-    maintain_aspect_ratio: bool,
+    padding: Optional[constants.PaddingType] = None,
+    maintain_aspect_ratio: bool = False,
 ) -> list[nn.Module]:
     """Function to get the resize and padding transforms.
 
@@ -31,7 +33,7 @@ def get_resize_and_padding_transforms(
     """
 
     resize_and_padding: list[nn.Module] = [
-        ResizeAndPadding(width, height, maintain_aspect_ratio, interpolation, padding),
+        ResizeAndPadding(width, height, interpolation, padding, maintain_aspect_ratio),
     ]
     return resize_and_padding
 
@@ -43,18 +45,18 @@ class ResizeAndPadding(nn.Module):
         self,
         width: int,
         height: int,
-        maintain_aspect_ratio: bool,
         interpolation: constants.InterpolationType,
-        padding: constants.PaddingType,
+        padding: Optional[constants.PaddingType] = None,
+        maintain_aspect_ratio: bool = False,
     ) -> None:
         """Initialize the Resize layer.
 
         Args:
             width (int): The width of the image.
             height (int): The height of the image.
-            maintain_aspect_ratio (bool): Whether to maintain the aspect ratio.
             interpolation (constants.InterpolationType): The interpolation type.
             padding (constants.PaddingType): The padding type.
+            maintain_aspect_ratio (bool): Whether to maintain the aspect ratio.
         """
 
         super().__init__()
@@ -62,9 +64,9 @@ class ResizeAndPadding(nn.Module):
         self.__w = width
         self.__h = height
 
+        self.__padding = padding
         self.__interpolation = getattr(torchvision.transforms.InterpolationMode, interpolation.value.upper())
         self.__maintain_aspect_ratio = maintain_aspect_ratio
-        self.__padding = padding
 
     def __call__(self, image: torch.Tensor) -> torch.Tensor:
         """Resize the image to the specified dimensions.

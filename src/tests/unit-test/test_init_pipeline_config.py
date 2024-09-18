@@ -5,6 +5,13 @@ import pytest
 from classifier_trains.schemas import config, constants, pipeline
 
 
+@pytest.fixture(name="dataset_path")
+def dataset_path_fixture() -> str:
+    """Return the default directory path"""
+
+    return f"{os.path.dirname(os.path.dirname(__file__))}/test_dataset"
+
+
 @pytest.fixture(name="model")
 def model_config_fixture() -> config.ModelConfig:
     """ModelConfig fixture"""
@@ -20,14 +27,7 @@ def model_config_fixture() -> config.ModelConfig:
 def dataloader_config_fixture() -> config.DataloaderConfig:
     """DataloaderConfig fixture"""
 
-    dirpath = f"{os.path.dirname(os.path.dirname(__file__))}/test_dataset"
-
-    return config.DataloaderConfig(
-        trainset_dir=dirpath,
-        valset_dir=dirpath,
-        batch_size=32,
-        num_workers=4,
-    )
+    return config.DataloaderConfig(batch_size=32)
 
 
 @pytest.fixture(name="preprocessing")
@@ -37,66 +37,47 @@ def preprocessing_config_fixture() -> config.PreprocessingConfig:
     return config.PreprocessingConfig(
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225],
-        resize_config=config.ResizeConfig(
-            width=224,
-            height=224,
-            interpolation=constants.InterpolationType.BILINEAR,
-            padding=constants.PaddingType.CENTER,
-            maintain_aspect_ratio=True,
-        ),
-        spatial_config=config.SpatialTransformConfig(
-            hflip_prob=0.5,
-            vflip_prob=0.5,
-            max_rotate_in_degree=45,
-            allow_center_crop=True,
-            allow_random_crop=True,
-        ),
-        color_config=config.ColorTransformConfig(
-            allow_gray_scale=True,
-            allow_random_color=True,
-        ),
+        resize_config=config.ResizeConfig(width=48, height=48),
     )
+
+
+@pytest.fixture(name="optimizer")
+def optimizer_config_fixture() -> config.OptimizerConfig:
+    """OptimizerConfig fixture"""
+
+    return config.OptimizerConfig(name=constants.OptimizerType.ADAM, lr=1e-3, weight_decay=1e-4)
+
+
+@pytest.fixture(name="scheduler")
+def scheduler_config_fixture() -> config.SchedulerConfig:
+    """SchedulerConfig fixture"""
+
+    return config.SchedulerConfig(name=constants.SchedulerType.STEP, step_size=1, gamma=0.1)
 
 
 @pytest.fixture(name="training")
-def training_config_fixture() -> config.TrainingConfig:
+def training_config_fixture(
+    optimizer: config.OptimizerConfig,
+    scheduler: config.SchedulerConfig,
+    dataset_path: str,
+) -> config.TrainingConfig:
     """TrainingConfig fixture"""
 
-    optimizer = config.OptimizerConfig(name=constants.OptimizerType.ADAM, lr=1e-3, weight_decay=1e-4)
-    scheduler = config.SchedulerConfig(name=constants.SchedulerType.STEP, step_size=1, gamma=0.1)
-
-    c = config.TrainingConfig(
+    return config.TrainingConfig(
         name="test",
         num_epochs=10,
-        random_seed=42,
-        precision=64,
-        device="cpu",
-        validate_every_n_epoch=1,
-        save_every_n_epoch=1,
-        patience_in_epoch=1,
-        criterion=constants.Criterion.LOSS,
         optimizer=optimizer,
         scheduler=scheduler,
-        export_best_as_onnx=True,
-        export_last_as_onnx=True,
-        max_num_hrs=1.0,
+        trainset_dir=dataset_path,
+        valset_dir=dataset_path,
     )
-    return c
 
 
 @pytest.fixture(name="evaluation")
-def evaluation_config_fixture() -> config.EvaluationConfig:
+def evaluation_config_fixture(dataset_path: str) -> config.EvaluationConfig:
     """EvaluationConfig fixture"""
 
-    c = config.EvaluationConfig(
-        name="test",
-        device="cpu",
-        random_seed=42,
-        precision=64,
-        evalset_dir="test",
-        models=[],
-    )
-    return c
+    return config.EvaluationConfig(name="test", evalset_dir=dataset_path, models=[])
 
 
 def test_init_pipeline_config(
@@ -105,7 +86,7 @@ def test_init_pipeline_config(
     preprocessing: config.PreprocessingConfig,
     training: config.TrainingConfig,
     evaluation: config.EvaluationConfig,
-):
+) -> None:
     """Test PipelineConfig initialization"""
 
     c = pipeline.PipelineConfig(
@@ -127,7 +108,7 @@ def test_init_pipeline_config_without_training(
     preprocessing: config.PreprocessingConfig,
     training: config.TrainingConfig,
     evaluation: config.EvaluationConfig,
-):
+) -> None:
     """Test PipelineConfig initialization"""
 
     c = pipeline.PipelineConfig(
@@ -142,6 +123,48 @@ def test_init_pipeline_config_without_training(
 
     # Expected: training config is ignored
     assert c.training is None
+    # Expected: model config is ignored
+    assert c.model is None
+
+
+def test_init_pipeline_config_with_training_but_empty_content(
+    model: config.ModelConfig,
+    dataloader: config.DataloaderConfig,
+    preprocessing: config.PreprocessingConfig,
+    evaluation: config.EvaluationConfig,
+) -> None:
+    """Test PipelineConfig initialization"""
+
+    with pytest.raises(ValueError):
+        pipeline.PipelineConfig(
+            enable_training=True,
+            enable_evaluation=True,
+            model=model,
+            dataloader=dataloader,
+            preprocessing=preprocessing,
+            training=None,
+            evaluation=evaluation,
+        )
+
+
+def test_init_pipeline_config_with_trainig_but_no_model(
+    dataloader: config.DataloaderConfig,
+    preprocessing: config.PreprocessingConfig,
+    training: config.TrainingConfig,
+    evaluation: config.EvaluationConfig,
+) -> None:
+    """Test PipelineConfig initialization"""
+
+    with pytest.raises(ValueError):
+        pipeline.PipelineConfig(
+            enable_training=True,
+            enable_evaluation=True,
+            model=None,
+            dataloader=dataloader,
+            preprocessing=preprocessing,
+            training=training,
+            evaluation=evaluation,
+        )
 
 
 def test_init_pipeline_config_without_evaluation(
@@ -150,7 +173,7 @@ def test_init_pipeline_config_without_evaluation(
     preprocessing: config.PreprocessingConfig,
     training: config.TrainingConfig,
     evaluation: config.EvaluationConfig,
-):
+) -> None:
     """Test PipelineConfig initialization"""
 
     c = pipeline.PipelineConfig(
@@ -165,3 +188,47 @@ def test_init_pipeline_config_without_evaluation(
 
     # Expected: evaluation config is ignored
     assert c.evaluation is None
+
+
+def test_init_pipeline_config_with_evaluation_but_empty_content(
+    model: config.ModelConfig,
+    dataloader: config.DataloaderConfig,
+    preprocessing: config.PreprocessingConfig,
+    training: config.TrainingConfig,
+) -> None:
+    """Test PipelineConfig initialization"""
+
+    with pytest.raises(ValueError):
+        pipeline.PipelineConfig(
+            enable_training=True,
+            enable_evaluation=True,
+            model=model,
+            dataloader=dataloader,
+            preprocessing=preprocessing,
+            training=training,
+            evaluation=None,
+        )
+
+
+def test_init_pipeline_config_inconsistent_random_seed(
+    model: config.ModelConfig,
+    dataloader: config.DataloaderConfig,
+    preprocessing: config.PreprocessingConfig,
+    training: config.TrainingConfig,
+    evaluation: config.EvaluationConfig,
+) -> None:
+    """Test PipelineConfig initialization"""
+
+    training.random_seed = 42
+    evaluation.random_seed = 43
+
+    with pytest.raises(ValueError):
+        pipeline.PipelineConfig(
+            enable_training=True,
+            enable_evaluation=True,
+            model=model,
+            dataloader=dataloader,
+            preprocessing=preprocessing,
+            training=training,
+            evaluation=evaluation,
+        )

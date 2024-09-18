@@ -31,59 +31,8 @@ class ModelConfig(BaseModel):
 class DataloaderConfig(BaseModel):
     """Dataset configuration"""
 
-    trainset_dir: str
-    valset_dir: str
     batch_size: PositiveInt
-    num_workers: PositiveInt
-    testset_dir: Optional[str] = None
-
-    @model_validator(mode="after")
-    @classmethod
-    def trainset_dir_is_valid(cls, v):
-        """Validate the training set directory."""
-
-        if not os.path.isdir(v.trainset_dir):
-            raise ValueError(f"trainset_dir {v.trainset_dir} does not exist.")
-
-        return v
-
-    @model_validator(mode="after")
-    @classmethod
-    def valset_dir_is_valid(cls, v):
-        """Validate the validation set directory."""
-
-        if not os.path.isdir(v.valset_dir):
-            raise ValueError(f"valset_dir {v.valset_dir} does not exist.")
-
-        return v
-
-    @model_validator(mode="after")
-    @classmethod
-    def testset_dir_is_valid(cls, v: Optional[str]) -> Optional[str]:
-        """Validate the test set directory."""
-
-        if v.testset_dir and not os.path.isdir(v.testset_dir):
-            raise ValueError(f"testset_dir {v.testset_dir} does not exist.")
-
-        return v
-
-    def get_dirpath(self, phase: C.Phase) -> Optional[str]:
-        """Get the directory path for the given phase.
-
-        Args:
-            phase (C.Phase): The phase.
-
-        Returns:
-            str: The directory path.
-        """
-
-        if phase is C.Phase.TRAINING:
-            return self.trainset_dir
-
-        if phase is C.Phase.VALIDATION:
-            return self.valset_dir
-
-        return self.testset_dir
+    num_workers: PositiveInt = 0
 
 
 class ResizeConfig(BaseModel):
@@ -91,9 +40,23 @@ class ResizeConfig(BaseModel):
 
     width: PositiveInt
     height: PositiveInt
-    interpolation: C.InterpolationType
-    padding: C.PaddingType
-    maintain_aspect_ratio: bool
+    interpolation: C.InterpolationType = C.InterpolationType.BICUBIC
+    padding: Optional[C.PaddingType] = None
+    maintain_aspect_ratio: bool = False
+
+    @model_validator(mode="after")
+    @classmethod
+    def handling_is_provided_if_maintain_aspect_ratio(cls, v):
+        """Validate the handling of maintain_aspect_ratio"""
+
+        if v.maintain_aspect_ratio:
+            if v.padding is None:
+                raise ValueError("padding is expected to be input if maintain_aspect_ratio is True")
+
+        if v.padding is not None and not v.maintain_aspect_ratio:
+            raise ValueError("padding is expected to be None if maintain_aspect_ratio is False")
+
+        return v
 
 
 class SpatialTransformConfig(BaseModel):
@@ -101,9 +64,9 @@ class SpatialTransformConfig(BaseModel):
 
     hflip_prob: NonNegativeFloat
     vflip_prob: NonNegativeFloat
-    max_rotate_in_degree: NonNegativeFloat
-    allow_center_crop: bool
-    allow_random_crop: bool
+    max_rotate_in_degree: NonNegativeFloat = 0.0
+    allow_center_crop: bool = False
+    allow_random_crop: bool = False
 
     @field_validator("hflip_prob")
     @classmethod
@@ -146,8 +109,8 @@ class PreprocessingConfig(BaseModel):
     mean: list[float]
     std: list[float]
     resize_config: ResizeConfig
-    spatial_config: SpatialTransformConfig
-    color_config: ColorTransformConfig
+    spatial_config: Optional[SpatialTransformConfig] = None
+    color_config: Optional[ColorTransformConfig] = None
 
 
 class OptimizerConfig(BaseModel):
@@ -262,26 +225,69 @@ class TrainingConfig(BaseModel):
 
     name: str
     num_epochs: PositiveInt
-    random_seed: PositiveInt
-    precision: Literal[64, 32, 16]
-    device: str
-    validate_every_n_epoch: PositiveInt
-    save_every_n_epoch: PositiveInt
-    patience_in_epoch: PositiveInt
-    criterion: C.Criterion
     optimizer: OptimizerConfig
     scheduler: SchedulerConfig
-    export_last_as_onnx: bool
-    export_best_as_onnx: bool
+    trainset_dir: str
+    valset_dir: str
+    testset_dir: Optional[str] = None
+    device: str = "cuda"
     max_num_hrs: Optional[NonNegativeFloat] = None
+    criterion: C.Criterion = C.Criterion.LOSS
+    validate_every_n_epoch: PositiveInt = 1
+    save_every_n_epoch: PositiveInt = 3
+    patience_in_epoch: PositiveInt = 5
+    random_seed: PositiveInt = 42
+    precision: Literal[64, 32, 16] = 64
+    export_last_as_onnx: bool = False
+    export_best_as_onnx: bool = False
+
+    @model_validator(mode="after")
+    @classmethod
+    def trainset_dir_is_valid(cls, v):
+        """Validate the training set directory."""
+
+        if not os.path.isdir(v.trainset_dir):
+            raise ValueError(f"trainset_dir {v.trainset_dir} does not exist.")
+
+        return v
+
+    @model_validator(mode="after")
+    @classmethod
+    def valset_dir_is_valid(cls, v):
+        """Validate the validation set directory."""
+
+        if not os.path.isdir(v.valset_dir):
+            raise ValueError(f"valset_dir {v.valset_dir} does not exist.")
+
+        return v
+
+    @model_validator(mode="after")
+    @classmethod
+    def testset_dir_is_valid(cls, v):
+        """Validate the test set directory."""
+
+        if v.testset_dir and not os.path.isdir(v.testset_dir):
+            raise ValueError(f"testset_dir {v.testset_dir} does not exist.")
+
+        return v
 
 
 class EvaluationConfig(BaseModel):
     """Evaluation configuration"""
 
     name: str
-    device: str
-    random_seed: PositiveInt
-    precision: Literal[64, 32, 16]
     evalset_dir: str
     models: list[ModelConfig]
+    device: str = "cuda"
+    precision: Literal[64, 32, 16] = 64
+    random_seed: PositiveInt = 42
+
+    @model_validator(mode="after")
+    @classmethod
+    def evalset_dir_is_valid(cls, v):
+        """Validate the evaluation set directory."""
+
+        if not os.path.isdir(v.evalset_dir):
+            raise ValueError(f"evalset_dir {v.evalset_dir} does not exist.")
+
+        return v
