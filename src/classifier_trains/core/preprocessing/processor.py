@@ -44,19 +44,26 @@ class Preprocessor:
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(self.__mean, self.__std),
         ]
-        self.__spatial_augmentation = get_spatial_transforms(
-            width=self.__resize_config.width,
-            height=self.__resize_config.height,
-            hflip_prob=self.__spatial_config.hflip_prob,
-            vflip_prob=self.__spatial_config.vflip_prob,
-            max_rotate_in_degree=self.__spatial_config.max_rotate_in_degree,
-            allow_center_crop=self.__spatial_config.allow_center_crop,
-            allow_random_crop=self.__spatial_config.allow_random_crop,
-        )
-        self.__color_augmentation = get_color_transforms(
-            allow_gray_scale=self.__color_config.allow_gray_scale,
-            allow_random_color=self.__color_config.allow_random_color,
-        )
+
+        self.__spatial_augmentation = []
+        if self.__spatial_config:
+            self.__spatial_augmentation = get_spatial_transforms(
+                width=self.__resize_config.width,
+                height=self.__resize_config.height,
+                hflip_prob=self.__spatial_config.hflip_prob,
+                vflip_prob=self.__spatial_config.vflip_prob,
+                max_rotate_in_degree=self.__spatial_config.max_rotate_in_degree,
+                allow_center_crop=self.__spatial_config.allow_center_crop,
+                allow_random_crop=self.__spatial_config.allow_random_crop,
+            )
+
+        self.__color_augmentation = []
+        if self.__color_config:
+            self.__color_augmentation = get_color_transforms(
+                allow_gray_scale=self.__color_config.allow_gray_scale,
+                allow_random_color=self.__color_config.allow_random_color,
+            )
+
         self.__resize_and_padding = get_resize_and_padding_transforms(
             width=self.__resize_config.width,
             height=self.__resize_config.height,

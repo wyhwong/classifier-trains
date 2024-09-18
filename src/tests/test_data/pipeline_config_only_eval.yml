@@ -1,0 +1,22 @@
+enable_training: false
+enable_evaluation: true
+
+dataloader:
+  batch_size: 8
+
+preprocessing:
+  mean: [0.47488933801651, 0.4632834792137146, 0.4371258318424225]
+  std: [0.21972933411598206, 0.22210058569908142, 0.22161932289600372]
+  resize_config:
+    width: 48
+    height: 48
+
+evaluation:
+  name: experiment
+  evalset_dir: ./tests/test_dataset/
+  device: cpu
+  models:
+    - backbone: squeezenet1_0
+      num_classes: 2
+      weights: DEFAULT
+      checkpoint_path: null

@@ -71,6 +71,78 @@ class ModelBackbone(enum.StrEnum):
     DENSENET201 = "densenet201"
     INCEPTION_V3 = "inception_v3"
 
+    @classmethod
+    def resnets(cls):
+        """Return the resnet backbones."""
+
+        return [cls.RESNET18, cls.RESNET34, cls.RESNET50, cls.RESNET152]
+
+    @property
+    def is_resnet(self) -> bool:
+        """Check if the backbone is resnet."""
+
+        return self in self.resnets()
+
+    @classmethod
+    def alexnets(cls):
+        """Return the alexnet backbones."""
+
+        return [cls.ALEXNET]
+
+    @property
+    def is_alexnet(self) -> bool:
+        """Check if the backbone is alexnet."""
+
+        return self in self.alexnets()
+
+    @classmethod
+    def vggs(cls):
+        """Return the vgg backbones."""
+
+        return [cls.VGG11, cls.VGG11_BN, cls.VGG13, cls.VGG13_BN, cls.VGG16, cls.VGG16_BN, cls.VGG19, cls.VGG19_BN]
+
+    @property
+    def is_vgg(self) -> bool:
+        """Check if the backbone is vgg."""
+
+        return self in self.vggs()
+
+    @classmethod
+    def squeezenets(cls):
+        """Return the squeezenet backbones."""
+
+        return [cls.SQUEEZENET1_0, cls.SQUEEZENET1_1]
+
+    @property
+    def is_squeezenet(self) -> bool:
+        """Check if the backbone is squeezenet."""
+
+        return self in self.squeezenets()
+
+    @classmethod
+    def densenets(cls):
+        """Return the densenet backbones."""
+
+        return [cls.DENSENET121, cls.DENSENET161, cls.DENSENET169, cls.DENSENET201]
+
+    @property
+    def is_densenet(self) -> bool:
+        """Check if the backbone is densenet."""
+
+        return self in self.densenets()
+
+    @classmethod
+    def inceptionnets(cls):
+        """Return the inception backbones."""
+
+        return [cls.INCEPTION_V3]
+
+    @property
+    def is_inception(self) -> bool:
+        """Check if the backbone is inception."""
+
+        return self in self.inceptionnets()
+
 
 class Phase(enum.StrEnum):
     """The phase."""

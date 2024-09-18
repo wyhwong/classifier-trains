@@ -24,24 +24,25 @@ def initialize_classifier(model_config: config.ModelConfig) -> nn.Module:
     local_logger.info("Initializing model with the following configuration: %s.", model_config)
 
     model = getattr(torchvision.models, model_config.backbone)(weights=model_config.weights)
+
     # Modify output layer to fit number of classes
-    if "resnet" in model_config.backbone:
+    if model_config.backbone.is_resnet:
         model.fc = torch.nn.Linear(model.fc.in_features, model_config.num_classes)
 
-    if "alexnet" in model_config.backbone:
+    if model_config.backbone.is_alexnet:
         model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, model_config.num_classes)
 
-    if "vgg" in model_config.backbone:
+    if model_config.backbone.is_vgg:
         model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, model_config.num_classes)
 
-    if "squeezenet" in model_config.backbone:
+    if model_config.backbone.is_squeezenet:
         model.classifier[1] = torch.nn.Conv2d(512, model_config.num_classes, kernel_size=(1, 1), stride=(1, 1))
         model.num_classes = model_config.num_classes
 
-    if "densenet" in model_config.backbone:
+    if model_config.backbone.is_densenet:
         model.classifier = torch.nn.Linear(model.classifier.in_features, model_config.num_classes)
 
-    if "inception" in model_config.backbone:
+    if model_config.backbone.is_inception:
         model.AuxLogits.fc = torch.nn.Linear(model.AuxLogits.fc.in_features, model_config.num_classes)
         model.fc = torch.nn.Linear(model.fc.in_features, model_config.num_classes)
 
@@ -121,7 +122,7 @@ def initialize_scheduler(
     if scheduler_config.name is constants.SchedulerType.STEP:
         return torch.optim.lr_scheduler.StepLR(
             optimizer=optimizer,
-            step_size=scheduler_config.step_size,
+            step_size=scheduler_config.step_size,  # type: ignore
             gamma=scheduler_config.gamma,
         )
 

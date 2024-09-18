@@ -32,15 +32,39 @@ class ImageDataloader(pl.LightningDataModule):
 
         local_logger.info("Initializing ImageDataloader with config: %s", dataloader_config)
 
-        self.__trainset_dir = dataloader_config.trainset_dir
-        self.__valset_dir = dataloader_config.valset_dir
-        self.__test_dir = dataloader_config.testset_dir
         self.__batch_size = dataloader_config.batch_size
         self.__num_workers = dataloader_config.num_workers
         self.__transforms = transforms or {phase: None for phase in Phase}
 
+        self.__trainset_dir: Optional[str] = None
+        self.__valset_dir: Optional[str] = None
+        self.__test_dir: Optional[str] = None
+
+    def setup_for_training(self, trainset_dir: str, valset_dir: str, test_dir: Optional[str] = None) -> None:
+        """Setup the dataloader.
+
+        Args:
+            trainset_dir (str): The path to the training dataset.
+            valset_dir (str): The path to the validation dataset.
+            test_dir (Optional[str]): The path to the test dataset.
+        """
+
+        local_logger.info(
+            "Setting up dataloader with trainset_dir: %s, valset_dir: %s, test_dir: %s",
+            trainset_dir,
+            valset_dir,
+            test_dir,
+        )
+
+        self.__trainset_dir = trainset_dir
+        self.__valset_dir = valset_dir
+        self.__test_dir = test_dir
+
     def train_dataloader(self) -> DataLoader:
         """Get the training dataloader."""
+
+        if not self.__trainset_dir:
+            raise ValueError("trainset_dir is not set.")
 
         return DataLoader(
             dataset=datasets.ImageFolder(
@@ -54,6 +78,9 @@ class ImageDataloader(pl.LightningDataModule):
 
     def val_dataloader(self) -> DataLoader:
         """Get the validation dataloader."""
+
+        if not self.__valset_dir:
+            raise ValueError("valset_dir is not set.")
 
         return DataLoader(
             dataset=datasets.ImageFolder(
@@ -69,6 +96,7 @@ class ImageDataloader(pl.LightningDataModule):
         """Get the test dataloader."""
 
         if not self.__test_dir:
+            local_logger.info("testset_dir is not set. Return None.")
             return None
 
         return DataLoader(

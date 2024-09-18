@@ -1,8 +1,8 @@
 import click
-import yaml
 
 import classifier_trains.schemas.pipeline
 from classifier_trains.core import ModelInterface
+from classifier_trains.utils.file import load_yml
 
 
 def __run_pipeline(pipeline_config: classifier_trains.schemas.pipeline.PipelineConfig, output_dir: str) -> None:
@@ -13,21 +13,19 @@ def __run_pipeline(pipeline_config: classifier_trains.schemas.pipeline.PipelineC
         output_dir (str): Path to the output directory.
     """
 
-    model_interface = ModelInterface(
-        preprocessing_config=pipeline_config.preprocessing,
-        model_config=pipeline_config.model,
-    )
+    model_interface = ModelInterface(preprocessing_config=pipeline_config.preprocessing)
 
     if pipeline_config.enable_training:
         model_interface.train(
-            training_config=pipeline_config.training,
+            model_config=pipeline_config.model,  # type: ignore
+            training_config=pipeline_config.training,  # type: ignore
             dataloader_config=pipeline_config.dataloader,
             output_dir=output_dir,
         )
 
     if pipeline_config.enable_evaluation:
         model_interface.evaluate(
-            evaluation_config=pipeline_config.evaluation,
+            evaluation_config=pipeline_config.evaluation,  # type: ignore
             dataloader_config=pipeline_config.dataloader,
             output_dir=output_dir,
         )
@@ -52,9 +50,7 @@ def run(config_path: str, output_dir: str) -> None:
         >>> python -m pipeline run -c config.yaml -o output
     """
 
-    with open(config_path, mode="r", encoding="utf-8") as file:
-        content = yaml.load(file, Loader=yaml.SafeLoader)
-
+    content = load_yml(config_path)
     pipeline_config = classifier_trains.schemas.pipeline.PipelineConfig(**content)
     __run_pipeline(pipeline_config=pipeline_config, output_dir=output_dir)
 
@@ -119,9 +115,7 @@ def profile(config_path: str, output_dir: str, interval: float, show_all: bool, 
     profiler = Profiler(interval=interval)
     profiler.start()
 
-    with open(config_path, mode="r", encoding="utf-8") as file:
-        content = yaml.load(file, Loader=yaml.SafeLoader)
-
+    content = load_yml(config_path)
     pipeline_config = classifier_trains.schemas.pipeline.PipelineConfig(**content)
     __run_pipeline(pipeline_config=pipeline_config, output_dir=output_dir)
 

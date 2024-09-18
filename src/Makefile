@@ -2,7 +2,7 @@ export DOCKER_BUILDKIT=1
 
 # For Docker mount
 export DATA_DIR?=./tests/test_dataset
-export CONFIG_PATH?=pipeline_setting.yml
+export CONFIG_PATH?=./tests/test_data/full_pipeline_config.yml
 export OUTPUT_DIR?=results
 
 # For Docker image
