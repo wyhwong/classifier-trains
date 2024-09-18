@@ -1,7 +1,15 @@
 import os
 from typing import Literal, Optional
 
-from pydantic import BaseModel, NonNegativeFloat, PositiveFloat, PositiveInt, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    NonNegativeFloat,
+    NonNegativeInt,
+    PositiveFloat,
+    PositiveInt,
+    field_validator,
+    model_validator,
+)
 
 import classifier_trains.schemas.constants as C
 
@@ -11,7 +19,7 @@ class ModelConfig(BaseModel):
 
     backbone: C.ModelBackbone
     num_classes: PositiveInt
-    weights: str
+    weights: str = "DEFAULT"
     checkpoint_path: Optional[str] = None
 
     @field_validator("checkpoint_path")
@@ -32,7 +40,7 @@ class DataloaderConfig(BaseModel):
     """Dataset configuration"""
 
     batch_size: PositiveInt
-    num_workers: PositiveInt = 0
+    num_workers: NonNegativeInt = 0
 
 
 class ResizeConfig(BaseModel):
@@ -118,7 +126,7 @@ class OptimizerConfig(BaseModel):
 
     name: C.OptimizerType
     lr: PositiveFloat
-    weight_decay: NonNegativeFloat
+    weight_decay: NonNegativeFloat = 0.0
     momentum: Optional[NonNegativeFloat] = None
     alpha: Optional[NonNegativeFloat] = None
     betas: Optional[tuple[NonNegativeFloat, NonNegativeFloat]] = None
@@ -233,9 +241,9 @@ class TrainingConfig(BaseModel):
     device: str = "cuda"
     max_num_hrs: Optional[NonNegativeFloat] = None
     criterion: C.Criterion = C.Criterion.LOSS
-    validate_every_n_epoch: PositiveInt = 1
-    save_every_n_epoch: PositiveInt = 3
-    patience_in_epoch: PositiveInt = 5
+    validate_every: PositiveInt = 1
+    save_every: PositiveInt = 3
+    patience: PositiveInt = 5
     random_seed: PositiveInt = 42
     precision: Literal[64, 32, 16] = 64
     export_last_as_onnx: bool = False

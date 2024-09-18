@@ -83,7 +83,7 @@ class ModelFacade:
             accelerator=training_config.device,
             max_epochs=training_config.num_epochs,
             max_time=max_time,
-            check_val_every_n_epoch=training_config.validate_every_n_epoch,
+            check_val_every_n_epoch=training_config.validate_every,
             log_every_n_steps=1,
             default_root_dir=root_dir,
             callbacks=[
@@ -94,7 +94,7 @@ class ModelFacade:
                 ),
                 EarlyStopping(
                     monitor=constants.Phase.VALIDATION(training_config.criterion),
-                    patience=training_config.patience_in_epoch,
+                    patience=training_config.patience,
                     verbose=True,
                     mode=mode,
                 ),
@@ -110,7 +110,7 @@ class ModelFacade:
                 ModelCheckpoint(
                     dirpath=root_dir,
                     filename=training_config.name + "-{epoch:02d}",
-                    every_n_epochs=training_config.save_every_n_epoch,
+                    every_n_epochs=training_config.save_every,
                     save_top_k=-1,
                     verbose=True,
                 ),

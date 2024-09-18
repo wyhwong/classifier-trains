@@ -3,6 +3,7 @@ enable_evaluation: true
 
 dataloader:
   batch_size: 4
+  num_workers: 0
 
 preprocessing:
   mean: [0.47488933801651, 0.4632834792137146, 0.4371258318424225]
@@ -10,12 +11,18 @@ preprocessing:
   resize_config:
     width: 48
     height: 48
+    interpolation: bicubic
+    padding: top_left
+    maintain_aspect_ratio: true
   spatial_config:
     hflip_prob: 0.5
     vflip_prob: 0.5
     max_rotate_in_degree: 10
     allow_center_crop: true
     allow_random_crop: true
+  color_config:
+    allow_gray_scale: false
+    allow_random_color: true
 
 model:
   backbone: squeezenet1_0
@@ -25,26 +32,45 @@ model:
 
 training:
   name: experiment
-  num_epochs: 1
-  device: cpu
-  trainset_dir: ./tests/test_dataset/
-  valset_dir: ./tests/test_dataset/
+  num_epochs: 5
   scheduler:
     name: step
     step_size: 30
     gamma: 0.1
+    lr_min: null
   optimizer:
     name: adam
     lr: 1e-7
-    weight_decay: 0
+    weight_decay: 0.0
     betas: [0.9, 0.999]
+    momentum: null
+    alpha: null
+  trainset_dir: ./tests/test_dataset/
+  valset_dir: ./tests/test_dataset/
+  testset_dir: null
+  device: cuda
+  max_num_hrs: null
+  criterion: loss
+  validate_every: 1
+  save_every: 1
+  patience: 5
+  random_seed: 42
+  precision: 64
+  export_last_as_onnx: true
+  export_best_as_onnx: true
 
 evaluation:
   name: experiment
   evalset_dir: ./tests/test_dataset/
-  device: cpu
+  device: cuda
+  precision: 64
+  random_seed: 42
   models:
     - backbone: squeezenet1_0
+      num_classes: 2
+      weights: DEFAULT
+      checkpoint_path: null
+    - backbone: squeezenet1_1
       num_classes: 2
       weights: DEFAULT
       checkpoint_path: null
