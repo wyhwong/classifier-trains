@@ -1,7 +1,7 @@
 import enum
 
 
-class OptimizerType(enum.StrEnum):
+class OptimizerType(str, enum.Enum):
     """The optimizer type."""
 
     SGD = "sgd"
@@ -10,21 +10,21 @@ class OptimizerType(enum.StrEnum):
     ADAMW = "adamw"
 
 
-class SchedulerType(enum.StrEnum):
+class SchedulerType(str, enum.Enum):
     """The scheduler type."""
 
     STEP = "step"
     COSINE = "cosine"
 
 
-class Criterion(enum.StrEnum):
+class Criterion(str, enum.Enum):
     """The best criteria."""
 
     LOSS = "loss"
     ACCURACY = "accuracy"
 
 
-class InterpolationType(enum.StrEnum):
+class InterpolationType(str, enum.Enum):
     """The interpolation type.
     These are based on the support of torchvision
     Details please check:
@@ -37,7 +37,7 @@ class InterpolationType(enum.StrEnum):
     BICUBIC = "bicubic"
 
 
-class PaddingType(enum.StrEnum):
+class PaddingType(str, enum.Enum):
     """The padding type."""
 
     TOPLEFT = "top_left"
@@ -47,7 +47,7 @@ class PaddingType(enum.StrEnum):
     CENTER = "center"
 
 
-class ModelBackbone(enum.StrEnum):
+class ModelBackbone(str, enum.Enum):
     """The model backbone."""
 
     RESNET18 = "resnet18"
@@ -144,7 +144,7 @@ class ModelBackbone(enum.StrEnum):
         return self in self.inceptionnets()
 
 
-class Phase(enum.StrEnum):
+class Phase(str, enum.Enum):
     """The phase."""
 
     TRAINING = "train"
