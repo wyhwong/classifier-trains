@@ -1,6 +1,8 @@
 # Classifier-trains
 
-For project details, please see [README.md](https://github.com/wyhwong/classifier-trains)
+[![github](https://img.shields.io/badge/GitHub-classifier_trains-blue.svg)](https://github.com/wyhwong/classifier-trains)
+[![PyPI version](https://badge.fury.io/py/classifier-trains.svg)](https://pypi.org/project/classifier-trains/)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/wyhwong/classifier-trains/blob/main/LICENSE)
 
 ## Install as a package
 ```bash

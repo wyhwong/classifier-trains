@@ -1,6 +1,7 @@
 # Classifier-trains
+
 [![github](https://img.shields.io/badge/GitHub-classifier_trains-blue.svg)](https://github.com/wyhwong/classifier-trains)
-[![PyPI version](https://badge.fury.io/py/archeo.svg)](https://pypi.org/project/classifier-trains/)
+[![PyPI version](https://badge.fury.io/py/classifier-trains.svg)](https://pypi.org/project/classifier-trains/)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/wyhwong/classifier-trains/blob/main/LICENSE)
 
 Classifier-trains is a package aims to provide a primitive tool to finetune state-of-the-art models with PyTorch implementation, similar to Nvidia TAO but with more flexibility in augmentation and models. Like TAO classification, all parameters are configurable in yaml file to minimize the need of modifying scripts.
