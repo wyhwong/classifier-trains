@@ -1,30 +1,31 @@
 [tool.poetry]
 name = "classifier_trains"
-version = "1.1.2"
+version = "1.1.3"
 description = "A PyTorch-based deep learning classifier training framework."
 authors = ["wyhwong <wyhwong@link.cuhk.edu.hk>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/wyhwong/classifier-trains"
+homepage = "https://pypi.org/project/classifier_trains/"
 repository = "https://github.com/wyhwong/classifier-trains"
-keywords = ["pytorch", "deep learning", "classification", "training", "onnx", "tensorboard", "profiler"]
+keywords = ["pytorch", "deep learning", "image classification"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.11",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 pyyaml = "^6.0.1"
 pydantic = "^2.8.2"
 click = "^8.1.7"
 # Dependencies for model training
 lightning = "^2.4.0"
-numpy = "^2.1.1"
+numpy = "^2.0.2"
 onnx = "^1.15.0"
 # Dependencies for visualization
 scikit-learn = "^1.5.1"
@@ -42,12 +43,6 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
 pytest-cov = "^4.1.0"
-black = "^24.3.0"
-pylint = "^3.0.3"
-mypy = "^1.8.0"
-bandit = "^1.7.6"
-radon = "^6.0.1"
-isort = "^5.13.2"
 pre-commit = "^3.6.0"
 ipykernel = "^6.29.5"
 pyinstrument = "^4.7.2"
@@ -69,23 +64,3 @@ line_length = 120
 include_trailing_comma = true
 lines_after_imports = 2
 profile = "black"
-
-[tool.bandit]
-exclude_dirs = ["tests",]
-
-[tool.mypy]
-exclude = ["tests",]
-
-[[tool.mypy.overrides]]
-module = "*.*"
-ignore_missing_imports = true
-
-# Tutorial:
-# https://radon.readthedocs.io/en/latest/commandline.html#radon-configuration-files
-[tool.radon]
-exclude = "test_*.py"
-cc_min = "A"
-cc_max = "C"
-average = true
-total_average = true
-show_complexity = true

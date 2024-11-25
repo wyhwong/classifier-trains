@@ -13,6 +13,10 @@ def config_path_fixture() -> PipelineConfig:
 
     config_path = f"{os.path.dirname(os.path.dirname(__file__))}/test_data/pipeline_config_only_eval.yml"
     content = load_yml(config_path)
+
+    # NOTE: Here we Fix the path of the dataset
+    content["evaluation"]["evalset_dir"] = f"{os.path.dirname(os.path.dirname(__file__))}/test_dataset/"
+
     return PipelineConfig(**content)
 
 

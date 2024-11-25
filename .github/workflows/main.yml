@@ -11,8 +11,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11"]
-        poetry-version: ["1.7.1"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        poetry-version: ["1.8.4"]
         os: [ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     steps:
@@ -29,7 +29,7 @@ jobs:
         working-directory: ./src
         run: |
           poetry install --with dev
-      - name: Static code Analysis
+      - name: Run pytest
         working-directory: ./src
         run: |
-          make static-code-analysis
+          poetry run pytest --disable-warnings --cov=classifier_trains

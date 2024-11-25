@@ -7,14 +7,7 @@ For project details, please see [README.md](https://github.com/wyhwong/classifie
 pip3 install classifier-trains
 ```
 
-## Makefile Commands (Only when cloned from GitHub)
-
-```bash
-# Check all available commands
-make help
-```
-
-## After installation
+## Examples of Pipeline Configuration
 
 For example of pipeline configuration, please see [pipeline_config_only_train.yml](https://github.com/wyhwong/classifier-trains/blob/main/src/tests/test_data/pipeline_config_only_train.yml), [pipeline_config_only_eval.yml](https://github.com/wyhwong/classifier-trains/blob/main/src/tests/test_data/pipeline_config_only_eval.yml), [full_pipeline_config.yml](https://github.com/wyhwong/classifier-trains/blob/main/src/tests/test_data/full_pipeline_config.yml).
 
