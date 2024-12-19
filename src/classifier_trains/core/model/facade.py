@@ -24,7 +24,7 @@ class ModelFacade:
             denorm_fn (Optional[Callable], optional): The denormalization function. Defaults to None.
         """
 
-        self.__denorm_fn = denorm_fn
+        self._denorm_fn = denorm_fn
 
         local_logger.info("Initializing ModelFacade.")
 
@@ -50,14 +50,14 @@ class ModelFacade:
         local_logger.info("Model config: %s", model_config)
 
         if not model_config.checkpoint_path:
-            model = ClassifierModel(model_config=model_config, denorm_fn=self.__denorm_fn)
+            model = ClassifierModel(model_config=model_config, denorm_fn=self._denorm_fn)
         else:
             # NOTE: Here we need to disable the pylint check for no-value-for-parameter
             # Expected message: E1120: No value for argument 'cls' in unbound method call
             model = ClassifierModel.load_from_checkpoint(  # pylint: disable=E1120
                 checkpoint_path=model_config.checkpoint_path,
                 model_config=model_config,
-                denorm_fn=self.__denorm_fn,
+                denorm_fn=self._denorm_fn,
             )
 
         pl.pytorch.seed_everything(training_config.random_seed)
@@ -121,12 +121,12 @@ class ModelFacade:
         file.save_as_yml(f"{root_dir}/training.yml", training_config.model_dump())
 
         if training_config.export_best_as_onnx:
-            self.__export_checkpoint_as_onnx(model_config, "best.ckpt", root_dir, input_sample)
+            self._export_checkpoint_as_onnx(model_config, "best.ckpt", root_dir, input_sample)
 
         if training_config.export_last_as_onnx:
-            self.__export_checkpoint_as_onnx(model_config, "last.ckpt", root_dir, input_sample)
+            self._export_checkpoint_as_onnx(model_config, "last.ckpt", root_dir, input_sample)
 
-    def __export_checkpoint_as_onnx(
+    def _export_checkpoint_as_onnx(
         self,
         model_config: config.ModelConfig,
         checkpoint_name: str,

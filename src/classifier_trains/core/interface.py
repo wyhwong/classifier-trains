@@ -25,12 +25,12 @@ class ModelInterface:
             preprocessing_config (PreprocessingConfig): The preprocessing configuration
         """
 
-        self.__preprocessor = Preprocessor(preprocessing_config=preprocessing_config)
-        self.__model_facade = ModelFacade(denorm_fn=self.__preprocessor.denormalize)
-        self.__transforms = {
-            constants.Phase.TRAINING: self.__preprocessor.get_training_transforms(),
-            constants.Phase.VALIDATION: self.__preprocessor.get_validation_transforms(),
-            constants.Phase.TESTING: self.__preprocessor.get_validation_transforms(),
+        self._preprocessor = Preprocessor(preprocessing_config=preprocessing_config)
+        self._model_facade = ModelFacade(denorm_fn=self._preprocessor.denormalize)
+        self._transforms = {
+            constants.Phase.TRAINING: self._preprocessor.get_training_transforms(),
+            constants.Phase.VALIDATION: self._preprocessor.get_validation_transforms(),
+            constants.Phase.TESTING: self._preprocessor.get_validation_transforms(),
         }
 
     def train(
@@ -53,7 +53,7 @@ class ModelInterface:
 
         datamodule = ImageDataloader(
             dataloader_config=dataloader_config,
-            transforms=self.__transforms,
+            transforms=self._transforms,
         )
         datamodule.setup_for_training(
             trainset_dir=training_config.trainset_dir,
@@ -61,12 +61,12 @@ class ModelInterface:
             test_dir=training_config.testset_dir,
         )
 
-        self.__model_facade.train(
+        self._model_facade.train(
             model_config=model_config,
             training_config=training_config,
             datamodule=datamodule,
             output_dir=output_dir,
-            input_sample=self.__preprocessor.get_example_array(),
+            input_sample=self._preprocessor.get_example_array(),
         )
 
     def evaluate(
@@ -90,7 +90,7 @@ class ModelInterface:
 
         datamodule = ImageDataloader(
             dataloader_config=dataloader_config,
-            transforms=self.__transforms,
+            transforms=self._transforms,
         )
         dataloader = datamodule.get_dataloader(
             dirpath=evaluation_config.evalset_dir,

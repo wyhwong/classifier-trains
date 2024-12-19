@@ -31,22 +31,22 @@ class ClassifierModel(pl.LightningModule):
             denorm_fn (Optional[Callable], optional): The denormalization function. Defaults to None.
         """
 
-        super().__init__()
+        super()._init__()
 
         local_logger.info("Initializing ClassifierModel with config: %s", model_config)
 
-        self.__model_config = model_config
-        self.__denorm_fn = denorm_fn
-        self.__classifier = classifier_trains.core.model.utils.initialize_classifier(
-            model_config=self.__model_config,
+        self._model_config = model_config
+        self._denorm_fn = denorm_fn
+        self._classifier = classifier_trains.core.model.utils.initialize_classifier(
+            model_config=self._model_config,
         )
 
-        self.__loss_fn = nn.CrossEntropyLoss()
-        self.__optimizers: Optional[list[torch.optim.Optimizer]] = None
-        self.__schedulers: Optional[list[torch.optim.lr_scheduler.LRScheduler]] = None
+        self._loss_fn = nn.CrossEntropyLoss()
+        self._optimizers: Optional[list[torch.optim.Optimizer]] = None
+        self._schedulers: Optional[list[torch.optim.lr_scheduler.LRScheduler]] = None
 
-        self.__y_test_true: torch.Tensor = torch.tensor([])
-        self.__y_test_pred: torch.Tensor = torch.tensor([])
+        self._y_test_true: torch.Tensor = torch.tensor([])
+        self._y_test_pred: torch.Tensor = torch.tensor([])
 
     def training_setup(
         self,
@@ -71,19 +71,19 @@ class ClassifierModel(pl.LightningModule):
             scheduler_config,
         )
 
-        self.__optimizers = [
+        self._optimizers = [
             classifier_trains.core.model.utils.initialize_optimizer(
-                params=self.__classifier.parameters(),
+                params=self._classifier.parameters(),
                 optimizer_config=optimizer_config,
             )
         ]
-        self.__schedulers = [
+        self._schedulers = [
             classifier_trains.core.model.utils.initialize_scheduler(
                 optimizer=optim,
                 scheduler_config=scheduler_config,
                 num_epochs=num_epochs,
             )
-            for optim in self.__optimizers
+            for optim in self._optimizers
         ]
 
         if input_sample is not None:
@@ -98,11 +98,11 @@ class ClassifierModel(pl.LightningModule):
                     "optimizer": optim,
                     "lr_scheduler": {"scheduler": sched, "interval": "step", "frequency": 1},
                 }
-                for optim, sched in zip(self.__optimizers, self.__schedulers)
+                for optim, sched in zip(self._optimizers, self._schedulers)
             ]
         )
 
-    def __common_step(
+    def _common_step(
         self,
         batch: tuple[torch.Tensor, torch.Tensor],
         batch_idx: int,  # pylint: disable=unused-argument
@@ -122,7 +122,7 @@ class ClassifierModel(pl.LightningModule):
         x, y = batch
 
         if batch_idx == 0:
-            x_denorm = self.__denorm_fn(x) if self.__denorm_fn else x
+            x_denorm = self._denorm_fn(x) if self._denorm_fn else x
             grid = torchvision.utils.make_grid(x_denorm)
             # Here we ignore the type, expected message:
             # "Attribute 'experiment' is not defined for 'Optional[LightningLoggerBase]'"
@@ -133,7 +133,7 @@ class ClassifierModel(pl.LightningModule):
             )
 
         logits = self.forward(x)
-        loss = self.__loss_fn(logits, y)
+        loss = self._loss_fn(logits, y)
         self.log(name=phase(constants.Criterion.LOSS), value=loss, on_step=True)
 
         acc = (logits.argmax(dim=1) == y).float().mean()
@@ -156,7 +156,7 @@ class ClassifierModel(pl.LightningModule):
             torch.Tensor: The loss
         """
 
-        loss = self.__common_step(
+        loss = self._common_step(
             batch=batch,
             batch_idx=batch_idx,
             phase=constants.Phase.TRAINING,
@@ -178,7 +178,7 @@ class ClassifierModel(pl.LightningModule):
             torch.Tensor: The loss
         """
 
-        loss = self.__common_step(
+        loss = self._common_step(
             batch=batch,
             batch_idx=batch_idx,
             phase=constants.Phase.VALIDATION,
@@ -202,32 +202,32 @@ class ClassifierModel(pl.LightningModule):
 
         x, y = batch
         logits = self.forward(x)
-        loss = self.__loss_fn(logits, y)
+        loss = self._loss_fn(logits, y)
         self.log(name=constants.Phase.TESTING(constants.Criterion.LOSS), value=loss, on_step=True)
         acc = (logits.argmax(dim=1) == y).float().mean()
         self.log(name=constants.Phase.TESTING(constants.Criterion.ACCURACY), value=acc, on_step=True)
 
         probis = nn.functional.softmax(logits, dim=1)
-        self.__y_test_true = torch.cat([self.__y_test_true.to(y.device), y])
-        self.__y_test_pred = torch.cat([self.__y_test_pred.to(logits.device), probis])
+        self._y_test_true = torch.cat([self._y_test_true.to(y.device), y])
+        self._y_test_pred = torch.cat([self._y_test_pred.to(logits.device), probis])
         return loss
 
     def on_test_epoch_end(self) -> None:
         """Test epoch end"""
 
-        for i in range(self.__y_test_pred.shape[1]):  # Iterate over each class
+        for i in range(self._y_test_pred.shape[1]):  # Iterate over each class
             fpr, tpr, _ = roc_curve(
-                y_true=(self.__y_test_true == i).cpu().numpy(),
-                y_score=self.__y_test_pred[:, i].cpu().numpy(),
+                y_true=(self._y_test_true == i).cpu().numpy(),
+                y_score=self._y_test_pred[:, i].cpu().numpy(),
             )
             self.plot_roc_curve(fpr, tpr, i)
 
-        y_true = self.__y_test_true.cpu().numpy()
-        y_pred = self.__y_test_pred.argmax(dim=1).cpu().numpy()
+        y_true = self._y_test_true.cpu().numpy()
+        y_pred = self._y_test_pred.argmax(dim=1).cpu().numpy()
         self.plot_confusion_matrix(y_true, y_pred)
 
-        self.__y_test_true = torch.tensor([])
-        self.__y_test_pred = torch.tensor([])
+        self._y_test_true = torch.tensor([])
+        self._y_test_pred = torch.tensor([])
 
     def plot_roc_curve(self, fpr: np.ndarray, tpr: np.ndarray, class_index: int) -> None:
         """Plot the ROC curve
@@ -239,7 +239,7 @@ class ClassifierModel(pl.LightningModule):
         """
 
         plt.figure(figsize=(10, 10))
-        plt.plot(fpr, tpr, label=f"{self.__model_config.backbone} (AUC = {np.trapz(tpr, fpr):.2f})")  # type: ignore
+        plt.plot(fpr, tpr, label=f"{self._model_config.backbone} (AUC = {np.trapz(tpr, fpr):.2f})")  # type: ignore
         plt.plot([0, 1], [0, 1], color="navy", linestyle="--", label="Random")
         plt.xlabel("False Positive Rate")
         plt.ylabel("True Positive Rate")
@@ -247,7 +247,7 @@ class ClassifierModel(pl.LightningModule):
         plt.legend(loc="lower right")
 
         self.logger.experiment.add_figure(  # type: ignore
-            f"ROC Curve Class {class_index} ({self.__model_config.backbone})",
+            f"ROC Curve Class {class_index} ({self._model_config.backbone})",
             plt.gcf(),
             self.current_epoch,
         )
@@ -264,7 +264,7 @@ class ClassifierModel(pl.LightningModule):
         cm = confusion_matrix(y_true, y_pred)
         plt.figure(figsize=(10, 10))
         plt.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)  # type: ignore
-        plt.title(f"Confusion Matrix ({self.__model_config.backbone})")
+        plt.title(f"Confusion Matrix ({self._model_config.backbone})")
         plt.colorbar()
         tick_marks = np.arange(len(np.unique(y_true)))
         plt.yticks(tick_marks, tick_marks)  # type: ignore
@@ -304,4 +304,4 @@ class ClassifierModel(pl.LightningModule):
             torch.Tensor: The output tensor
         """
 
-        return self.__classifier(x.to(self.dtype))
+        return self._classifier(x.to(self.dtype))

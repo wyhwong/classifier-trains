@@ -5,7 +5,7 @@ from classifier_trains.core import ModelInterface
 from classifier_trains.utils.file import load_yml
 
 
-def __run_pipeline(pipeline_config: classifier_trains.schemas.pipeline.PipelineConfig, output_dir: str) -> None:
+def _run_pipeline(pipeline_config: classifier_trains.schemas.pipeline.PipelineConfig, output_dir: str) -> None:
     """Run the pipeline based on the configuration file.
 
     Args:
@@ -52,7 +52,7 @@ def run(config_path: str, output_dir: str) -> None:
 
     content = load_yml(config_path)
     pipeline_config = classifier_trains.schemas.pipeline.PipelineConfig(**content)
-    __run_pipeline(pipeline_config=pipeline_config, output_dir=output_dir)
+    _run_pipeline(pipeline_config=pipeline_config, output_dir=output_dir)
 
 
 @cli.command("compute-mean-and-std")
@@ -117,7 +117,7 @@ def profile(config_path: str, output_dir: str, interval: float, show_all: bool, 
 
     content = load_yml(config_path)
     pipeline_config = classifier_trains.schemas.pipeline.PipelineConfig(**content)
-    __run_pipeline(pipeline_config=pipeline_config, output_dir=output_dir)
+    _run_pipeline(pipeline_config=pipeline_config, output_dir=output_dir)
 
     profiler.stop()
     profiler.write_html(f"{output_dir}/profile.html", show_all=show_all, timeline=timeline)

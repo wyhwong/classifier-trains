@@ -28,17 +28,17 @@ class ImageDataloader(pl.LightningDataModule):
             transforms (Optional[dict[Phase, torchvision.transforms.Compose]]): The transforms for each phase.
         """
 
-        super().__init__()
+        super()._init__()
 
         local_logger.info("Initializing ImageDataloader with config: %s", dataloader_config)
 
-        self.__batch_size = dataloader_config.batch_size
-        self.__num_workers = dataloader_config.num_workers
-        self.__transforms = transforms or {phase: None for phase in Phase}
+        self._batch_size = dataloader_config.batch_size
+        self._num_workers = dataloader_config.num_workers
+        self._transforms = transforms or {phase: None for phase in Phase}
 
-        self.__trainset_dir: Optional[str] = None
-        self.__valset_dir: Optional[str] = None
-        self.__test_dir: Optional[str] = None
+        self._trainset_dir: Optional[str] = None
+        self._valset_dir: Optional[str] = None
+        self._test_dir: Optional[str] = None
 
     def setup_for_training(self, trainset_dir: str, valset_dir: str, test_dir: Optional[str] = None) -> None:
         """Setup the dataloader.
@@ -56,56 +56,56 @@ class ImageDataloader(pl.LightningDataModule):
             test_dir,
         )
 
-        self.__trainset_dir = trainset_dir
-        self.__valset_dir = valset_dir
-        self.__test_dir = test_dir
+        self._trainset_dir = trainset_dir
+        self._valset_dir = valset_dir
+        self._test_dir = test_dir
 
     def train_dataloader(self) -> DataLoader:
         """Get the training dataloader."""
 
-        if not self.__trainset_dir:
+        if not self._trainset_dir:
             raise ValueError("trainset_dir is not set.")
 
         return DataLoader(
             dataset=datasets.ImageFolder(
-                root=self.__trainset_dir,
-                transform=self.__transforms[Phase.TRAINING],
+                root=self._trainset_dir,
+                transform=self._transforms[Phase.TRAINING],
             ),
-            batch_size=self.__batch_size,
-            num_workers=self.__num_workers,
+            batch_size=self._batch_size,
+            num_workers=self._num_workers,
             shuffle=True,
         )
 
     def val_dataloader(self) -> DataLoader:
         """Get the validation dataloader."""
 
-        if not self.__valset_dir:
+        if not self._valset_dir:
             raise ValueError("valset_dir is not set.")
 
         return DataLoader(
             dataset=datasets.ImageFolder(
-                root=self.__valset_dir,
-                transform=self.__transforms[Phase.VALIDATION],
+                root=self._valset_dir,
+                transform=self._transforms[Phase.VALIDATION],
             ),
-            batch_size=self.__batch_size,
-            num_workers=self.__num_workers,
+            batch_size=self._batch_size,
+            num_workers=self._num_workers,
             shuffle=False,
         )
 
     def test_dataloader(self) -> Optional[DataLoader]:
         """Get the test dataloader."""
 
-        if not self.__test_dir:
+        if not self._test_dir:
             local_logger.info("testset_dir is not set. Return None.")
             return None
 
         return DataLoader(
             dataset=datasets.ImageFolder(
-                root=self.__test_dir,
-                transform=self.__transforms[Phase.TESTING],
+                root=self._test_dir,
+                transform=self._transforms[Phase.TESTING],
             ),
-            batch_size=self.__batch_size,
-            num_workers=self.__num_workers,
+            batch_size=self._batch_size,
+            num_workers=self._num_workers,
             shuffle=False,
         )
 
@@ -120,14 +120,14 @@ class ImageDataloader(pl.LightningDataModule):
             DataLoader: The dataloader.
         """
 
-        transforms = self.__transforms[Phase.TRAINING] if is_augmented else self.__transforms[Phase.VALIDATION]
+        transforms = self._transforms[Phase.TRAINING] if is_augmented else self._transforms[Phase.VALIDATION]
         dataloader = DataLoader(
             dataset=datasets.ImageFolder(
                 root=dirpath,
                 transform=transforms,
             ),
-            batch_size=self.__batch_size,
-            num_workers=self.__num_workers,
+            batch_size=self._batch_size,
+            num_workers=self._num_workers,
             shuffle=False,
         )
         return dataloader

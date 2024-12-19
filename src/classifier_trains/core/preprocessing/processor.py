@@ -23,53 +23,53 @@ class Preprocessor:
 
         local_logger.info("Initializing Preprocessor with config: %s", preprocessing_config)
 
-        self.__mean = np.array(preprocessing_config.mean)
-        self.__std = np.array(preprocessing_config.std)
+        self._mean = np.array(preprocessing_config.mean)
+        self._std = np.array(preprocessing_config.std)
 
-        self.__spatial_config = preprocessing_config.spatial_config
-        self.__color_config = preprocessing_config.color_config
-        self.__resize_config = preprocessing_config.resize_config
+        self._spatial_config = preprocessing_config.spatial_config
+        self._color_config = preprocessing_config.color_config
+        self._resize_config = preprocessing_config.resize_config
 
-        self.__denormalizer = torchvision.transforms.Normalize(
-            mean=-1 * self.__mean / self.__std,
-            std=1 / self.__std,
+        self._denormalizer = torchvision.transforms.Normalize(
+            mean=-1 * self._mean / self._std,
+            std=1 / self._std,
         )
 
-        self.__construct_transforms()
+        self._construct_transforms()
 
-    def __construct_transforms(self) -> None:
+    def _construct_transforms(self) -> None:
         """Construct the data transforms."""
 
-        self.__normalization = [
+        self._normalization = [
             torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(self.__mean, self.__std),
+            torchvision.transforms.Normalize(self._mean, self._std),
         ]
 
-        self.__spatial_augmentation = []
-        if self.__spatial_config:
-            self.__spatial_augmentation = get_spatial_transforms(
-                width=self.__resize_config.width,
-                height=self.__resize_config.height,
-                hflip_prob=self.__spatial_config.hflip_prob,
-                vflip_prob=self.__spatial_config.vflip_prob,
-                max_rotate_in_degree=self.__spatial_config.max_rotate_in_degree,
-                allow_center_crop=self.__spatial_config.allow_center_crop,
-                allow_random_crop=self.__spatial_config.allow_random_crop,
+        self._spatial_augmentation = []
+        if self._spatial_config:
+            self._spatial_augmentation = get_spatial_transforms(
+                width=self._resize_config.width,
+                height=self._resize_config.height,
+                hflip_prob=self._spatial_config.hflip_prob,
+                vflip_prob=self._spatial_config.vflip_prob,
+                max_rotate_in_degree=self._spatial_config.max_rotate_in_degree,
+                allow_center_crop=self._spatial_config.allow_center_crop,
+                allow_random_crop=self._spatial_config.allow_random_crop,
             )
 
-        self.__color_augmentation = []
-        if self.__color_config:
-            self.__color_augmentation = get_color_transforms(
-                allow_gray_scale=self.__color_config.allow_gray_scale,
-                allow_random_color=self.__color_config.allow_random_color,
+        self._color_augmentation = []
+        if self._color_config:
+            self._color_augmentation = get_color_transforms(
+                allow_gray_scale=self._color_config.allow_gray_scale,
+                allow_random_color=self._color_config.allow_random_color,
             )
 
-        self.__resize_and_padding = get_resize_and_padding_transforms(
-            width=self.__resize_config.width,
-            height=self.__resize_config.height,
-            interpolation=self.__resize_config.interpolation,
-            padding=self.__resize_config.padding,
-            maintain_aspect_ratio=self.__resize_config.maintain_aspect_ratio,
+        self._resize_and_padding = get_resize_and_padding_transforms(
+            width=self._resize_config.width,
+            height=self._resize_config.height,
+            interpolation=self._resize_config.interpolation,
+            padding=self._resize_config.padding,
+            maintain_aspect_ratio=self._resize_config.maintain_aspect_ratio,
         )
 
     def __call__(self, image: np.ndarray, is_augmented: bool) -> np.ndarray:
@@ -84,10 +84,10 @@ class Preprocessor:
         """
 
         if is_augmented:
-            layers = self.__spatial_augmentation + self.__color_augmentation
+            layers = self._spatial_augmentation + self._color_augmentation
         else:
             layers = []
-        layers += self.__normalization + self.__resize_and_padding
+        layers += self._normalization + self._resize_and_padding
 
         for layer in layers:
             image = layer(image)
@@ -104,7 +104,7 @@ class Preprocessor:
             np.ndarray: The denormalized image.
         """
 
-        return self.__denormalizer(image)
+        return self._denormalizer(image)
 
     def get_training_transforms(self) -> torchvision.transforms.Compose:
         """Get the training transforms.
@@ -114,7 +114,7 @@ class Preprocessor:
         """
 
         return torchvision.transforms.Compose(
-            self.__spatial_augmentation + self.__color_augmentation + self.__normalization + self.__resize_and_padding
+            self._spatial_augmentation + self._color_augmentation + self._normalization + self._resize_and_padding
         )
 
     def get_validation_transforms(self) -> torchvision.transforms.Compose:
@@ -124,7 +124,7 @@ class Preprocessor:
             torchvision.transforms.Compose: The validation transforms.
         """
 
-        return torchvision.transforms.Compose(self.__normalization + self.__resize_and_padding)
+        return torchvision.transforms.Compose(self._normalization + self._resize_and_padding)
 
     def get_example_array(self) -> torch.Tensor:
         """Get an example array.
@@ -133,7 +133,7 @@ class Preprocessor:
             torch.Tensor: The example array.
         """
 
-        return torch.rand(1, 3, self.__resize_config.height, self.__resize_config.width)
+        return torch.rand(1, 3, self._resize_config.height, self._resize_config.width)
 
     @staticmethod
     def compute_mean_and_std(dirpath: str) -> dict[str, list[float]]:

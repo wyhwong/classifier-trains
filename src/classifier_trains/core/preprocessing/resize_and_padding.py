@@ -59,14 +59,14 @@ class ResizeAndPadding(nn.Module):
             maintain_aspect_ratio (bool): Whether to maintain the aspect ratio.
         """
 
-        super().__init__()
+        super()._init__()
 
-        self.__w = width
-        self.__h = height
+        self._w = width
+        self._h = height
 
-        self.__padding = padding
-        self.__interpolation = getattr(torchvision.transforms.InterpolationMode, interpolation.value.upper())
-        self.__maintain_aspect_ratio = maintain_aspect_ratio
+        self._padding = padding
+        self._interpolation = getattr(torchvision.transforms.InterpolationMode, interpolation.value.upper())
+        self._maintain_aspect_ratio = maintain_aspect_ratio
 
     def __call__(self, image: torch.Tensor) -> torch.Tensor:
         """Resize the image to the specified dimensions.
@@ -78,38 +78,38 @@ class ResizeAndPadding(nn.Module):
             torch.Tensor: The resized image.
         """
 
-        if not self.__maintain_aspect_ratio:
-            return torchvision.transforms.functional.resize(image, (self.__h, self.__w), self.__interpolation)
+        if not self._maintain_aspect_ratio:
+            return torchvision.transforms.functional.resize(image, (self._h, self._w), self._interpolation)
 
         # Resize the image while maintaining the aspect ratio
         h, w = image.shape[-2:]
 
-        if h / self.__h < w / self.__w:
-            h, w = int(h * (self.__w / w)), self.__w
+        if h / self._h < w / self._w:
+            h, w = int(h * (self._w / w)), self._w
         else:
-            w, h = int(w * (self.__h / h)), self.__h
+            w, h = int(w * (self._h / h)), self._h
 
-        image = torchvision.transforms.functional.resize(image, (h, w), self.__interpolation)
-        output_image = torch.zeros((3, self.__h, self.__w), dtype=image.dtype)
+        image = torchvision.transforms.functional.resize(image, (h, w), self._interpolation)
+        output_image = torch.zeros((3, self._h, self._w), dtype=image.dtype)
 
-        if self.__padding is constants.PaddingType.TOPLEFT:
+        if self._padding is constants.PaddingType.TOPLEFT:
             output_image[:, :h, :w] = image
-        elif self.__padding is constants.PaddingType.TOPRIGHT:
+        elif self._padding is constants.PaddingType.TOPRIGHT:
             output_image[:, :h, -w:] = image
 
-        elif self.__padding is constants.PaddingType.BOTTOMLEFT:
+        elif self._padding is constants.PaddingType.BOTTOMLEFT:
             output_image[:, -h:, :w] = image
 
-        elif self.__padding is constants.PaddingType.BOTTOMRIGHT:
+        elif self._padding is constants.PaddingType.BOTTOMRIGHT:
             output_image[:, -h:, -w:] = image
 
-        elif self.__padding is constants.PaddingType.CENTER:
+        elif self._padding is constants.PaddingType.CENTER:
             output_image[
-                :, (self.__h - h) // 2 : (self.__h - h) // 2 + h, (self.__w - w) // 2 : (self.__w - w) // 2 + w
+                :, (self._h - h) // 2 : (self._h - h) // 2 + h, (self._w - w) // 2 : (self._w - w) // 2 + w
             ] = image
 
         else:
-            local_logger.error("Invalid padding type: %s", self.__padding)
-            raise ValueError(f"Invalid padding type: {self.__padding}")
+            local_logger.error("Invalid padding type: %s", self._padding)
+            raise ValueError(f"Invalid padding type: {self._padding}")
 
         return output_image
