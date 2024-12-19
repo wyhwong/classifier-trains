@@ -59,7 +59,7 @@ class ResizeAndPadding(nn.Module):
             maintain_aspect_ratio (bool): Whether to maintain the aspect ratio.
         """
 
-        super()._init__()
+        super().__init__()
 
         self._w = width
         self._h = height

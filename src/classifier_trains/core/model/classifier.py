@@ -31,7 +31,7 @@ class ClassifierModel(pl.LightningModule):
             denorm_fn (Optional[Callable], optional): The denormalization function. Defaults to None.
         """
 
-        super()._init__()
+        super().__init__()
 
         local_logger.info("Initializing ClassifierModel with config: %s", model_config)
 

@@ -28,7 +28,7 @@ class ImageDataloader(pl.LightningDataModule):
             transforms (Optional[dict[Phase, torchvision.transforms.Compose]]): The transforms for each phase.
         """
 
-        super()._init__()
+        super().__init__()
 
         local_logger.info("Initializing ImageDataloader with config: %s", dataloader_config)
 
