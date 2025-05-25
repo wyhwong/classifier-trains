@@ -239,7 +239,7 @@ class ClassifierModel(pl.LightningModule):
         """
 
         plt.figure(figsize=(10, 10))
-        plt.plot(fpr, tpr, label=f"{self._model_config.backbone} (AUC = {np.trapz(tpr, fpr):.2f})")  # type: ignore
+        plt.plot(fpr, tpr, label=f"{self._model_config.backbone} (AUC = {np.trapezoid(tpr, fpr):.2f})")  # type: ignore
         plt.plot([0, 1], [0, 1], color="navy", linestyle="--", label="Random")
         plt.xlabel("False Positive Rate")
         plt.ylabel("True Positive Rate")
