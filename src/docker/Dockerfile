@@ -15,7 +15,7 @@ RUN poetry export -o requirements.txt \
     --only dev
 
 # STAGE 2 - Build main image
-FROM pytorch/pytorch:2.4.0-cuda12.4-cudnn9-runtime AS main
+FROM pytorch/pytorch:2.7.0-cuda12.6-cudnn9-runtime AS main
 
 # Install system dependencies
 RUN apt-get update && \
