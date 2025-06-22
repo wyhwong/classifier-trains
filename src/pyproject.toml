@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "classifier_trains"
-version = "1.2.0"
+version = "1.2.1"
 description = "A PyTorch-based deep learning classifier training framework."
 authors = ["wyhwong <wyhwong@link.cuhk.edu.hk>"]
 license = "MIT"
