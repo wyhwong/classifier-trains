@@ -40,7 +40,7 @@ def test_initialize_resnet() -> None:
         model = initialize_classifier(model_config)
         assert model.fc.out_features == 2
 
-    reset_cache()
+        reset_cache()
 
 
 def test_initialize_alexnet() -> None:
@@ -51,7 +51,7 @@ def test_initialize_alexnet() -> None:
         model = initialize_classifier(model_config)
         assert model.classifier[6].out_features == 2
 
-    reset_cache()
+        reset_cache()
 
 
 def test_initialize_vgg() -> None:
@@ -62,7 +62,7 @@ def test_initialize_vgg() -> None:
         model = initialize_classifier(model_config)
         assert model.classifier[6].out_features == 2
 
-    reset_cache()
+        reset_cache()
 
 
 def test_initialize_squeezenet() -> None:
@@ -74,7 +74,7 @@ def test_initialize_squeezenet() -> None:
         assert model.classifier[1].out_channels == 2
         assert model.num_classes == 2
 
-    reset_cache()
+        reset_cache()
 
 
 def test_initialize_densenet() -> None:
@@ -85,7 +85,7 @@ def test_initialize_densenet() -> None:
         model = initialize_classifier(model_config)
         assert model.classifier.out_features == 2
 
-    reset_cache()
+        reset_cache()
 
 
 def test_initialize_inception() -> None:
@@ -97,4 +97,4 @@ def test_initialize_inception() -> None:
         assert model.AuxLogits.fc.out_features == 2
         assert model.fc.out_features == 2
 
-    reset_cache()
+        reset_cache()
